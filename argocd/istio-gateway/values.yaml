@@ -1,0 +1,4 @@
+service:
+  type: LoadBalancer
+  annotations:
+    oci.oraclecloud.com/load-balancer-type: nlb

@@ -1,0 +1,33 @@
+apiVersion: argoproj.io/v1alpha1
+kind: Application
+metadata:
+  namespace: argocd
+  name: istio-gateway
+  finalizers:
+  - resources-finalizer.argocd.argoproj.io
+spec:
+  project: default
+  destination:
+    name: in-cluster
+    namespace: istio-ingress
+  syncPolicy:
+    syncOptions:
+    - CreateNamespace=true
+    managedNamespaceMetadata:
+      labels:
+        istio-injection: enabled
+  sources:
+  - repoURL: https://istio-release.storage.googleapis.com/charts
+    chart: gateway
+    targetRevision: 1.26.0
+    helm:
+      valueFiles:
+      - $values/argocd/istio-gateway/values.yaml
+  - repoURL: https://github.com/wafflestudio/waffle-world-oci.git
+    targetRevision: main
+    ref: values
+  - repoURL: https://github.com/wafflestudio/waffle-world-oci.git
+    targetRevision: main
+    path: argocd/istio-gateway
+    directory:
+      include: 'resources.yaml'

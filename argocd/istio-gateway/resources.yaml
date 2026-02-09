@@ -1,0 +1,54 @@
+apiVersion: networking.istio.io/v1alpha3
+kind: Gateway
+metadata:
+  namespace: istio-ingress
+  name: waffle-ingressgateway
+spec:
+  selector:
+    istio: gateway
+  servers:
+  - port:
+      number: 80
+      name: http
+      protocol: HTTP
+    hosts:
+    - "*"
+    tls:
+      httpsRedirect: true
+  - port:
+      number: 443
+      name: https
+      protocol: HTTPS
+    hosts:
+    - "*"
+    tls:
+      mode: SIMPLE
+      credentialName: wildcard-wafflestudio-tls
+---
+apiVersion: cert-manager.io/v1
+kind: Certificate
+metadata:
+  namespace: istio-ingress
+  name: wildcard-wafflestudio-tls
+spec:
+  secretName: wildcard-wafflestudio-tls
+  issuerRef:
+    name: letsencrypt-prod
+    kind: ClusterIssuer
+  dnsNames:
+  - argocd-oci.wafflestudio.com
+---
+apiVersion: networking.istio.io/v1alpha3
+kind: VirtualService
+metadata:
+  namespace: argocd
+  name: argocd-server
+spec:
+  gateways:
+  - istio-ingress/waffle-ingressgateway
+  hosts:
+  - argocd-oci.wafflestudio.com
+  http:
+  - route:
+    - destination:
+        host: argocd-server

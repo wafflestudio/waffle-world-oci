@@ -1,0 +1,28 @@
+apiVersion: argoproj.io/v1alpha1
+kind: Application
+metadata:
+  namespace: argocd
+  name: istio
+  finalizers:
+  - resources-finalizer.argocd.argoproj.io
+spec:
+  project: default
+  ignoreDifferences:
+  - group: admissionregistration.k8s.io
+    kind: ValidatingWebhookConfiguration
+    jqPathExpressions:
+    - .webhooks[].failurePolicy
+    - .webhooks[].clientConfig.caBundle
+  destination:
+    name: in-cluster
+    namespace: istio-system
+  sources:
+  - repoURL: https://istio-release.storage.googleapis.com/charts
+    chart: istiod
+    targetRevision: 1.26.0
+    helm:
+      valueFiles:
+      - $values/argocd/istio/values.yaml
+  - repoURL: https://github.com/wafflestudio/waffle-world-oci.git
+    targetRevision: main
+    ref: values
