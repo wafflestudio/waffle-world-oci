@@ -1,0 +1,26 @@
+apiVersion: argoproj.io/v1alpha1
+kind: Application
+metadata:
+  namespace: argocd
+  name: metrics-server
+  finalizers:
+  - resources-finalizer.argocd.argoproj.io
+spec:
+  project: default
+  syncPolicy:
+    automated:
+      prune: true
+      selfHeal: true
+  destination:
+    name: in-cluster
+    namespace: kube-system
+  sources:
+  - repoURL: https://kubernetes-sigs.github.io/metrics-server
+    chart: metrics-server
+    targetRevision: 3.12.2
+    helm:
+      valueFiles:
+      - $values/argocd/metrics-server/values.yaml
+  - repoURL: https://github.com/wafflestudio/waffle-world-oci.git
+    targetRevision: main
+    ref: values
