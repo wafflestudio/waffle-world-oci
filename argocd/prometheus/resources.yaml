@@ -5,16 +5,16 @@ metadata:
   namespace: prometheus
 spec:
   gateways:
-  - istio-ingress/waffle-ingressgateway
-  - mesh
+    - istio-ingress/waffle-ingressgateway
+    - mesh
   hosts:
-  - grafana-oci.wafflestudio.com
+    - grafana.wafflestudio.com
   http:
-  - route:
-    - destination:
-        host: prometheus-grafana.prometheus.svc.cluster.local
-        port:
-          number: 80
+    - route:
+        - destination:
+            host: prometheus-grafana.prometheus.svc.cluster.local
+            port:
+              number: 80
 ---
 apiVersion: v1
 kind: ConfigMap
