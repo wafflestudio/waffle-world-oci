@@ -1,0 +1,11 @@
+spec:
+  source:
+    repoURL: https://github.com/wafflestudio/waffle-world-oci.git
+  destination:
+    server: https://kubernetes.default.svc
+  syncPolicy:
+    automated:
+      prune: true
+      selfHeal: true
+    syncOptions:
+    - CreateNamespace=true
