@@ -36,7 +36,7 @@ spec:
     name: letsencrypt-prod
     kind: ClusterIssuer
   dnsNames:
-  - argocd-oci.wafflestudio.com
+  - "*.wafflestudio.com"
 ---
 apiVersion: networking.istio.io/v1alpha3
 kind: VirtualService
