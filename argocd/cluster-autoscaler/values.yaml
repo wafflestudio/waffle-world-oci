@@ -14,7 +14,7 @@ autoscalingGroups:
     maxSize: 3
 
 # 4. 권한 및 리전 설정 (Instance Principal 방식)
-env:
+extraEnv:
   OCI_USE_INSTANCE_PRINCIPAL: "true"
   OCI_REGION: ap-chuncheon-1  # 본인이 사용하는 리전 코드
 
