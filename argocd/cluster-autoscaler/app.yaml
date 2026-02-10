@@ -1,0 +1,38 @@
+apiVersion: argoproj.io/v1alpha1
+kind: Application
+metadata:
+  name: cluster-autoscaler
+  namespace: argocd
+  finalizers:
+  - resources-finalizer.argocd.argoproj.io
+spec:
+  project: default
+  
+  # 동기화 정책 (자동 생성, 자동 복구)
+  syncPolicy:
+    automated:
+      prune: true
+      selfHeal: true
+    syncOptions:
+      - CreateNamespace=true
+      - ServerSideApply=true  # 리소스 충돌 방지
+
+  # 배포 목적지 (시스템 컴포넌트는 보통 kube-system에 배치)
+  destination:
+    server: https://kubernetes.default.svc
+    namespace: kube-system
+
+  # 멀티 소스 패턴
+  sources:
+    # 소스 1: 공식 Helm Chart (로직)
+    - repoURL: https://kubernetes.github.io/autoscaler
+      chart: cluster-autoscaler
+      targetRevision: 9.55.0
+      helm:
+        valueFiles:
+          - $values/argocd/cluster-autoscaler/values.yaml
+
+    # 소스 2: 내 Git 설정 (값)
+    - repoURL: https://github.com/wafflestudio/waffle-world-oci.git
+      targetRevision: main
+      ref: values

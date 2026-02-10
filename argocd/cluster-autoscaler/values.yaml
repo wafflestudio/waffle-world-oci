@@ -1,0 +1,35 @@
+# 1. 클라우드 공급자 설정
+cloudProvider: oci
+
+# 2. 이미지 설정 (OCI 전용 이미지를 사용해야 함)
+image:
+  repository: iad.ocir.io/oracle/oci-cluster-autoscaler
+  tag: 1.30.0  # K8s 버전에 맞춰 고정
+  pullPolicy: IfNotPresent
+
+# 3. 오토스케일링 대상 그룹 (노드 풀)
+autoscalingGroups:
+  - name: ocid1.nodepool.oc1.ap-chuncheon-1.aaaaaaaabwphttinoqq4yugywnzhrpqsfjcskf3cejm77tknjndknudkkeoa
+    minSize: 1
+    maxSize: 3
+
+# 4. 권한 및 리전 설정 (Instance Principal 방식)
+env:
+  OCI_USE_INSTANCE_PRINCIPAL: "true"
+  OCI_REGION: ap-chuncheon-1  # 본인이 사용하는 리전 코드
+
+# 5. 운영 옵션 (로그 레벨 및 축소 지연 시간)
+extraArgs:
+  v: 4
+  scale-down-delay-after-add: 10m
+  scale-down-unneeded-time: 10m
+  # 시스템 파드가 있어도 강제로 노드를 삭제할지 여부 (필요시 true로 변경)
+  skip-nodes-with-system-pods: false 
+  skip-nodes-with-local-storage: false
+
+# 6. RBAC (필수 권한 생성)
+rbac:
+  create: true
+  serviceAccount:
+    create: true
+    name: cluster-autoscaler
