@@ -4,7 +4,7 @@ cloudProvider: oci
 # 2. 이미지 설정 (OCI 전용 이미지를 사용해야 함)
 image:
   repository: iad.ocir.io/oracle/oci-cluster-autoscaler
-  tag: 1.30.0  # K8s 버전에 맞춰 고정
+  tag: 1.34.0 
   pullPolicy: IfNotPresent
 
 # 3. 오토스케일링 대상 그룹 (노드 풀)
