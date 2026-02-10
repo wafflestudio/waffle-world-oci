@@ -9,8 +9,11 @@ image:
 
 # 3. 오토스케일링 대상 그룹 (노드 풀)
 autoscalingGroups:
-  - name: ocid1.nodepool.oc1.ap-chuncheon-1.aaaaaaaabwphttinoqq4yugywnzhrpqsfjcskf3cejm77tknjndknudkkeoa
+  - name: ocid1.nodepool.oc1.ap-chuncheon-1.aaaaaaaapyujbllqf4cmj7jwhinp7m6ycezimsqmfmnvitdwnnokdhjksl6q # Pool 1
     minSize: 1
+    maxSize: 3
+  - name: ocid1.nodepool.oc1.ap-chuncheon-1.aaaaaaaabwphttinoqq4yugywnzhrpqsfjcskf3cejm77tknjndknudkkeoa # Pool dev
+    minSize: 0
     maxSize: 3
 
 # 4. 권한 및 리전 설정 (Instance Principal 방식)
