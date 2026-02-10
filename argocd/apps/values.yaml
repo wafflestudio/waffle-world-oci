@@ -12,7 +12,7 @@ argo_common:
 
 # List of applications to deploy
 applications:
-  memowithtags-dev:
+  memowithtags_dev:
     enabled: true
     namespace: memowithtags-dev
     path: argocd/apps/manifests/memowithtags-dev
