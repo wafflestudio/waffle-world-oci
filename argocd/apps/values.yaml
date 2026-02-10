@@ -1,0 +1,18 @@
+argo-common:
+  repoURL: https://github.com/wafflestudio/waffle-world-oci.git
+  targetRevision: HEAD
+  destination:
+    server: https://kubernetes.default.svc
+  syncPolicy:
+    automated:
+      prune: true
+      selfHeal: true
+    syncOptions:
+    - CreateNamespace=true
+
+# List of applications to deploy
+applications:
+  memowithtags-dev:
+    enabled: true
+    namespace: memowithtags-dev
+    path: argocd/apps/manifests/memowithtags-dev

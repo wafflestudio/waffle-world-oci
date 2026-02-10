@@ -1,0 +1,5 @@
+apiVersion: v2
+name: apps
+description: A Helm chart for custom Waffle World applications
+type: application
+version: 0.1.0

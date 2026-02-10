@@ -1,0 +1,20 @@
+{{- if .Values.applications.memowithtags-dev.enabled }}
+apiVersion: argoproj.io/v1alpha1
+kind: Application
+metadata:
+  name: memowithtags-dev
+  namespace: argocd
+  finalizers:
+    - resources-finalizer.argocd.argoproj.io
+spec:
+  project: default
+  source:
+    repoURL: {{ .Values.argo-common.repoURL }}
+    targetRevision: {{ .Values.argo-common.targetRevision }}
+    path: {{ .Values.applications.memowithtags-dev.path }}
+  destination:
+    server: {{ .Values.argo-common.destination.server }}
+    namespace: {{ .Values.applications.memowithtags-dev.namespace }}
+  syncPolicy:
+    {{- toYaml .Values.argo-common.syncPolicy | nindent 4 }}
+{{- end }}
