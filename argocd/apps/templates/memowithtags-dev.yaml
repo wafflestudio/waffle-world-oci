@@ -10,9 +10,9 @@ spec:
   source:
     repoURL: {{ .Values.argo_common.repoURL }}
     targetRevision: {{ .Values.argo_common.targetRevision }}
-    path: {{ .Values.applications.memowithtags-dev.path }}
+    path: {{ .Values.applications.memowithtags_dev.path }}
   destination:
     server: {{ .Values.argo_common.destination.server }}
-    namespace: {{ .Values.applications.memowithtags-dev.namespace }}
+    namespace: {{ .Values.applications.memowithtags_dev.namespace }}
   syncPolicy:
     {{- toYaml .Values.argo_common.syncPolicy | nindent 4 }}
