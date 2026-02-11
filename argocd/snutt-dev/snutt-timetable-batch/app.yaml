@@ -3,10 +3,6 @@ kind: Application
 metadata:
   namespace: argocd
   name: snutt-timetable-batch-dev
-  annotations:
-    argocd-image-updater.argoproj.io/image-list: snutt=yny.ocir.io/ax1dvc8vmenm/snutt-dev/snutt-timetable-batch
-    argocd-image-updater.argoproj.io/snutt.update-strategy: newest-build
-    argocd-image-updater.argoproj.io/write-back-method: git
   finalizers:
   - resources-finalizer.argocd.argoproj.io
 spec:

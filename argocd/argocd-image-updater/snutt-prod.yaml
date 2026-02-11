@@ -1,0 +1,22 @@
+apiVersion: argocd-image-updater.argoproj.io/v1alpha1
+kind: ImageUpdater
+metadata:
+  name: snutt-prod
+  namespace: argocd
+spec:
+  namespace: argocd
+  commonUpdateSettings:
+    updateStrategy: newest-build
+  writeBackConfig:
+    method: git
+    gitConfig:
+      branch: main
+  applicationRefs:
+    - namePattern: snutt-timetable-prod
+      images:
+        - alias: snutt
+          imageName: yny.ocir.io/ax1dvc8vmenm/snutt-prod/snutt-timetable
+    - namePattern: snutt-timetable-batch-prod
+      images:
+        - alias: snutt
+          imageName: yny.ocir.io/ax1dvc8vmenm/snutt-prod/snutt-timetable-batch
