@@ -29,9 +29,17 @@ spec:
           key: phase
           operator: Equal
           value: prod
+      volumes:
+        - name: oci-api-key
+          secret:
+            secretName: oci-api-key
       containers:
         - image: yny.ocir.io/ax1dvc8vmenm/snutt-prod/snutt-timetable:1
           name: snutt-timetable
+          volumeMounts:
+            - name: oci-api-key
+              mountPath: /root/.oci
+              readOnly: true
           resources:
             requests:
               cpu: 200m

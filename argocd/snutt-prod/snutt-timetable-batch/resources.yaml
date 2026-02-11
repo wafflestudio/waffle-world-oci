@@ -26,9 +26,17 @@ spec:
               value: batch
           restartPolicy: OnFailure
           serviceAccountName: snutt-timetable-batch
+          volumes:
+            - name: oci-api-key
+              secret:
+                secretName: oci-api-key
           containers:
             - image: yny.ocir.io/ax1dvc8vmenm/snutt-prod/snutt-timetable-batch:1
               name: snutt-timetable-batch-coursebook
+              volumeMounts:
+                - name: oci-api-key
+                  mountPath: /root/.oci
+                  readOnly: true
               resources:
                 requests:
                   cpu: 200m
@@ -74,9 +82,17 @@ spec:
               value: batch
           restartPolicy: OnFailure
           serviceAccountName: snutt-timetable-batch
+          volumes:
+            - name: oci-api-key
+              secret:
+                secretName: oci-api-key
           containers:
             - image: yny.ocir.io/ax1dvc8vmenm/snutt-prod/snutt-timetable-batch:10
               name: snu4t-batch-vacancy-noti
+              volumeMounts:
+                - name: oci-api-key
+                  mountPath: /root/.oci
+                  readOnly: true
               resources:
                 requests:
                   cpu: 200m
@@ -122,9 +138,17 @@ spec:
               value: batch
           restartPolicy: OnFailure
           serviceAccountName: snutt-timetable-batch
+          volumes:
+            - name: oci-api-key
+              secret:
+                secretName: oci-api-key
           containers:
             - image: yny.ocir.io/ax1dvc8vmenm/snutt-prod/snutt-timetable-batch:10
               name: snutt-timetable-batch-user-nickname
+              volumeMounts:
+                - name: oci-api-key
+                  mountPath: /root/.oci
+                  readOnly: true
               resources:
                 requests:
                   cpu: 200m
