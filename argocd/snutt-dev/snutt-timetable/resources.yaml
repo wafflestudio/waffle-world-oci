@@ -30,7 +30,7 @@ spec:
           operator: Equal
           value: dev
       containers:
-        - image: yny.ocir.io/ax1dvc8vmenm/snutt-dev/snutt-timetable:test-event-789
+        - image: yny.ocir.io/ax1dvc8vmenm/snutt-dev/snutt-timetable:5
           name: snutt-timetable
           resources:
             requests:
