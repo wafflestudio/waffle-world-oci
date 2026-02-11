@@ -36,11 +36,11 @@ spec:
               readOnly: true
           resources:
             requests:
-              cpu: 200m
-              memory: 256Mi
+              cpu: 300m
+              memory: 400Mi
             limits:
-              cpu: 400m
-              memory: 512Mi
+              cpu: 600m
+              memory: 800Mi
           ports:
             - containerPort: 8080
           livenessProbe:
@@ -51,6 +51,8 @@ spec:
             httpGet:
               path: /actuator/health/readiness
               port: 8080
+            timeoutSeconds: 3
+            failureThreshold: 5
           startupProbe:
             httpGet:
               path: /actuator/health/liveness
