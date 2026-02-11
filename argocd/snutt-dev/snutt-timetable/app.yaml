@@ -1,0 +1,25 @@
+apiVersion: argoproj.io/v1alpha1
+kind: Application
+metadata:
+  namespace: argocd
+  name: snutt-timetable-dev
+  annotations:
+    argocd-image-updater.argoproj.io/image-list: snutt=yny.ocir.io/ax1dvc8vmenm/snutt-dev/snutt-timetable
+    argocd-image-updater.argoproj.io/snutt.update-strategy: newest-build
+    argocd-image-updater.argoproj.io/write-back-method: git
+  finalizers:
+  - resources-finalizer.argocd.argoproj.io
+spec:
+  project: default
+  destination:
+    name: in-cluster
+    namespace: snutt-dev
+  source:
+    repoURL: https://github.com/wafflestudio/waffle-world-oci.git
+    targetRevision: main
+    path: argocd/snutt-dev/snutt-timetable
+    directory:
+      include: 'resources.yaml'
+  syncPolicy:
+    syncOptions:
+    - CreateNamespace=true

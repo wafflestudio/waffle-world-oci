@@ -1,0 +1,148 @@
+apiVersion: batch/v1
+kind: CronJob
+metadata:
+  name: snutt-timetable-batch-coursebook
+  labels:
+    app: snutt-timetable-batch-coursebook
+spec:
+  concurrencyPolicy: Forbid
+  schedule: "45 */12 * * *"
+  successfulJobsHistoryLimit: 2
+  failedJobsHistoryLimit: 3
+  jobTemplate:
+    spec:
+      template:
+        metadata:
+          annotations:
+            sidecar.istio.io/inject: "false"
+        spec:
+          nodeSelector:
+            kubernetes.io/arch: arm64
+            phase: batch
+          tolerations:
+            - effect: NoSchedule
+              key: phase
+              operator: Equal
+              value: batch
+          restartPolicy: OnFailure
+          serviceAccountName: snutt-timetable-batch
+          containers:
+          - image: yny.ocir.io/ax1dvc8vmenm/snutt-prod/snutt-timetable-batch:10
+            name: snutt-timetable-batch-coursebook
+            resources:
+              requests:
+                cpu: 200m
+                memory: 1Gi
+              limits:
+                cpu: 1000m
+                memory: 2Gi
+            env:
+            - name: JOB_NAME
+              value: "sugangSnuMigrationJob"
+            - name: JAVA_OPTS
+              value: "-XX:InitialRAMPercentage=80.0 -XX:MaxRAMPercentage=80.0 -Duser.timezone=UTC"
+            - name: SPRING_PROFILES_ACTIVE
+              value: "prod"
+            - name: TRUFFLE_ENABLED
+              value: "true"
+---
+apiVersion: batch/v1
+kind: CronJob
+metadata:
+  name: snu4t-batch-vacancy-noti
+  labels:
+    app: snu4t-batch-vacancy-noti
+spec:
+  concurrencyPolicy: Forbid
+  schedule: "30 23 * * 0-4"
+  successfulJobsHistoryLimit: 2
+  failedJobsHistoryLimit: 3
+  jobTemplate:
+    spec:
+      template:
+        metadata:
+          annotations:
+            sidecar.istio.io/inject: "false"
+        spec:
+          nodeSelector:
+            kubernetes.io/arch: arm64
+            phase: batch
+          tolerations:
+            - effect: NoSchedule
+              key: phase
+              operator: Equal
+              value: batch
+          restartPolicy: OnFailure
+          serviceAccountName: snutt-timetable-batch
+          containers:
+          - image: yny.ocir.io/ax1dvc8vmenm/snutt-prod/snutt-timetable-batch:10
+            name: snu4t-batch-vacancy-noti
+            resources:
+              requests:
+                cpu: 200m
+                memory: 1Gi
+              limits:
+                cpu: 1000m
+                memory: 2Gi
+            env:
+            - name: JOB_NAME
+              value: "vacancyNotificationJob"
+            - name: JAVA_OPTS
+              value: "-XX:InitialRAMPercentage=80.0 -XX:MaxRAMPercentage=80.0 -Duser.timezone=UTC"
+            - name: SPRING_PROFILES_ACTIVE
+              value: "prod"
+            - name: TRUFFLE_ENABLED
+              value: "true"
+---
+apiVersion: batch/v1
+kind: CronJob
+metadata:
+  name: snutt-timetable-batch-user-nickname
+  labels:
+    app: snutt-timetable-batch-user-nickname
+spec:
+  concurrencyPolicy: Forbid
+  schedule: "0 0 31 2 *"
+  successfulJobsHistoryLimit: 2
+  failedJobsHistoryLimit: 3
+  jobTemplate:
+    spec:
+      template:
+        metadata:
+          annotations:
+            sidecar.istio.io/inject: "false"
+        spec:
+          nodeSelector:
+            kubernetes.io/arch: arm64
+            phase: batch
+          tolerations:
+            - effect: NoSchedule
+              key: phase
+              operator: Equal
+              value: batch
+          restartPolicy: OnFailure
+          serviceAccountName: snutt-timetable-batch
+          containers:
+            - image: yny.ocir.io/ax1dvc8vmenm/snutt-prod/snutt-timetable-batch:10
+              name: snutt-timetable-batch-user-nickname
+              resources:
+                requests:
+                  cpu: 200m
+                  memory: 1Gi
+                limits:
+                  cpu: 1000m
+                  memory: 1Gi
+              env:
+                - name: JOB_NAME
+                  value: "userNicknameCreateJob"
+                - name: JAVA_OPTS
+                  value: "-XX:InitialRAMPercentage=80.0 -XX:MaxRAMPercentage=80.0 -Duser.timezone=UTC"
+                - name: SPRING_PROFILES_ACTIVE
+                  value: "prod"
+                - name: TRUFFLE_ENABLED
+                  value: "true"
+---
+apiVersion: v1
+kind: ServiceAccount
+metadata:
+  name: snutt-timetable-batch
