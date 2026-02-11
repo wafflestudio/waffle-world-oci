@@ -12,7 +12,7 @@ spec:
           - path: argocd/**/config.json
   template:
     metadata:
-      name: '{{name}}'
+      name: '{{`{{name}}`}}'
       namespace: argocd
       finalizers:
         - resources-finalizer.argocd.argoproj.io
@@ -21,12 +21,12 @@ spec:
       source:
         repoURL: https://github.com/wafflestudio/waffle-world-oci.git
         targetRevision: main
-        path: '{{path.path}}'
+        path: '{{`{{path.path}}`}}'
         directory:
           include: 'resources.yaml'
       destination:
         name: in-cluster
-        namespace: '{{namespace}}'
+        namespace: '{{`{{namespace}}`}}'
       syncPolicy:
         syncOptions:
           - CreateNamespace=true
