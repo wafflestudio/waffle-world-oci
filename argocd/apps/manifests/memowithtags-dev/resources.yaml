@@ -31,8 +31,8 @@ spec:
       serviceAccountName: memowithtags
       # NOTE: You may need to adapt the following node selectors and tolerations
       # to match the node configuration of your OCI OKE cluster.
-      nodeSelector:
-        phase: dev
+      # nodeSelector:
+      #   phase: dev
       # tolerations:
       #   - effect: NoSchedule
       #     key: phase
