@@ -30,37 +30,37 @@ spec:
           operator: Equal
           value: dev
       containers:
-      - image: yny.ocir.io/ax1dvc8vmenm/snutt-dev/snutt-timetable:100
-        name: snutt-timetable
-        resources:
-          requests:
-            cpu: 100m
-            memory: 200Mi
-          limits:
-            cpu: 200m
-            memory: 400Mi
-        ports:
-        - containerPort: 8080
-        livenessProbe:
-          httpGet:
-            path: /actuator/health/liveness
-            port: 8080
-        readinessProbe:
-          httpGet:
-            path: /actuator/health/readiness
-            port: 8080
-        startupProbe:
-          httpGet:
-            path: /actuator/health/liveness
-            port: 8080
-          failureThreshold: 20
-        env:
-        - name: JAVA_OPTS
-          value: "-XX:InitialRAMPercentage=75.0 -XX:MaxRAMPercentage=75.0 -Duser.timezone=UTC"
-        - name: SPRING_PROFILES_ACTIVE
-          value: "dev"
-        - name: TRUFFLE_ENABLED
-          value: "true"
+        - image: yny.ocir.io/ax1dvc8vmenm/snutt-dev/snutt-timetable:1
+          name: snutt-timetable
+          resources:
+            requests:
+              cpu: 100m
+              memory: 200Mi
+            limits:
+              cpu: 200m
+              memory: 400Mi
+          ports:
+            - containerPort: 8080
+          livenessProbe:
+            httpGet:
+              path: /actuator/health/liveness
+              port: 8080
+          readinessProbe:
+            httpGet:
+              path: /actuator/health/readiness
+              port: 8080
+          startupProbe:
+            httpGet:
+              path: /actuator/health/liveness
+              port: 8080
+            failureThreshold: 20
+          env:
+            - name: JAVA_OPTS
+              value: "-XX:InitialRAMPercentage=75.0 -XX:MaxRAMPercentage=75.0 -Duser.timezone=UTC"
+            - name: SPRING_PROFILES_ACTIVE
+              value: "dev"
+            - name: TRUFFLE_ENABLED
+              value: "true"
 ---
 apiVersion: v1
 kind: ServiceAccount
@@ -78,8 +78,8 @@ spec:
   selector:
     app: snutt-timetable
   ports:
-  - port: 80
-    targetPort: 8080
+    - port: 80
+      targetPort: 8080
 ---
 apiVersion: networking.istio.io/v1alpha3
 kind: VirtualService
@@ -87,37 +87,37 @@ metadata:
   name: snutt-timetable
 spec:
   gateways:
-  - istio-ingress/waffle-ingressgateway
-  - mesh
+    - istio-ingress/waffle-ingressgateway
+    - mesh
   hosts:
-  - snutt-api-dev.wafflestudio.com
+    - snutt-api-dev.wafflestudio.com
   http:
-  - name: "dev-snutt-timetable-route"
-    timeout: 10s
-    route:
-    - destination:
-        host: snutt-timetable
-    corsPolicy:
-      allowHeaders:
-      - content-type
-      - x-access-apikey
-      - x-access-token
-      - x-app-version
-      - x-app-type
-      - x-os-type
-      - x-os-version
-      - x-device-id
-      - x-device-model
-      allowMethods:
-      - POST
-      - GET
-      - PUT
-      - PATCH
-      - DELETE
-      - OPTIONS
-      allowOrigins:
-      - exact: 'https://snutt-dev.wafflestudio.com'
-      - exact: 'https://snutt-admin-dev.wafflestudio.com'
-      - exact: 'https://snutt-ev-web-dev.wafflestudio.com'
-      - exact: 'https://snutt-theme-market-dev.wafflestudio.com'
-      - exact: 'http://localhost:3000'
+    - name: "dev-snutt-timetable-route"
+      timeout: 10s
+      route:
+        - destination:
+            host: snutt-timetable
+      corsPolicy:
+        allowHeaders:
+          - content-type
+          - x-access-apikey
+          - x-access-token
+          - x-app-version
+          - x-app-type
+          - x-os-type
+          - x-os-version
+          - x-device-id
+          - x-device-model
+        allowMethods:
+          - POST
+          - GET
+          - PUT
+          - PATCH
+          - DELETE
+          - OPTIONS
+        allowOrigins:
+          - exact: "https://snutt-dev.wafflestudio.com"
+          - exact: "https://snutt-admin-dev.wafflestudio.com"
+          - exact: "https://snutt-ev-web-dev.wafflestudio.com"
+          - exact: "https://snutt-theme-market-dev.wafflestudio.com"
+          - exact: "http://localhost:3000"
