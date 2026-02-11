@@ -9,9 +9,6 @@ config:
   gitCommitMail: 2841904+argocd-image-updater[bot]@users.noreply.github.com
   gitCommitTemplate: "build: update image {{ .AppName }} to {{ .NewImage }}"
 
-extraArgs:
-  - --write-back-method=git
-
 extraEnv:
   - name: GIT_ASKPASS
     value: /app/git-ask-pass.sh
