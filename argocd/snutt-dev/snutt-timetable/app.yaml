@@ -14,6 +14,8 @@ spec:
     repoURL: https://github.com/wafflestudio/waffle-world-oci.git
     targetRevision: main
     path: argocd/snutt-dev/snutt-timetable
+    directory:
+      include: 'resources.yaml'
   syncPolicy:
     syncOptions:
     - CreateNamespace=true
