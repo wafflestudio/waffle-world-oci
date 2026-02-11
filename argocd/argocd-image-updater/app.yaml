@@ -1,0 +1,26 @@
+apiVersion: argoproj.io/v1alpha1
+kind: Application
+metadata:
+  namespace: argocd
+  name: argocd-image-updater
+  finalizers:
+  - resources-finalizer.argocd.argoproj.io
+spec:
+  project: default
+  syncPolicy:
+    automated:
+      prune: true
+      selfHeal: true
+  destination:
+    name: in-cluster
+    namespace: argocd
+  sources:
+  - repoURL: https://argoproj.github.io/argo-helm
+    targetRevision: 1.1.0
+    chart: argocd-image-updater
+    helm:
+      valueFiles:
+      - $values/argocd/argocd-image-updater/values.yaml
+  - repoURL: https://github.com/wafflestudio/waffle-world-oci.git
+    targetRevision: main
+    ref: values
