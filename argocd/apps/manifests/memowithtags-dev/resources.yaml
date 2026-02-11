@@ -80,6 +80,8 @@ metadata:
     # that is configured for OKE Workload Identity.
     # skip for now
     # iam.oracle.com/oci-iam-role: "ocid1.iamrole.oc1..xxxx"
+imagePullSecrets:
+  - name: ocir-pull-secret
 ---
 apiVersion: v1
 kind: Service
