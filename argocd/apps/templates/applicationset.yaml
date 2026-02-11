@@ -1,0 +1,32 @@
+apiVersion: argoproj.io/v1alpha1
+kind: ApplicationSet
+metadata:
+  name: apps
+  namespace: argocd
+spec:
+  generators:
+    - git:
+        repoURL: https://github.com/wafflestudio/waffle-world-oci.git
+        revision: main
+        files:
+          - path: argocd/**/config.json
+  template:
+    metadata:
+      name: '{{`{{name}}`}}'
+      namespace: argocd
+      finalizers:
+        - resources-finalizer.argocd.argoproj.io
+    spec:
+      project: default
+      source:
+        repoURL: https://github.com/wafflestudio/waffle-world-oci.git
+        targetRevision: main
+        path: '{{`{{path.path}}`}}'
+        directory:
+          include: 'resources.yaml'
+      destination:
+        name: in-cluster
+        namespace: '{{`{{namespace}}`}}'
+      syncPolicy:
+        syncOptions:
+          - CreateNamespace=true
