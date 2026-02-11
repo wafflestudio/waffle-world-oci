@@ -23,12 +23,6 @@ spec:
       serviceAccountName: snutt-timetable
       nodeSelector:
         kubernetes.io/arch: arm64
-        phase: dev
-      tolerations:
-        - effect: NoSchedule
-          key: phase
-          operator: Equal
-          value: dev
       volumes:
         - name: oci-api-key
           secret:

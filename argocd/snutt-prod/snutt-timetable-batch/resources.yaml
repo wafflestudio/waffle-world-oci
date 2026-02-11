@@ -18,12 +18,6 @@ spec:
         spec:
           nodeSelector:
             kubernetes.io/arch: arm64
-            phase: batch
-          tolerations:
-            - effect: NoSchedule
-              key: phase
-              operator: Equal
-              value: batch
           restartPolicy: OnFailure
           serviceAccountName: snutt-timetable-batch
           volumes:
@@ -74,12 +68,6 @@ spec:
         spec:
           nodeSelector:
             kubernetes.io/arch: arm64
-            phase: batch
-          tolerations:
-            - effect: NoSchedule
-              key: phase
-              operator: Equal
-              value: batch
           restartPolicy: OnFailure
           serviceAccountName: snutt-timetable-batch
           volumes:
@@ -130,12 +118,6 @@ spec:
         spec:
           nodeSelector:
             kubernetes.io/arch: arm64
-            phase: batch
-          tolerations:
-            - effect: NoSchedule
-              key: phase
-              operator: Equal
-              value: batch
           restartPolicy: OnFailure
           serviceAccountName: snutt-timetable-batch
           volumes:
