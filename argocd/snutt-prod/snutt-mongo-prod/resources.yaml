@@ -1,0 +1,56 @@
+apiVersion: apps/v1
+kind: StatefulSet
+metadata:
+  name: snutt-mongo-prod
+  labels:
+    app: snutt-mongo-prod
+spec:
+  serviceName: snutt-mongo-prod
+  replicas: 1
+  selector:
+    matchLabels:
+      app: snutt-mongo-prod
+  template:
+    metadata:
+      labels:
+        app: snutt-mongo-prod
+      annotations:
+        sidecar.istio.io/inject: "false"
+    spec:
+      nodeSelector:
+        kubernetes.io/arch: arm64
+      containers:
+        - name: mongo
+          image: docker.io/library/mongo:8.2.5
+          ports:
+            - containerPort: 27017
+          volumeMounts:
+            - name: mongo-data
+              mountPath: /data/db
+          resources:
+            requests:
+              cpu: 200m
+              memory: 256Mi
+            limits:
+              cpu: 500m
+              memory: 512Mi
+  volumeClaimTemplates:
+    - metadata:
+        name: mongo-data
+      spec:
+        accessModes: ["ReadWriteOnce"]
+        resources:
+          requests:
+            storage: 20Gi
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: snutt-mongo-prod
+spec:
+  type: ClusterIP
+  selector:
+    app: snutt-mongo-prod
+  ports:
+    - port: 27017
+      targetPort: 27017
