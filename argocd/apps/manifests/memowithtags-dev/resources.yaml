@@ -29,6 +29,8 @@ spec:
         app: memowithtags-server
     spec:
       serviceAccountName: memowithtags
+      imagePullSecrets:
+        - name: ocir-pull-secret
       # NOTE: You may need to adapt the following node selectors and tolerations
       # to match the node configuration of your OCI OKE cluster.
       # nodeSelector:
