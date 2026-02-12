@@ -24,9 +24,6 @@ spec:
           image: docker.io/valkey/valkey:8-alpine
           ports:
             - containerPort: 6379
-          volumeMounts:
-            - name: valkey-data
-              mountPath: /data
           resources:
             requests:
               cpu: 100m
@@ -34,14 +31,6 @@ spec:
             limits:
               cpu: 300m
               memory: 256Mi
-  volumeClaimTemplates:
-    - metadata:
-        name: valkey-data
-      spec:
-        accessModes: ["ReadWriteOnce"]
-        resources:
-          requests:
-            storage: 1Gi
 ---
 apiVersion: v1
 kind: Service
