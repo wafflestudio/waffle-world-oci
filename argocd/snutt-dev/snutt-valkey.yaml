@@ -1,19 +1,19 @@
 apiVersion: apps/v1
 kind: StatefulSet
 metadata:
-  name: snutt-valkey-dev
+  name: snutt-valkey
   labels:
-    app: snutt-valkey-dev
+    app: snutt-valkey
 spec:
-  serviceName: snutt-valkey-dev
+  serviceName: snutt-valkey
   replicas: 1
   selector:
     matchLabels:
-      app: snutt-valkey-dev
+      app: snutt-valkey
   template:
     metadata:
       labels:
-        app: snutt-valkey-dev
+        app: snutt-valkey
       annotations:
         sidecar.istio.io/inject: "false"
     spec:
@@ -35,11 +35,11 @@ spec:
 apiVersion: v1
 kind: Service
 metadata:
-  name: snutt-valkey-dev
+  name: snutt-valkey
 spec:
   type: ClusterIP
   selector:
-    app: snutt-valkey-dev
+    app: snutt-valkey
   ports:
     - port: 6379
       targetPort: 6379

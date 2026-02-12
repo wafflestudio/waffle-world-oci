@@ -1,19 +1,19 @@
 apiVersion: apps/v1
 kind: StatefulSet
 metadata:
-  name: snutt-mongo-prod
+  name: snutt-mongo
   labels:
-    app: snutt-mongo-prod
+    app: snutt-mongo
 spec:
-  serviceName: snutt-mongo-prod
+  serviceName: snutt-mongo
   replicas: 1
   selector:
     matchLabels:
-      app: snutt-mongo-prod
+      app: snutt-mongo
   template:
     metadata:
       labels:
-        app: snutt-mongo-prod
+        app: snutt-mongo
       annotations:
         sidecar.istio.io/inject: "false"
     spec:
@@ -46,11 +46,11 @@ spec:
 apiVersion: v1
 kind: Service
 metadata:
-  name: snutt-mongo-prod
+  name: snutt-mongo
 spec:
   type: ClusterIP
   selector:
-    app: snutt-mongo-prod
+    app: snutt-mongo
   ports:
     - port: 27017
       targetPort: 27017
