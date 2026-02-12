@@ -37,10 +37,10 @@ spec:
           resources:
             requests:
               cpu: 200m
-              memory: 512Mi
+              memory: 384Mi
             limits:
               cpu: 400m
-              memory: 768Mi
+              memory: 512Mi
           ports:
             - containerPort: 8080
           livenessProbe:
@@ -51,6 +51,8 @@ spec:
             httpGet:
               path: /health-check
               port: 8080
+            timeoutSeconds: 3
+            failureThreshold: 5
           startupProbe:
             httpGet:
               path: /health-check
