@@ -19,7 +19,7 @@ spec:
           nodeSelector:
             kubernetes.io/arch: arm64
           restartPolicy: OnFailure
-          serviceAccountName: snutt-ev-batch
+          serviceAccountName: snutt
           volumes:
             - name: oci-api-key
               secret:
@@ -71,7 +71,7 @@ spec:
           nodeSelector:
             kubernetes.io/arch: arm64
           restartPolicy: OnFailure
-          serviceAccountName: snutt-ev-batch
+          serviceAccountName: snutt
           volumes:
             - name: oci-api-key
               secret:
@@ -124,7 +124,7 @@ spec:
           nodeSelector:
             kubernetes.io/arch: arm64
           restartPolicy: OnFailure
-          serviceAccountName: snutt-ev-batch
+          serviceAccountName: snutt
           volumes:
             - name: oci-api-key
               secret:
@@ -152,10 +152,3 @@ spec:
                   value: "prod"
                 - name: TRUFFLE_ENABLED
                   value: "true"
----
-apiVersion: v1
-kind: ServiceAccount
-metadata:
-  name: snutt-ev-batch
-imagePullSecrets:
-  - name: ocir-pull-secret

@@ -20,7 +20,7 @@ spec:
       labels:
         app: snutt-ev
     spec:
-      serviceAccountName: snutt-ev
+      serviceAccountName: snutt
       nodeSelector:
         kubernetes.io/arch: arm64
       volumes:
@@ -84,13 +84,6 @@ spec:
         target:
           type: Utilization
           averageUtilization: 40
----
-apiVersion: v1
-kind: ServiceAccount
-metadata:
-  name: snutt-ev
-imagePullSecrets:
-  - name: ocir-pull-secret
 ---
 apiVersion: v1
 kind: Service

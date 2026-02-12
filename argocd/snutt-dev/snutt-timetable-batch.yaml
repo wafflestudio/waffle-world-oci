@@ -19,7 +19,7 @@ spec:
           nodeSelector:
             kubernetes.io/arch: arm64
           restartPolicy: OnFailure
-          serviceAccountName: snutt-timetable-batch
+          serviceAccountName: snutt
           volumes:
             - name: oci-api-key
               secret:
@@ -69,7 +69,7 @@ spec:
           nodeSelector:
             kubernetes.io/arch: arm64
           restartPolicy: OnFailure
-          serviceAccountName: snutt-timetable-batch
+          serviceAccountName: snutt
           volumes:
             - name: oci-api-key
               secret:
@@ -97,10 +97,3 @@ spec:
                   value: "dev"
                 - name: TRUFFLE_ENABLED
                   value: "true"
----
-apiVersion: v1
-kind: ServiceAccount
-metadata:
-  name: snutt-timetable-batch
-imagePullSecrets:
-  - name: ocir-pull-secret

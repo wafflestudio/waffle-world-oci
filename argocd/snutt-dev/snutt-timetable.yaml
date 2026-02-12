@@ -20,7 +20,7 @@ spec:
       labels:
         app: snutt-timetable
     spec:
-      serviceAccountName: snutt-timetable
+      serviceAccountName: snutt
       nodeSelector:
         kubernetes.io/arch: arm64
       volumes:
@@ -69,7 +69,7 @@ spec:
 apiVersion: v1
 kind: ServiceAccount
 metadata:
-  name: snutt-timetable
+  name: snutt
 imagePullSecrets:
   - name: ocir-pull-secret
 ---
