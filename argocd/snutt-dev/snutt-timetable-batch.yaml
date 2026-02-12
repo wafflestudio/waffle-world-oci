@@ -25,7 +25,7 @@ spec:
               secret:
                 secretName: oci-api-key
           containers:
-            - image: yny.ocir.io/ax1dvc8vmenm/snutt-dev/snutt-timetable-batch:1
+            - image: yny.ocir.io/ax1dvc8vmenm/snutt-dev/snutt-timetable-batch:18
               name: snutt-timetable-batch-coursebook
               volumeMounts:
                 - name: oci-api-key
@@ -75,7 +75,7 @@ spec:
               secret:
                 secretName: oci-api-key
           containers:
-            - image: yny.ocir.io/ax1dvc8vmenm/snutt-dev/snutt-timetable-batch:10
+            - image: yny.ocir.io/ax1dvc8vmenm/snutt-dev/snutt-timetable-batch:18
               name: snutt-timetable-batch-user-nickname
               volumeMounts:
                 - name: oci-api-key
