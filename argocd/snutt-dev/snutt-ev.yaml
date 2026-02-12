@@ -28,7 +28,7 @@ spec:
           secret:
             secretName: oci-api-key
       containers:
-        - image: yny.ocir.io/ax1dvc8vmenm/snutt-dev/snutt-ev:9
+        - image: yny.ocir.io/ax1dvc8vmenm/snutt-dev/snutt-ev:10
           name: snutt-ev
           volumeMounts:
             - name: oci-api-key
