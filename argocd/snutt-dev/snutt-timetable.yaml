@@ -28,7 +28,7 @@ spec:
           secret:
             secretName: oci-api-key
       containers:
-        - image: yny.ocir.io/ax1dvc8vmenm/snutt-dev/snutt-timetable:13
+        - image: yny.ocir.io/ax1dvc8vmenm/snutt-dev/snutt-timetable:14
           name: snutt-timetable
           volumeMounts:
             - name: oci-api-key
