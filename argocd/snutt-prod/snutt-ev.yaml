@@ -64,6 +64,7 @@ spec:
               value: "prod"
             - name: TRUFFLE_ENABLED
               value: "true"
+---
 apiVersion: v1
 kind: Service
 metadata:
