@@ -1,0 +1,125 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: snutt-timetable
+  labels:
+    app: snutt-timetable
+spec:
+  replicas: 0
+  selector:
+    matchLabels:
+      app: snutt-timetable
+  strategy:
+    type: RollingUpdate
+    rollingUpdate:
+      maxSurge: 25%
+      maxUnavailable: 25%
+  revisionHistoryLimit: 4
+  template:
+    metadata:
+      labels:
+        app: snutt-timetable
+    spec:
+      serviceAccountName: snutt
+      nodeSelector:
+        kubernetes.io/arch: arm64
+      volumes:
+        - name: oci-api-key
+          secret:
+            secretName: oci-api-key
+      containers:
+        - image: yny.ocir.io/ax1dvc8vmenm/snutt-prod/snutt-timetable:1
+          name: snutt-timetable
+          volumeMounts:
+            - name: oci-api-key
+              mountPath: /root/.oci
+              readOnly: true
+          resources:
+            requests:
+              cpu: 250m
+              memory: 400Mi
+            limits:
+              memory: 800Mi
+          ports:
+            - containerPort: 8080
+          livenessProbe:
+            httpGet:
+              path: /actuator/health/liveness
+              port: 8080
+          readinessProbe:
+            httpGet:
+              path: /actuator/health/readiness
+              port: 8080
+            timeoutSeconds: 3
+            failureThreshold: 5
+          startupProbe:
+            httpGet:
+              path: /actuator/health/liveness
+              port: 8080
+            failureThreshold: 20
+          env:
+            - name: JAVA_OPTS
+              value: "-XX:InitialRAMPercentage=80.0 -XX:MaxRAMPercentage=80.0 -Duser.timezone=UTC"
+            - name: SPRING_PROFILES_ACTIVE
+              value: "prod"
+            - name: TRUFFLE_ENABLED
+              value: "true"
+---
+apiVersion: v1
+kind: ServiceAccount
+metadata:
+  name: snutt
+imagePullSecrets:
+  - name: ocir-pull-secret
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: snutt-timetable
+spec:
+  type: ClusterIP
+  selector:
+    app: snutt-timetable
+  ports:
+    - port: 80
+      targetPort: 8080
+---
+apiVersion: networking.istio.io/v1alpha3
+kind: VirtualService
+metadata:
+  name: snutt-timetable
+spec:
+  gateways:
+    - istio-ingress/waffle-ingressgateway
+    - mesh
+  hosts:
+    - snutt-api.wafflestudio.com
+  http:
+    - name: "snutt-timetable-route"
+      timeout: 10s
+      route:
+        - destination:
+            host: snutt-timetable
+      corsPolicy:
+        allowHeaders:
+          - content-type
+          - x-access-apikey
+          - x-access-token
+          - x-app-version
+          - x-app-type
+          - x-os-type
+          - x-os-version
+          - x-device-id
+          - x-device-model
+        allowMethods:
+          - POST
+          - GET
+          - PUT
+          - PATCH
+          - DELETE
+          - OPTIONS
+        allowOrigins:
+          - exact: "https://snutt.wafflestudio.com"
+          - exact: "https://snutt-admin.wafflestudio.com"
+          - exact: "https://snutt-ev-web.wafflestudio.com"
+          - exact: "https://snutt-theme-market.wafflestudio.com"

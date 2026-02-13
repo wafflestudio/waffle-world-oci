@@ -1,12 +1,12 @@
 apiVersion: batch/v1
 kind: CronJob
 metadata:
-  name: snutt-timetable-batch-coursebook
+  name: snutt-ev-batch-lecture-sync-latest-semester
   labels:
-    app: snutt-timetable-batch-coursebook
+    app: snutt-ev-batch-lecture-sync-latest-semester
 spec:
   concurrencyPolicy: Forbid
-  schedule: "45 */12 * * *"
+  schedule: "10 */12 * * *"
   successfulJobsHistoryLimit: 2
   failedJobsHistoryLimit: 3
   jobTemplate:
@@ -19,14 +19,14 @@ spec:
           nodeSelector:
             kubernetes.io/arch: arm64
           restartPolicy: OnFailure
-          serviceAccountName: snutt-timetable-batch
+          serviceAccountName: snutt
           volumes:
             - name: oci-api-key
               secret:
                 secretName: oci-api-key
           containers:
-            - image: yny.ocir.io/ax1dvc8vmenm/snutt-prod/snutt-timetable-batch:1
-              name: snutt-timetable-batch-coursebook
+            - image: yny.ocir.io/ax1dvc8vmenm/snutt-dev/snutt-ev-batch:24
+              name: snutt-ev-batch-lecture-sync-latest-semester
               volumeMounts:
                 - name: oci-api-key
                   mountPath: /root/.oci
@@ -40,72 +40,24 @@ spec:
                   memory: 2Gi
               env:
                 - name: JOB_NAME
-                  value: "sugangSnuMigrationJob"
+                  value: "NEXT_SEMESTER_SYNC_JOB"
                 - name: JAVA_OPTS
                   value: "-XX:InitialRAMPercentage=80.0 -XX:MaxRAMPercentage=80.0 -Duser.timezone=UTC"
                 - name: SPRING_PROFILES_ACTIVE
-                  value: "prod"
+                  value: "dev"
                 - name: TRUFFLE_ENABLED
                   value: "true"
 ---
 apiVersion: batch/v1
 kind: CronJob
 metadata:
-  name: snu4t-batch-vacancy-noti
+  name: snutt-ev-batch-lecture-sync-all
   labels:
-    app: snu4t-batch-vacancy-noti
+    app: snutt-ev-batch-lecture-sync-all
 spec:
   concurrencyPolicy: Forbid
-  schedule: "30 23 * * 0-4"
-  successfulJobsHistoryLimit: 2
-  failedJobsHistoryLimit: 3
-  jobTemplate:
-    spec:
-      template:
-        metadata:
-          annotations:
-            sidecar.istio.io/inject: "false"
-        spec:
-          nodeSelector:
-            kubernetes.io/arch: arm64
-          restartPolicy: OnFailure
-          serviceAccountName: snutt-timetable-batch
-          volumes:
-            - name: oci-api-key
-              secret:
-                secretName: oci-api-key
-          containers:
-            - image: yny.ocir.io/ax1dvc8vmenm/snutt-prod/snutt-timetable-batch:10
-              name: snu4t-batch-vacancy-noti
-              volumeMounts:
-                - name: oci-api-key
-                  mountPath: /root/.oci
-                  readOnly: true
-              resources:
-                requests:
-                  cpu: 200m
-                  memory: 1Gi
-                limits:
-                  cpu: 1000m
-                  memory: 2Gi
-              env:
-                - name: JOB_NAME
-                  value: "vacancyNotificationJob"
-                - name: JAVA_OPTS
-                  value: "-XX:InitialRAMPercentage=80.0 -XX:MaxRAMPercentage=80.0 -Duser.timezone=UTC"
-                - name: SPRING_PROFILES_ACTIVE
-                  value: "prod"
-                - name: TRUFFLE_ENABLED
-                  value: "true"
----
-apiVersion: batch/v1
-kind: CronJob
-metadata:
-  name: snutt-timetable-batch-user-nickname
-  labels:
-    app: snutt-timetable-batch-user-nickname
-spec:
-  concurrencyPolicy: Forbid
+  # 실행 방법
+  # kubectl create job snutt-ev-batch-snuev-migration --from=cronjob/snutt-ev-batch-snuev-migration
   schedule: "0 0 31 2 *"
   successfulJobsHistoryLimit: 2
   failedJobsHistoryLimit: 3
@@ -119,14 +71,68 @@ spec:
           nodeSelector:
             kubernetes.io/arch: arm64
           restartPolicy: OnFailure
-          serviceAccountName: snutt-timetable-batch
+          serviceAccountName: snutt
           volumes:
             - name: oci-api-key
               secret:
                 secretName: oci-api-key
           containers:
-            - image: yny.ocir.io/ax1dvc8vmenm/snutt-prod/snutt-timetable-batch:10
-              name: snutt-timetable-batch-user-nickname
+            - image: yny.ocir.io/ax1dvc8vmenm/snutt-dev/snutt-ev-batch:24
+              name: snutt-ev-batch-lecture-sync-all
+              volumeMounts:
+                - name: oci-api-key
+                  mountPath: /root/.oci
+                  readOnly: true
+              resources:
+                requests:
+                  cpu: 200m
+                  memory: 1Gi
+                limits:
+                  cpu: 1000m
+                  memory: 2Gi
+              env:
+                - name: JOB_NAME
+                  value: "SYNC_JOB"
+                - name: JAVA_OPTS
+                  value: "-XX:InitialRAMPercentage=80.0 -XX:MaxRAMPercentage=80.0 -Duser.timezone=UTC"
+                - name: SPRING_PROFILES_ACTIVE
+                  value: "dev"
+                - name: TRUFFLE_ENABLED
+                  value: "true"
+---
+apiVersion: batch/v1
+kind: CronJob
+metadata:
+  name: snutt-ev-batch-snuev-migration
+  labels:
+    app: snutt-ev-batch-snuev-migration
+spec:
+  concurrencyPolicy: Forbid
+  suspend: true
+  # 실행 방법
+  # kubectl create job snutt-ev-batch-snuev-migration --from=cronjob/snutt-ev-batch-snuev-migration
+  schedule: "0 0 31 2 *"
+  successfulJobsHistoryLimit: 2
+  failedJobsHistoryLimit: 3
+  jobTemplate:
+    spec:
+      template:
+        metadata:
+          annotations:
+            sidecar.istio.io/inject: "false"
+        spec:
+          nodeSelector:
+            kubernetes.io/arch: arm64
+          restartPolicy: OnFailure
+          serviceAccountName: snutt
+          volumes:
+            - name: oci-api-key
+              secret:
+                secretName: oci-api-key
+          containers:
+            - image: yny.ocir.io/ax1dvc8vmenm/snutt-dev/snutt-ev-batch:24
+              imagePullPolicy: IfNotPresent
+              name: snutt-ev-batch-snuev-migration
               volumeMounts:
                 - name: oci-api-key
                   mountPath: /root/.oci
@@ -140,17 +146,10 @@ spec:
                   memory: 1Gi
               env:
                 - name: JOB_NAME
-                  value: "userNicknameCreateJob"
+                  value: "SNUEV_MIGRATION_JOB"
                 - name: JAVA_OPTS
                   value: "-XX:InitialRAMPercentage=80.0 -XX:MaxRAMPercentage=80.0 -Duser.timezone=UTC"
                 - name: SPRING_PROFILES_ACTIVE
-                  value: "prod"
+                  value: "dev"
                 - name: TRUFFLE_ENABLED
                   value: "true"
----
-apiVersion: v1
-kind: ServiceAccount
-metadata:
-  name: snutt-timetable-batch
-imagePullSecrets:
-  - name: ocir-pull-secret

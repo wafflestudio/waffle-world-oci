@@ -5,7 +5,7 @@ metadata:
   labels:
     app: snutt-timetable
 spec:
-  # replicas: HPA
+  replicas: 1
   selector:
     matchLabels:
       app: snutt-timetable
@@ -20,7 +20,7 @@ spec:
       labels:
         app: snutt-timetable
     spec:
-      serviceAccountName: snutt-timetable
+      serviceAccountName: snutt
       nodeSelector:
         kubernetes.io/arch: arm64
       volumes:
@@ -28,7 +28,7 @@ spec:
           secret:
             secretName: oci-api-key
       containers:
-        - image: yny.ocir.io/ax1dvc8vmenm/snutt-prod/snutt-timetable:1
+        - image: yny.ocir.io/ax1dvc8vmenm/snutt-dev/snutt-timetable:17
           name: snutt-timetable
           volumeMounts:
             - name: oci-api-key
@@ -36,11 +36,10 @@ spec:
               readOnly: true
           resources:
             requests:
-              cpu: 200m
-              memory: 256Mi
+              cpu: 100m
+              memory: 300Mi
             limits:
-              cpu: 400m
-              memory: 512Mi
+              memory: 600Mi
           ports:
             - containerPort: 8080
           livenessProbe:
@@ -51,6 +50,8 @@ spec:
             httpGet:
               path: /actuator/health/readiness
               port: 8080
+            timeoutSeconds: 3
+            failureThreshold: 5
           startupProbe:
             httpGet:
               path: /actuator/health/liveness
@@ -58,37 +59,16 @@ spec:
             failureThreshold: 20
           env:
             - name: JAVA_OPTS
-              value: "-XX:InitialRAMPercentage=80.0 -XX:MaxRAMPercentage=80.0 -Duser.timezone=UTC"
+              value: "-XX:InitialRAMPercentage=75.0 -XX:MaxRAMPercentage=75.0 -Duser.timezone=UTC"
             - name: SPRING_PROFILES_ACTIVE
-              value: "prod"
+              value: "dev"
             - name: TRUFFLE_ENABLED
               value: "true"
----
-apiVersion: autoscaling/v2
-kind: HorizontalPodAutoscaler
-metadata:
-  name: snutt-timetable-hpa
-  labels:
-    app: snutt-timetable
-spec:
-  scaleTargetRef:
-    apiVersion: apps/v1
-    kind: Deployment
-    name: snutt-timetable
-  minReplicas: 1
-  maxReplicas: 3
-  metrics:
-    - type: Resource
-      resource:
-        name: cpu
-        target:
-          type: Utilization
-          averageUtilization: 40
 ---
 apiVersion: v1
 kind: ServiceAccount
 metadata:
-  name: snutt-timetable
+  name: snutt
 imagePullSecrets:
   - name: ocir-pull-secret
 ---
@@ -113,9 +93,9 @@ spec:
     - istio-ingress/waffle-ingressgateway
     - mesh
   hosts:
-    - snutt-api.wafflestudio.com
+    - snutt-api-dev.wafflestudio.com
   http:
-    - name: "snutt-timetable-route"
+    - name: "dev-snutt-timetable-route"
       timeout: 10s
       route:
         - destination:
@@ -139,19 +119,8 @@ spec:
           - DELETE
           - OPTIONS
         allowOrigins:
-          - exact: "https://snutt.wafflestudio.com"
-          - exact: "https://snutt-admin.wafflestudio.com"
-          - exact: "https://snutt-ev-web.wafflestudio.com"
-          - exact: "https://snutt-theme-market.wafflestudio.com"
----
-apiVersion: networking.istio.io/v1beta1
-kind: DestinationRule
-metadata:
-  name: snutt-timetable
-spec:
-  host: snutt-timetable
-  trafficPolicy:
-    connectionPool:
-      http:
-        maxRequestsPerConnection: 100
-        idleTimeout: 30s
+          - exact: "https://snutt-dev.wafflestudio.com"
+          - exact: "https://snutt-admin-dev.wafflestudio.com"
+          - exact: "https://snutt-ev-web-dev.wafflestudio.com"
+          - exact: "https://snutt-theme-market-dev.wafflestudio.com"
+          - exact: "http://localhost:3000"

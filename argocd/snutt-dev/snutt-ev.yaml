@@ -1,14 +1,14 @@
 apiVersion: apps/v1
 kind: Deployment
 metadata:
-  name: snutt-timetable
+  name: snutt-ev
   labels:
-    app: snutt-timetable
+    app: snutt-ev
 spec:
   replicas: 1
   selector:
     matchLabels:
-      app: snutt-timetable
+      app: snutt-ev
   strategy:
     type: RollingUpdate
     rollingUpdate:
@@ -18,9 +18,9 @@ spec:
   template:
     metadata:
       labels:
-        app: snutt-timetable
+        app: snutt-ev
     spec:
-      serviceAccountName: snutt-timetable
+      serviceAccountName: snutt
       nodeSelector:
         kubernetes.io/arch: arm64
       volumes:
@@ -28,32 +28,33 @@ spec:
           secret:
             secretName: oci-api-key
       containers:
-        - image: yny.ocir.io/ax1dvc8vmenm/snutt-dev/snutt-timetable:6
-          name: snutt-timetable
+        - image: yny.ocir.io/ax1dvc8vmenm/snutt-dev/snutt-ev:21
+          name: snutt-ev
           volumeMounts:
             - name: oci-api-key
               mountPath: /root/.oci
               readOnly: true
           resources:
             requests:
-              cpu: 100m
-              memory: 200Mi
+              cpu: 75m
+              memory: 256Mi
             limits:
-              cpu: 200m
-              memory: 400Mi
+              memory: 512Mi
           ports:
             - containerPort: 8080
           livenessProbe:
             httpGet:
-              path: /actuator/health/liveness
+              path: /health-check
               port: 8080
           readinessProbe:
             httpGet:
-              path: /actuator/health/readiness
+              path: /health-check
               port: 8080
+            timeoutSeconds: 3
+            failureThreshold: 5
           startupProbe:
             httpGet:
-              path: /actuator/health/liveness
+              path: /health-check
               port: 8080
             failureThreshold: 20
           env:
@@ -65,20 +66,13 @@ spec:
               value: "true"
 ---
 apiVersion: v1
-kind: ServiceAccount
-metadata:
-  name: snutt-timetable
-imagePullSecrets:
-  - name: ocir-pull-secret
----
-apiVersion: v1
 kind: Service
 metadata:
-  name: snutt-timetable
+  name: snutt-ev
 spec:
   type: ClusterIP
   selector:
-    app: snutt-timetable
+    app: snutt-ev
   ports:
     - port: 80
       targetPort: 8080
@@ -86,40 +80,20 @@ spec:
 apiVersion: networking.istio.io/v1alpha3
 kind: VirtualService
 metadata:
-  name: snutt-timetable
+  name: snutt-ev
 spec:
   gateways:
     - istio-ingress/waffle-ingressgateway
     - mesh
   hosts:
-    - snutt-api-dev.wafflestudio.com
+    - snutt-ev-api-dev.wafflestudio.com
   http:
-    - name: "dev-snutt-timetable-route"
-      timeout: 10s
+    - timeout: 10s
+      match:
+        - uri:
+            prefix: /swagger-ui
+        - uri:
+            prefix: /v3/api-docs
       route:
         - destination:
-            host: snutt-timetable
-      corsPolicy:
-        allowHeaders:
-          - content-type
-          - x-access-apikey
-          - x-access-token
-          - x-app-version
-          - x-app-type
-          - x-os-type
-          - x-os-version
-          - x-device-id
-          - x-device-model
-        allowMethods:
-          - POST
-          - GET
-          - PUT
-          - PATCH
-          - DELETE
-          - OPTIONS
-        allowOrigins:
-          - exact: "https://snutt-dev.wafflestudio.com"
-          - exact: "https://snutt-admin-dev.wafflestudio.com"
-          - exact: "https://snutt-ev-web-dev.wafflestudio.com"
-          - exact: "https://snutt-theme-market-dev.wafflestudio.com"
-          - exact: "http://localhost:3000"
+            host: snutt-ev

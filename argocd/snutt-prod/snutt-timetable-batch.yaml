@@ -6,7 +6,8 @@ metadata:
     app: snutt-timetable-batch-coursebook
 spec:
   concurrencyPolicy: Forbid
-  schedule: "0 */12 * * *"
+  suspend: true
+  schedule: "45 */12 * * *"
   successfulJobsHistoryLimit: 2
   failedJobsHistoryLimit: 3
   jobTemplate:
@@ -19,13 +20,13 @@ spec:
           nodeSelector:
             kubernetes.io/arch: arm64
           restartPolicy: OnFailure
-          serviceAccountName: snutt-timetable-batch
+          serviceAccountName: snutt
           volumes:
             - name: oci-api-key
               secret:
                 secretName: oci-api-key
           containers:
-            - image: yny.ocir.io/ax1dvc8vmenm/snutt-dev/snutt-timetable-batch:1
+            - image: yny.ocir.io/ax1dvc8vmenm/snutt-prod/snutt-timetable-batch:1
               name: snutt-timetable-batch-coursebook
               volumeMounts:
                 - name: oci-api-key
@@ -44,19 +45,20 @@ spec:
                 - name: JAVA_OPTS
                   value: "-XX:InitialRAMPercentage=80.0 -XX:MaxRAMPercentage=80.0 -Duser.timezone=UTC"
                 - name: SPRING_PROFILES_ACTIVE
-                  value: "dev"
+                  value: "prod"
                 - name: TRUFFLE_ENABLED
                   value: "true"
 ---
 apiVersion: batch/v1
 kind: CronJob
 metadata:
-  name: snutt-timetable-batch-user-nickname
+  name: snu4t-batch-vacancy-noti
   labels:
-    app: snutt-timetable-batch-user-nickname
+    app: snu4t-batch-vacancy-noti
 spec:
   concurrencyPolicy: Forbid
-  schedule: "0 0 31 2 *"
+  suspend: true
+  schedule: "30 23 * * 0-4"
   successfulJobsHistoryLimit: 2
   failedJobsHistoryLimit: 3
   jobTemplate:
@@ -69,14 +71,14 @@ spec:
           nodeSelector:
             kubernetes.io/arch: arm64
           restartPolicy: OnFailure
-          serviceAccountName: snutt-timetable-batch
+          serviceAccountName: snutt
           volumes:
             - name: oci-api-key
               secret:
                 secretName: oci-api-key
           containers:
-            - image: yny.ocir.io/ax1dvc8vmenm/snutt-dev/snutt-timetable-batch:10
-              name: snutt-timetable-batch-user-nickname
+            - image: yny.ocir.io/ax1dvc8vmenm/snutt-prod/snutt-timetable-batch:10
+              name: snu4t-batch-vacancy-noti
               volumeMounts:
                 - name: oci-api-key
                   mountPath: /root/.oci
@@ -90,17 +92,61 @@ spec:
                   memory: 2Gi
               env:
                 - name: JOB_NAME
+                  value: "vacancyNotificationJob"
+                - name: JAVA_OPTS
+                  value: "-XX:InitialRAMPercentage=80.0 -XX:MaxRAMPercentage=80.0 -Duser.timezone=UTC"
+                - name: SPRING_PROFILES_ACTIVE
+                  value: "prod"
+                - name: TRUFFLE_ENABLED
+                  value: "true"
+---
+apiVersion: batch/v1
+kind: CronJob
+metadata:
+  name: snutt-timetable-batch-user-nickname
+  labels:
+    app: snutt-timetable-batch-user-nickname
+spec:
+  concurrencyPolicy: Forbid
+  suspend: true
+  schedule: "0 0 31 2 *"
+  successfulJobsHistoryLimit: 2
+  failedJobsHistoryLimit: 3
+  jobTemplate:
+    spec:
+      template:
+        metadata:
+          annotations:
+            sidecar.istio.io/inject: "false"
+        spec:
+          nodeSelector:
+            kubernetes.io/arch: arm64
+          restartPolicy: OnFailure
+          serviceAccountName: snutt
+          volumes:
+            - name: oci-api-key
+              secret:
+                secretName: oci-api-key
+          containers:
+            - image: yny.ocir.io/ax1dvc8vmenm/snutt-prod/snutt-timetable-batch:10
+              name: snutt-timetable-batch-user-nickname
+              volumeMounts:
+                - name: oci-api-key
+                  mountPath: /root/.oci
+                  readOnly: true
+              resources:
+                requests:
+                  cpu: 200m
+                  memory: 1Gi
+                limits:
+                  cpu: 1000m
+                  memory: 1Gi
+              env:
+                - name: JOB_NAME
                   value: "userNicknameCreateJob"
                 - name: JAVA_OPTS
                   value: "-XX:InitialRAMPercentage=80.0 -XX:MaxRAMPercentage=80.0 -Duser.timezone=UTC"
                 - name: SPRING_PROFILES_ACTIVE
-                  value: "dev"
+                  value: "prod"
                 - name: TRUFFLE_ENABLED
                   value: "true"
----
-apiVersion: v1
-kind: ServiceAccount
-metadata:
-  name: snutt-timetable-batch
-imagePullSecrets:
-  - name: ocir-pull-secret

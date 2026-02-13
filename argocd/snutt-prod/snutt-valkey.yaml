@@ -1,0 +1,44 @@
+apiVersion: apps/v1
+kind: StatefulSet
+metadata:
+  name: snutt-valkey
+  labels:
+    app: snutt-valkey
+spec:
+  serviceName: snutt-valkey
+  replicas: 1
+  selector:
+    matchLabels:
+      app: snutt-valkey
+  template:
+    metadata:
+      labels:
+        app: snutt-valkey
+      annotations:
+        sidecar.istio.io/inject: "false"
+    spec:
+      nodeSelector:
+        kubernetes.io/arch: arm64
+      containers:
+        - name: valkey
+          image: docker.io/valkey/valkey:8-alpine
+          ports:
+            - containerPort: 6379
+          resources:
+            requests:
+              cpu: 100m
+              memory: 128Mi
+            limits:
+              memory: 256Mi
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: snutt-valkey
+spec:
+  type: ClusterIP
+  selector:
+    app: snutt-valkey
+  ports:
+    - port: 6379
+      targetPort: 6379

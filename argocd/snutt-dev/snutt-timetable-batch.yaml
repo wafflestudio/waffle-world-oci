@@ -1,0 +1,99 @@
+apiVersion: batch/v1
+kind: CronJob
+metadata:
+  name: snutt-timetable-batch-coursebook
+  labels:
+    app: snutt-timetable-batch-coursebook
+spec:
+  concurrencyPolicy: Forbid
+  schedule: "0 */12 * * *"
+  successfulJobsHistoryLimit: 2
+  failedJobsHistoryLimit: 3
+  jobTemplate:
+    spec:
+      template:
+        metadata:
+          annotations:
+            sidecar.istio.io/inject: "false"
+        spec:
+          nodeSelector:
+            kubernetes.io/arch: arm64
+          restartPolicy: OnFailure
+          serviceAccountName: snutt
+          volumes:
+            - name: oci-api-key
+              secret:
+                secretName: oci-api-key
+          containers:
+            - image: yny.ocir.io/ax1dvc8vmenm/snutt-dev/snutt-timetable-batch:18
+              name: snutt-timetable-batch-coursebook
+              volumeMounts:
+                - name: oci-api-key
+                  mountPath: /root/.oci
+                  readOnly: true
+              resources:
+                requests:
+                  cpu: 200m
+                  memory: 1Gi
+                limits:
+                  cpu: 1000m
+                  memory: 2Gi
+              env:
+                - name: JOB_NAME
+                  value: "sugangSnuMigrationJob"
+                - name: JAVA_OPTS
+                  value: "-XX:InitialRAMPercentage=80.0 -XX:MaxRAMPercentage=80.0 -Duser.timezone=UTC"
+                - name: SPRING_PROFILES_ACTIVE
+                  value: "dev"
+                - name: TRUFFLE_ENABLED
+                  value: "true"
+---
+apiVersion: batch/v1
+kind: CronJob
+metadata:
+  name: snutt-timetable-batch-user-nickname
+  labels:
+    app: snutt-timetable-batch-user-nickname
+spec:
+  concurrencyPolicy: Forbid
+  schedule: "0 0 31 2 *"
+  successfulJobsHistoryLimit: 2
+  failedJobsHistoryLimit: 3
+  jobTemplate:
+    spec:
+      template:
+        metadata:
+          annotations:
+            sidecar.istio.io/inject: "false"
+        spec:
+          nodeSelector:
+            kubernetes.io/arch: arm64
+          restartPolicy: OnFailure
+          serviceAccountName: snutt
+          volumes:
+            - name: oci-api-key
+              secret:
+                secretName: oci-api-key
+          containers:
+            - image: yny.ocir.io/ax1dvc8vmenm/snutt-dev/snutt-timetable-batch:18
+              name: snutt-timetable-batch-user-nickname
+              volumeMounts:
+                - name: oci-api-key
+                  mountPath: /root/.oci
+                  readOnly: true
+              resources:
+                requests:
+                  cpu: 200m
+                  memory: 1Gi
+                limits:
+                  cpu: 1000m
+                  memory: 2Gi
+              env:
+                - name: JOB_NAME
+                  value: "userNicknameCreateJob"
+                - name: JAVA_OPTS
+                  value: "-XX:InitialRAMPercentage=80.0 -XX:MaxRAMPercentage=80.0 -Duser.timezone=UTC"
+                - name: SPRING_PROFILES_ACTIVE
+                  value: "dev"
+                - name: TRUFFLE_ENABLED
+                  value: "true"
