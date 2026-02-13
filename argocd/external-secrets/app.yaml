@@ -1,0 +1,30 @@
+ㅇapiVersion: argoproj.io/v1alpha1
+kind: Application
+metadata:
+  namespace: argocd
+  name: external-secrets
+  finalizers:
+  - resources-finalizer.argocd.argoproj.io
+spec:
+  project: default
+  destination:
+    name: in-cluster
+    namespace: external-secrets
+  sources:
+  - repoURL: https://charts.external-secrets.io
+    chart: external-secrets
+    targetRevision: 0.10.9
+    helm:
+      releaseName: external-secrets
+      valueFiles:
+      - $values/argocd/external-secrets/values.yaml
+  - repoURL: https://github.com/wafflestudio/waffle-world-oci.git
+    targetRevision: main
+    ref: values
+  syncPolicy:
+    automated:
+      prune: true
+      selfHeal: true
+    syncOptions:
+    - CreateNamespace=true
+    - ServerSideApply=true

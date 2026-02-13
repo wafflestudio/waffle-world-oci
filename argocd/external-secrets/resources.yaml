@@ -1,0 +1,14 @@
+---
+apiVersion: external-secrets.io/v1beta1
+kind: ClusterSecretStore
+metadata:
+  name: oci-vault
+spec:
+  provider:
+    oracle:
+      # OKE 노드의 instance principal을 사용하여 인증
+      auth: InstancePrincipal
+      # OCI Vault가 있는 리전
+      region: ap-chuncheon-1
+      # Vault OCID (실제 값으로 교체 필요)
+      vault: ocid1.vault.oc1.ap-chuncheon-1.gjuywcghaafim.ab4w4ljrb7curgwlstbr3usvz6daquzjl2ct36rli7oqaieuobvppiardxzq
