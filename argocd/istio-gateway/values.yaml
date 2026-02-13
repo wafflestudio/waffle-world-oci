@@ -2,3 +2,8 @@ service:
   type: LoadBalancer
   annotations:
     oci.oraclecloud.com/load-balancer-type: nlb
+
+resources:
+  requests:
+    cpu: 200m
+    memory: 256Mi
