@@ -6,6 +6,7 @@ metadata:
     app: snutt-timetable-batch-coursebook
 spec:
   concurrencyPolicy: Forbid
+  suspend: true
   schedule: "45 */12 * * *"
   successfulJobsHistoryLimit: 2
   failedJobsHistoryLimit: 3
@@ -56,6 +57,7 @@ metadata:
     app: snu4t-batch-vacancy-noti
 spec:
   concurrencyPolicy: Forbid
+  suspend: true
   schedule: "30 23 * * 0-4"
   successfulJobsHistoryLimit: 2
   failedJobsHistoryLimit: 3
@@ -106,6 +108,7 @@ metadata:
     app: snutt-timetable-batch-user-nickname
 spec:
   concurrencyPolicy: Forbid
+  suspend: true
   schedule: "0 0 31 2 *"
   successfulJobsHistoryLimit: 2
   failedJobsHistoryLimit: 3

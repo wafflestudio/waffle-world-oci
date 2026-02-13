@@ -6,6 +6,7 @@ metadata:
     app: snutt-ev-batch-lecture-sync-latest-semester
 spec:
   concurrencyPolicy: Forbid
+  suspend: true
   schedule: "55 */12 * * *"
   successfulJobsHistoryLimit: 2
   failedJobsHistoryLimit: 3
@@ -56,6 +57,7 @@ metadata:
     app: snutt-ev-batch-lecture-sync-all
 spec:
   concurrencyPolicy: Forbid
+  suspend: true
   # 실행 방법
   # kubectl create job snutt-ev-batch-snuev-migration --from=cronjob/snutt-ev-batch-snuev-migration
   schedule: "0 0 31 2 *"
