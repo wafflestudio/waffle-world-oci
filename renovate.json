@@ -2,5 +2,15 @@
   "$schema": "https://docs.renovatebot.com/renovate-schema.json",
   "extends": [
     "config:recommended"
-  ]
+  ],
+  "argocd": {
+    "managerFilePatterns": [
+      "/^argocd\\/.*\\/app\\.ya?ml$/"
+    ]
+  },
+  "kubernetes": {
+    "managerFilePatterns": [
+      "/^argocd\\/snutt-(dev|prod)\\/.*\\.ya?ml$/"
+    ]
+  }
 }
