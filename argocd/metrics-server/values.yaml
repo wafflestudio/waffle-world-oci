@@ -1,4 +1,6 @@
 args:
+# OKE compatibility: kubelet certificates are not always signed by a CA trusted
+# by metrics-server, so TLS verification is disabled for kubelet scraping.
 - --kubelet-insecure-tls
 
 resources:
