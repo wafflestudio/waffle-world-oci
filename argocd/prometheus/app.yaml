@@ -30,6 +30,5 @@ spec:
       include: 'resources.yaml'
   syncPolicy:
     syncOptions:
-    - CreateNamespace=true
     # We keep SSA enabled; CRDs are managed by a separate Application (prometheus-operator-crds).
     - ServerSideApply=true
