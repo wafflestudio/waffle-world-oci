@@ -126,3 +126,15 @@ prometheus:
               ]
             action: keep
             regex: istio-policy;http-policy-monitoring
+
+# ArgoCD can get stuck "waiting for completion of hook Job/..." if the admission
+# webhook certgen Jobs are garbage-collected too quickly (TTL) during controller
+# restarts. Keep them around longer so Argo can observe Succeeded and then delete.
+prometheusOperator:
+  admissionWebhooks:
+    annotations:
+      argocd.argoproj.io/hook-delete-policy: HookSucceeded
+    patch:
+      annotations:
+        argocd.argoproj.io/hook-delete-policy: HookSucceeded
+      ttlSecondsAfterFinished: 3600
