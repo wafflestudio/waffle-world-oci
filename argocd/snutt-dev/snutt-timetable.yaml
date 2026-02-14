@@ -24,7 +24,7 @@ spec:
       nodeSelector:
         kubernetes.io/arch: arm64
       containers:
-        - image: yny.ocir.io/ax1dvc8vmenm/snutt-dev/snutt-timetable:26
+        - image: yny.ocir.io/ax1dvc8vmenm/snutt-dev/snutt-timetable:28
           name: snutt-timetable
           resources:
             requests:
