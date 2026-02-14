@@ -5,6 +5,8 @@ metadata:
   name: prometheus
   finalizers:
   - resources-finalizer.argocd.argoproj.io
+  annotations:
+    argocd.argoproj.io/sync-wave: "0"
 spec:
   project: default
   destination:
@@ -29,4 +31,5 @@ spec:
   syncPolicy:
     syncOptions:
     - CreateNamespace=true
+    # We keep SSA enabled; CRDs are managed by a separate Application (prometheus-operator-crds).
     - ServerSideApply=true

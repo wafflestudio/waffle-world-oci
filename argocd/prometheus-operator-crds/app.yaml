@@ -1,0 +1,32 @@
+apiVersion: argoproj.io/v1alpha1
+kind: Application
+metadata:
+  namespace: argocd
+  name: prometheus-operator-crds
+  finalizers:
+  - resources-finalizer.argocd.argoproj.io
+  annotations:
+    # Ensure CRDs land before the main kube-prometheus-stack app when using app-of-apps.
+    argocd.argoproj.io/sync-wave: "-1"
+spec:
+  project: default
+  destination:
+    name: in-cluster
+    # CRDs are cluster-scoped; ArgoCD requires a namespace field anyway.
+    namespace: prometheus
+  source:
+    repoURL: https://prometheus-community.github.io/helm-charts
+    chart: prometheus-operator-crds
+    # Match kube-prometheus-stack 81.6.9 (Prometheus Operator v0.88.1).
+    targetRevision: 26.0.1
+    helm:
+      releaseName: prometheus-operator-crds
+  syncPolicy:
+    automated:
+      prune: false
+      selfHeal: false
+    syncOptions:
+    - CreateNamespace=true
+    # Avoid client-side apply "last-applied" annotation bloat on large CRDs.
+    - ServerSideApply=true
+
