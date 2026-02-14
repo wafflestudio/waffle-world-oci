@@ -3,6 +3,14 @@ kind: Namespace
 metadata:
   name: prometheus
 ---
+apiVersion: cert-manager.io/v1
+kind: Issuer
+metadata:
+  name: prometheus-selfsigned
+  namespace: prometheus
+spec:
+  selfSigned: {}
+---
 apiVersion: external-secrets.io/v1
 kind: ExternalSecret
 metadata:

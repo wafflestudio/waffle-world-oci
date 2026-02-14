@@ -134,5 +134,8 @@ prometheusOperator:
   admissionWebhooks:
     certManager:
       enabled: true
+      issuerRef:
+        name: prometheus-selfsigned
+        kind: Issuer
     patch:
       enabled: false
