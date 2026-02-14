@@ -7,7 +7,7 @@ spec:
   provider:
     oracle:
       # OKE 노드의 instance principal을 사용하여 인증
-      auth: InstancePrincipal
+      principalType: InstancePrincipal
       # OCI Vault가 있는 리전
       region: ap-chuncheon-1
       # Vault OCID (실제 값으로 교체 필요)
