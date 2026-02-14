@@ -21,6 +21,11 @@ spec:
   - repoURL: https://github.com/wafflestudio/waffle-world-oci.git
     targetRevision: main
     ref: values
+  - repoURL: https://github.com/wafflestudio/waffle-world-oci.git
+    targetRevision: main
+    path: argocd/external-secrets
+    directory:
+      include: 'resources.yaml'
   syncPolicy:
     automated:
       prune: true
