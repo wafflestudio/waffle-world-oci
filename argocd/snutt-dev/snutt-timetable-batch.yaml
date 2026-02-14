@@ -21,7 +21,7 @@ spec:
           restartPolicy: OnFailure
           serviceAccountName: snutt
           containers:
-            - image: yny.ocir.io/ax1dvc8vmenm/snutt-dev/snutt-timetable-batch:24
+            - image: yny.ocir.io/ax1dvc8vmenm/snutt-dev/snutt-timetable-batch:27
               name: snutt-timetable-batch-coursebook
               resources:
                 requests:
@@ -67,7 +67,7 @@ spec:
               secret:
                 secretName: oci-api-key
           containers:
-            - image: yny.ocir.io/ax1dvc8vmenm/snutt-dev/snutt-timetable-batch:24
+            - image: yny.ocir.io/ax1dvc8vmenm/snutt-dev/snutt-timetable-batch:27
               name: snutt-timetable-batch-user-nickname
               volumeMounts:
                 - name: oci-api-key
