@@ -11,19 +11,15 @@ spec:
   target:
     name: prometheus-grafana
     creationPolicy: Owner
+    template:
+      data:
+        admin-user: '{{ .raw | fromJson | dig "admin-user" "" }}'
+        admin-password: '{{ .raw | fromJson | dig "admin-password" "" }}'
+        github-client-secret: '{{ .raw | fromJson | dig "github-client-secret" "" }}'
   data:
-    - secretKey: admin-user
+    - secretKey: raw
       remoteRef:
         key: prometheus-grafana
-        property: admin-user
-    - secretKey: admin-password
-      remoteRef:
-        key: prometheus-grafana
-        property: admin-password
-    - secretKey: github-client-secret
-      remoteRef:
-        key: prometheus-grafana
-        property: github-client-secret
 ---
 apiVersion: networking.istio.io/v1alpha3
 kind: VirtualService
