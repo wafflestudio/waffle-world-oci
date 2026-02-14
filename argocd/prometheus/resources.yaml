@@ -32,7 +32,10 @@ spec:
   data:
     - secretKey: raw
       remoteRef:
+        conversionStrategy: Default
+        decodingStrategy: None
         key: prometheus-grafana
+        metadataPolicy: None
 ---
 apiVersion: networking.istio.io/v1alpha3
 kind: VirtualService
