@@ -127,14 +127,12 @@ prometheus:
             action: keep
             regex: istio-policy;http-policy-monitoring
 
-# ArgoCD can get stuck "waiting for completion of hook Job/..." if the admission
-# webhook certgen Jobs are garbage-collected too quickly (TTL) during controller
-# restarts. Keep them around longer so Argo can observe Succeeded and then delete.
+# Use cert-manager for admission webhook certificates instead of the default
+# patch Jobs. The patch Jobs carry helm.sh/hook annotations that ArgoCD treats
+# as sync hooks, causing "waiting for completion of hook Job/..." hangs.
 prometheusOperator:
   admissionWebhooks:
-    annotations:
-      argocd.argoproj.io/hook-delete-policy: HookSucceeded
+    certManager:
+      enabled: true
     patch:
-      annotations:
-        argocd.argoproj.io/hook-delete-policy: HookSucceeded
-      ttlSecondsAfterFinished: 3600
+      enabled: false
