@@ -10,6 +10,10 @@ alertmanager:
 grafana:
   enabled: true
   defaultDashboardsTimezone: Asia/Seoul
+  admin:
+    existingSecret: prometheus-grafana
+    userKey: admin-user
+    passwordKey: admin-password
   envValueFrom:
     GF_AUTH_GITHUB_CLIENT_SECRET:
       secretKeyRef:
