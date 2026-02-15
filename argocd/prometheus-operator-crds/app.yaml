@@ -18,7 +18,7 @@ spec:
     repoURL: https://prometheus-community.github.io/helm-charts
     chart: prometheus-operator-crds
     # Match kube-prometheus-stack 81.6.9 (Prometheus Operator v0.88.1).
-    targetRevision: 26.0.1
+    targetRevision: 27.0.0
     helm:
       releaseName: prometheus-operator-crds
   syncPolicy:
