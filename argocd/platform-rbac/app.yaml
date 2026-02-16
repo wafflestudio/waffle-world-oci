@@ -1,0 +1,22 @@
+apiVersion: argoproj.io/v1alpha1
+kind: Application
+metadata:
+  namespace: argocd
+  name: platform-rbac
+  finalizers:
+  - resources-finalizer.argocd.argoproj.io
+spec:
+  project: default
+  destination:
+    name: in-cluster
+    namespace: argocd
+  source:
+    repoURL: https://github.com/wafflestudio/waffle-world-oci.git
+    targetRevision: main
+    path: argocd/platform-rbac
+    directory:
+      include: 'resources.yaml'
+  syncPolicy:
+    automated:
+      prune: true
+      selfHeal: true
