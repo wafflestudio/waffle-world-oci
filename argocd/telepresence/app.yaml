@@ -11,7 +11,7 @@ spec:
     name: in-cluster
     namespace: telepresence
   sources:
-  - repoURL: ghcr.io/telepresenceio/telepresence-oss
+  - repoURL: ghcr.io/telepresenceio
     chart: telepresence-oss
     targetRevision: 2.26.2
     helm:
