@@ -19,6 +19,7 @@ configs:
   rbac:
     policy.csv: |
       g, wafflestudio:waffle-k8s-admin, role:waffle-k8s-admin
+      g, wafflestudio:snutt-server, role:snutt-server
       p, role:waffle-k8s-admin, applications, *, */*, allow
       p, role:waffle-k8s-admin, clusters, get, *, allow
       p, role:waffle-k8s-admin, repositories, get, *, allow
@@ -26,6 +27,10 @@ configs:
       p, role:waffle-k8s-admin, repositories, update, *, allow
       p, role:waffle-k8s-admin, repositories, delete, *, allow
       p, role:waffle-k8s-admin, exec, create, */*, allow
+      p, role:snutt-server, applications, *, default/snutt, allow
+      p, role:snutt-server, exec, create, default/snutt, allow
+      p, role:snutt-server, applications, *, default/snutt-dev, allow
+      p, role:snutt-server, exec, create, default/snutt-dev, allow
     policy.default: role:readonly
 
 dex:
