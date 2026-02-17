@@ -18,7 +18,7 @@ clientRbac:
   create: true
   subjects:
   - kind: Group
-    name: ocid1.group.oc1..aaaaaaaa55k2gkstiltiprgogehgcb7ndxg5ud6egj5vmbbtgxxbitxg2bna
+    name: ocid1.group.oc1..aaaaaaaae56pz6exijiuegdhxwf6t3ad42dvayf6po32es3emf3vn7uovvga
     apiGroup: rbac.authorization.k8s.io
 
 agentInjector:
