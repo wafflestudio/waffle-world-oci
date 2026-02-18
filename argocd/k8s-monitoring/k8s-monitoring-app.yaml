@@ -1,0 +1,133 @@
+apiVersion: v1
+kind: Namespace
+metadata:
+  name: k8s-monitoring
+---
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: app
+  labels:
+    app: app
+  namespace: k8s-monitoring
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: app
+  strategy:
+    type: RollingUpdate
+    rollingUpdate:
+      maxSurge: 25%
+      maxUnavailable: 25%
+  revisionHistoryLimit: 4
+  template:
+    metadata:
+      labels:
+        app: app
+    spec:
+      serviceAccountName: k8s-monitoring-sa
+      imagePullSecrets:
+        - name: ocir-pull-secret
+      # NOTE: You may need to adapt the following node selectors and tolerations
+      # to match the node configuration of your OCI OKE cluster.
+      # nodeSelector:
+      #   kubernetes.io/arch: arm64
+      #   phase: prod
+      # tolerations:
+      #   - effect: NoSchedule
+      #     key: phase
+      #     operator: Equal
+      #     value: prod
+      containers:
+        - image: yny.ocir.io/ax1dvc8vmenm/k8s-monitoring:0.0.4-SNAPSHOT
+          imagePullPolicy: Always
+          name: app
+          envFrom:
+            - secretRef:
+                name: k8s-monitoring-secret
+          resources:
+            requests:
+              cpu: 100m
+              memory: 250Mi
+            limits:
+              cpu: 500m
+              memory: 250Mi
+---
+apiVersion: v1
+kind: ServiceAccount
+metadata:
+  name: k8s-monitoring-sa
+  namespace: k8s-monitoring
+imagePullSecrets:
+  - name: ocir-pull-secret
+---
+apiVersion: rbac.authorization.k8s.io/v1
+kind: ClusterRole
+metadata:
+  name: k8s-monitoring-cluster-role
+rules:
+  - apiGroups:
+      - "batch"
+    resources:
+      - jobs
+      - cronjobs
+    verbs:
+      - "*"
+  - apiGroups:
+      - ""
+    resources:
+      - nodes
+    verbs:
+      - "*"
+  - apiGroups:
+      - ""
+    resources:
+      - pods
+      - pods/log
+    verbs:
+      - "*"
+---
+apiVersion: rbac.authorization.k8s.io/v1
+kind: ClusterRoleBinding
+metadata:
+  name: k8s-monitoring-cluster-role-binding
+roleRef:
+  apiGroup: rbac.authorization.k8s.io
+  kind: ClusterRole
+  name: k8s-monitoring-cluster-role
+subjects:
+  - kind: ServiceAccount
+    name: k8s-monitoring-sa
+    namespace: k8s-monitoring
+---
+# OCIR imagePullSecret을 OCI Vault에서 자동으로 생성
+apiVersion: external-secrets.io/v1beta1
+kind: ExternalSecret
+metadata:
+  name: ocir-pull-secret
+  namespace: k8s-monitoring
+spec:
+  # 5분마다 Vault에서 secret 동기화
+  refreshInterval: 5m
+
+  # ClusterSecretStore 참조
+  secretStoreRef:
+    name: oci-vault
+    kind: ClusterSecretStore
+
+  # 생성될 K8s Secret 설정
+  target:
+    name: ocir-pull-secret
+    creationPolicy: Owner
+    template:
+      type: kubernetes.io/dockerconfigjson
+      data:
+        # OCI Vault secret의 내용을 .dockerconfigjson으로 매핑
+        .dockerconfigjson: "{{ .dockerconfigjson | toString }}"
+
+  # OCI Vault에서 가져올 secret 정보
+  data:
+  - secretKey: dockerconfigjson
+    remoteRef:
+      key: ocid1.vaultsecret.oc1.ap-chuncheon-1.amaaaaaat2m5lbqaktrp2vrmtyjp7rzcsyy3kmfqtg6nb4oo7datoipmh3oa
