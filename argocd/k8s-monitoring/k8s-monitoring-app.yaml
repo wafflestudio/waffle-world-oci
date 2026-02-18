@@ -102,7 +102,7 @@ subjects:
     namespace: k8s-monitoring
 ---
 # OCIR imagePullSecret을 OCI Vault에서 자동으로 생성
-apiVersion: external-secrets.io/v1beta1
+apiVersion: external-secrets.io/v1
 kind: ExternalSecret
 metadata:
   name: ocir-pull-secret
