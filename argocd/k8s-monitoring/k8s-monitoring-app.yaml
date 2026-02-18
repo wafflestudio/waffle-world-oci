@@ -130,4 +130,4 @@ spec:
   data:
   - secretKey: dockerconfigjson
     remoteRef:
-      key: ocid1.vaultsecret.oc1.ap-chuncheon-1.amaaaaaat2m5lbqaktrp2vrmtyjp7rzcsyy3kmfqtg6nb4oo7datoipmh3oa
+      key: ocir-dockerconfig
