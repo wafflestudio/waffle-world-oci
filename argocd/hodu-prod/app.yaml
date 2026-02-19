@@ -2,20 +2,20 @@ apiVersion: argoproj.io/v1alpha1
 kind: Application
 metadata:
   namespace: argocd
-  name: snutt-dev
+  name: hodu
   finalizers:
   - resources-finalizer.argocd.argoproj.io
 spec:
-  project: snutt
+  project: hodu
   destination:
     name: in-cluster
-    namespace: snutt-dev
+    namespace: hodu-prod
   source:
     repoURL: https://github.com/wafflestudio/waffle-world-oci.git
     targetRevision: main
-    path: argocd/snutt-dev
+    path: argocd/hodu-prod
     directory:
-      include: 'snutt-*.yaml'
+      include: 'hodu-*.yaml'
   syncPolicy:
     automated:
       prune: true

@@ -2,20 +2,20 @@ apiVersion: argoproj.io/v1alpha1
 kind: Application
 metadata:
   namespace: argocd
-  name: snutt-dev
+  name: internhasha-dev
   finalizers:
   - resources-finalizer.argocd.argoproj.io
 spec:
-  project: snutt
+  project: internhasha
   destination:
     name: in-cluster
-    namespace: snutt-dev
+    namespace: internhasha-dev
   source:
     repoURL: https://github.com/wafflestudio/waffle-world-oci.git
     targetRevision: main
-    path: argocd/snutt-dev
+    path: argocd/internhasha-dev
     directory:
-      include: 'snutt-*.yaml'
+      include: 'internhasha-*.yaml'
   syncPolicy:
     automated:
       prune: true

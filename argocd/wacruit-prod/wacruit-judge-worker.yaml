@@ -1,0 +1,37 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: wacruit-judge-worker
+  labels:
+    app: wacruit-judge-worker
+spec:
+  replicas: 0
+  selector:
+    matchLabels:
+      app: wacruit-judge-worker
+  strategy:
+    type: RollingUpdate
+    rollingUpdate:
+      maxSurge: 25%
+      maxUnavailable: 25%
+  revisionHistoryLimit: 4
+  template:
+    metadata:
+      labels:
+        app: wacruit-judge-worker
+    spec:
+      serviceAccountName: wacruit
+      nodeSelector:
+        kubernetes.io/arch: arm64
+      containers:
+        - image: yny.ocir.io/ax1dvc8vmenm/wacruit-prod/wacruit-judge-server:14
+          name: wacruit-judge-worker
+          command: ["./scripts/workers"]
+          securityContext:
+            privileged: true
+          resources:
+            requests:
+              cpu: 1000m
+              memory: 1Gi
+            limits:
+              memory: 1Gi

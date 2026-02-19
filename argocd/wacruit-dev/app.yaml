@@ -2,20 +2,20 @@ apiVersion: argoproj.io/v1alpha1
 kind: Application
 metadata:
   namespace: argocd
-  name: snutt-dev
+  name: wacruit-dev
   finalizers:
   - resources-finalizer.argocd.argoproj.io
 spec:
-  project: snutt
+  project: wacruit
   destination:
     name: in-cluster
-    namespace: snutt-dev
+    namespace: wacruit-dev
   source:
     repoURL: https://github.com/wafflestudio/waffle-world-oci.git
     targetRevision: main
-    path: argocd/snutt-dev
+    path: argocd/wacruit-dev
     directory:
-      include: 'snutt-*.yaml'
+      include: 'wacruit-*.yaml'
   syncPolicy:
     automated:
       prune: true

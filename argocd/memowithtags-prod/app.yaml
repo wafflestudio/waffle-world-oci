@@ -2,20 +2,20 @@ apiVersion: argoproj.io/v1alpha1
 kind: Application
 metadata:
   namespace: argocd
-  name: snutt-dev
+  name: memowithtags
   finalizers:
   - resources-finalizer.argocd.argoproj.io
 spec:
-  project: snutt
+  project: memowithtags
   destination:
     name: in-cluster
-    namespace: snutt-dev
+    namespace: memowithtags-prod
   source:
     repoURL: https://github.com/wafflestudio/waffle-world-oci.git
     targetRevision: main
-    path: argocd/snutt-dev
+    path: argocd/memowithtags-prod
     directory:
-      include: 'snutt-*.yaml'
+      include: 'memowithtags-*.yaml'
   syncPolicy:
     automated:
       prune: true
