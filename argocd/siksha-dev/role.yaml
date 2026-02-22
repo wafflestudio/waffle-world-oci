@@ -1,0 +1,17 @@
+# 팀별 namespace 접근 권한을 kubernetes RBAC (Role based access control)로 설정
+# IAM Group OCID에 role을 연결한다.
+# 이를 통해 팀별로 쿠버네티스 클러스터에 접속하여 pod 열람, 로그 확인 등이 가능하다
+# 기본정책으로 DEV는 edit, Prod는 제한된 권한을 주는 Role을 생성하는 것이 목표
+
+apiVersion: rbac.authorization.k8s.io/v1
+kind: RoleBinding
+metadata:
+  name: siksha-dev-role-binding
+  namespace: siksha-dev
+subjects:
+  - kind: Group
+    name: ocid1.group.oc1..aaaaaaaazbytmrmafinbs7nehoht7uwwqunicbndhecurexiq7liprdrfvaq   # OCI IAM Group OCID
+roleRef:
+  kind: ClusterRole
+  name: edit
+  apiGroup: rbac.authorization.k8s.io
