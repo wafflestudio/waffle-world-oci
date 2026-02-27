@@ -7,6 +7,18 @@ metadata:
   - resources-finalizer.argocd.argoproj.io
 spec:
   project: default
+  ignoreDifferences:
+  - group: ""
+    kind: Secret
+    name: mutator-webhook-tls
+    namespace: telepresence
+    jqPathExpressions:
+    - .data
+  - group: admissionregistration.k8s.io
+    kind: MutatingWebhookConfiguration
+    name: agent-injector-webhook-telepresence
+    jqPathExpressions:
+    - .webhooks[].clientConfig.caBundle
   destination:
     name: in-cluster
     namespace: telepresence
