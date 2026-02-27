@@ -46,8 +46,8 @@ spec:
                 name: k8s-monitoring-secret
           resources:
             requests:
-              cpu: 100m
-              memory: 250Mi
+              cpu: 50m
+              memory: 200Mi
             limits:
               cpu: 500m
               memory: 250Mi

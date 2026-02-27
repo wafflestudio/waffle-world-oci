@@ -28,8 +28,8 @@ spec:
           name: wacruit-server
           resources:
             requests:
-              cpu: 200m
-              memory: 256Mi
+              cpu: 100m
+              memory: 128Mi
             limits:
               memory: 256Mi
           ports:
