@@ -27,8 +27,6 @@ spec:
         app: app
     spec:
       serviceAccountName: k8s-monitoring-sa
-      imagePullSecrets:
-        - name: ocir-pull-secret
       # NOTE: You may need to adapt the following node selectors and tolerations
       # to match the node configuration of your OCI OKE cluster.
       # nodeSelector:
@@ -59,8 +57,6 @@ kind: ServiceAccount
 metadata:
   name: k8s-monitoring-sa
   namespace: k8s-monitoring
-imagePullSecrets:
-  - name: ocir-pull-secret
 ---
 apiVersion: rbac.authorization.k8s.io/v1
 kind: ClusterRole
@@ -100,34 +96,3 @@ subjects:
   - kind: ServiceAccount
     name: k8s-monitoring-sa
     namespace: k8s-monitoring
----
-# OCIR imagePullSecret을 OCI Vault에서 자동으로 생성
-apiVersion: external-secrets.io/v1
-kind: ExternalSecret
-metadata:
-  name: ocir-pull-secret
-  namespace: k8s-monitoring
-spec:
-  # 5분마다 Vault에서 secret 동기화
-  refreshInterval: 5m
-
-  # ClusterSecretStore 참조
-  secretStoreRef:
-    name: oci-vault
-    kind: ClusterSecretStore
-
-  # 생성될 K8s Secret 설정
-  target:
-    name: ocir-pull-secret
-    creationPolicy: Owner
-    template:
-      type: kubernetes.io/dockerconfigjson
-      data:
-        # OCI Vault secret의 내용을 .dockerconfigjson으로 매핑
-        .dockerconfigjson: "{{ .dockerconfigjson | toString }}"
-
-  # OCI Vault에서 가져올 secret 정보
-  data:
-  - secretKey: dockerconfigjson
-    remoteRef:
-      key: ocir-dockerconfig
