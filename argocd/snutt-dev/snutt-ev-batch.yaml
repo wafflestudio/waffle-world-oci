@@ -29,7 +29,7 @@ spec:
                   memory: 256Mi
                 limits:
                   cpu: 200m
-                  memory: 1Gi
+                  memory: 2Gi
               env:
                 - name: JOB_NAME
                   value: "NEXT_SEMESTER_SYNC_JOB"
@@ -73,7 +73,7 @@ spec:
                   memory: 256Mi
                 limits:
                   cpu: 200m
-                  memory: 1Gi
+                  memory: 2Gi
               env:
                 - name: JOB_NAME
                   value: "SYNC_JOB"
@@ -119,7 +119,7 @@ spec:
                   memory: 256Mi
                 limits:
                   cpu: 200m
-                  memory: 1Gi
+                  memory: 2Gi
               env:
                 - name: JOB_NAME
                   value: "SNUEV_MIGRATION_JOB"
