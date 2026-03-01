@@ -28,7 +28,7 @@ spec:
                   cpu: 50m
                   memory: 256Mi
                 limits:
-                  cpu: 500m
+                  cpu: 200m
                   memory: 1Gi
               env:
                 - name: JOB_NAME
@@ -62,24 +62,16 @@ spec:
             kubernetes.io/arch: arm64
           restartPolicy: OnFailure
           serviceAccountName: snutt
-          volumes:
-            - name: oci-api-key
-              secret:
-                secretName: oci-api-key
           containers:
             - image: yny.ocir.io/ax1dvc8vmenm/snutt-dev/snutt-timetable-batch:48
               name: snutt-timetable-batch-user-nickname
-              volumeMounts:
-                - name: oci-api-key
-                  mountPath: /root/.oci
-                  readOnly: true
               resources:
                 requests:
+                  cpu: 50m
+                  memory: 256Mi
+                limits:
                   cpu: 200m
                   memory: 1Gi
-                limits:
-                  cpu: 1000m
-                  memory: 2Gi
               env:
                 - name: JOB_NAME
                   value: "userNicknameCreateJob"
