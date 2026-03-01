@@ -25,11 +25,11 @@ spec:
               name: snutt-timetable-batch-coursebook
               resources:
                 requests:
-                  cpu: 200m
-                  memory: 1Gi
+                  cpu: 50m
+                  memory: 256Mi
                 limits:
-                  cpu: 1000m
-                  memory: 2Gi
+                  cpu: 500m
+                  memory: 1Gi
               env:
                 - name: JOB_NAME
                   value: "sugangSnuMigrationJob"

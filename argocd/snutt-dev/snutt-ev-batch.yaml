@@ -25,11 +25,11 @@ spec:
               name: snutt-ev-batch-lecture-sync-latest-semester
               resources:
                 requests:
+                  cpu: 50m
+                  memory: 256Mi
+                limits:
                   cpu: 200m
                   memory: 1Gi
-                limits:
-                  cpu: 1000m
-                  memory: 2Gi
               env:
                 - name: JOB_NAME
                   value: "NEXT_SEMESTER_SYNC_JOB"

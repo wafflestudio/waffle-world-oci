@@ -28,7 +28,7 @@ spec:
           name: snutt-ev
           resources:
             requests:
-              cpu: 75m
+              cpu: 50m
               memory: 256Mi
             limits:
               memory: 512Mi
