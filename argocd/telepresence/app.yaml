@@ -8,8 +8,7 @@ metadata:
 spec:
   project: default
   ignoreDifferences:
-  - group: ""
-    kind: Secret
+  - kind: Secret
     name: mutator-webhook-tls
     namespace: telepresence
     jqPathExpressions:
