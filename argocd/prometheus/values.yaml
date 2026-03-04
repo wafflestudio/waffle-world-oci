@@ -1,5 +1,12 @@
+kubeStateMetrics:
+  enabled: false
+
+nodeExporter:
+  enabled: false
+
 alertmanager:
   alertmanagerSpec:
+    replicas: 0
     resources:
       requests:
         cpu: 50m
@@ -9,6 +16,7 @@ alertmanager:
 
 grafana:
   enabled: true
+  replicas: 0
   defaultDashboardsTimezone: Asia/Seoul
   admin:
     existingSecret: prometheus-grafana
@@ -43,9 +51,16 @@ grafana:
       allowed_organizations: wafflestudio
       client_id: 75c8b088348e91be1e97
 
+kube-state-metrics:
+  replicas: 0
+
+prometheus-node-exporter:
+  enabled: false
+
 prometheus:
   enabled: true
   prometheusSpec:
+    replicas: 0
     retention: 10d
     resources:
       requests:
@@ -131,6 +146,7 @@ prometheus:
 # patch Jobs. The patch Jobs carry helm.sh/hook annotations that ArgoCD treats
 # as sync hooks, causing "waiting for completion of hook Job/..." hangs.
 prometheusOperator:
+  enabled: false
   admissionWebhooks:
     certManager:
       enabled: true
