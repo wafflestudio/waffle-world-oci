@@ -1,8 +1,0 @@
-apiVersion: v1
-kind: ConfigMap
-metadata:
-  name: snutt-dev-legacy-placeholder
-  labels:
-    app: snutt-dev-legacy-placeholder
-data:
-  purpose: keep the legacy snutt-dev ArgoCD application alive during app split migration
