@@ -19,7 +19,7 @@ spec:
           nodeSelector:
             kubernetes.io/arch: arm64
           restartPolicy: OnFailure
-          serviceAccountName: snutt
+          serviceAccountName: snutt-timetable-batch-dev
           containers:
             - image: yny.ocir.io/ax1dvc8vmenm/snutt-dev/snutt-timetable-batch:53
               name: snutt-timetable-batch-coursebook
@@ -59,7 +59,7 @@ spec:
           nodeSelector:
             kubernetes.io/arch: arm64
           restartPolicy: OnFailure
-          serviceAccountName: snutt
+          serviceAccountName: snutt-timetable-batch-dev
           containers:
             - image: yny.ocir.io/ax1dvc8vmenm/snutt-dev/snutt-timetable-batch:53
               name: snutt-timetable-batch-user-nickname
@@ -77,3 +77,8 @@ spec:
                   value: "dev"
                 - name: TRUFFLE_ENABLED
                   value: "true"
+---
+apiVersion: v1
+kind: ServiceAccount
+metadata:
+  name: snutt-timetable-batch-dev

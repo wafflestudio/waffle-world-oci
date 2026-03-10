@@ -20,7 +20,7 @@ spec:
       labels:
         app: snutt-ev
     spec:
-      serviceAccountName: snutt
+      serviceAccountName: snutt-ev-dev
       nodeSelector:
         kubernetes.io/arch: arm64
       containers:
@@ -54,6 +54,11 @@ spec:
               value: "dev"
             - name: TRUFFLE_ENABLED
               value: "true"
+---
+apiVersion: v1
+kind: ServiceAccount
+metadata:
+  name: snutt-ev-dev
 ---
 apiVersion: v1
 kind: Service

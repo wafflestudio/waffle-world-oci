@@ -20,7 +20,7 @@ spec:
       labels:
         app: snutt-timetable
     spec:
-      serviceAccountName: snutt
+      serviceAccountName: snutt-timetable-dev
       nodeSelector:
         kubernetes.io/arch: arm64
       containers:
@@ -58,7 +58,7 @@ spec:
 apiVersion: v1
 kind: ServiceAccount
 metadata:
-  name: snutt
+  name: snutt-timetable-dev
 ---
 apiVersion: v1
 kind: Service

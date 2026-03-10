@@ -17,6 +17,7 @@ spec:
       annotations:
         sidecar.istio.io/inject: "false"
     spec:
+      serviceAccountName: snutt-data-dev
       nodeSelector:
         kubernetes.io/arch: arm64
       containers:
