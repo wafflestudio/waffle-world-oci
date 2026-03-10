@@ -5,7 +5,7 @@ metadata:
   labels:
     app: snutt-ev
 spec:
-  replicas: 0
+  # replicas: HPA
   selector:
     matchLabels:
       app: snutt-ev
@@ -20,20 +20,12 @@ spec:
       labels:
         app: snutt-ev
     spec:
-      serviceAccountName: snutt
+      serviceAccountName: snutt-ev
       nodeSelector:
         kubernetes.io/arch: arm64
-      volumes:
-        - name: oci-api-key
-          secret:
-            secretName: oci-api-key
       containers:
         - image: yny.ocir.io/ax1dvc8vmenm/snutt-prod/snutt-ev:22
           name: snutt-ev
-          volumeMounts:
-            - name: oci-api-key
-              mountPath: /root/.oci
-              readOnly: true
           resources:
             requests:
               cpu: 150m
@@ -58,12 +50,36 @@ spec:
               port: 8080
             failureThreshold: 20
           env:
-            - name: JAVA_OPTS
-              value: "-XX:InitialRAMPercentage=80.0 -XX:MaxRAMPercentage=80.0 -Duser.timezone=UTC"
             - name: SPRING_PROFILES_ACTIVE
               value: "prod"
             - name: TRUFFLE_ENABLED
               value: "true"
+---
+apiVersion: v1
+kind: ServiceAccount
+metadata:
+  name: snutt-ev
+---
+apiVersion: autoscaling/v2
+kind: HorizontalPodAutoscaler
+metadata:
+  name: snutt-ev-hpa
+  labels:
+    app: snutt-ev
+spec:
+  scaleTargetRef:
+    apiVersion: apps/v1
+    kind: Deployment
+    name: snutt-ev
+  minReplicas: 1
+  maxReplicas: 3
+  metrics:
+    - type: Resource
+      resource:
+        name: cpu
+        target:
+          type: Utilization
+          averageUtilization: 40
 ---
 apiVersion: v1
 kind: Service

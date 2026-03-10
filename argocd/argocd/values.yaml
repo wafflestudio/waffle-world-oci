@@ -27,10 +27,26 @@ configs:
       p, role:waffle-k8s-admin, repositories, update, *, allow
       p, role:waffle-k8s-admin, repositories, delete, *, allow
       p, role:waffle-k8s-admin, exec, create, */*, allow
-      p, role:snutt-server, applications, *, default/snutt, allow
-      p, role:snutt-server, exec, create, default/snutt, allow
-      p, role:snutt-server, applications, *, default/snutt-dev, allow
-      p, role:snutt-server, exec, create, default/snutt-dev, allow
+      p, role:snutt-server, applications, *, default/snutt-data-dev, allow
+      p, role:snutt-server, exec, create, default/snutt-data-dev, allow
+      p, role:snutt-server, applications, *, default/snutt-timetable-dev, allow
+      p, role:snutt-server, exec, create, default/snutt-timetable-dev, allow
+      p, role:snutt-server, applications, *, default/snutt-timetable-batch-dev, allow
+      p, role:snutt-server, exec, create, default/snutt-timetable-batch-dev, allow
+      p, role:snutt-server, applications, *, default/snutt-ev-dev, allow
+      p, role:snutt-server, exec, create, default/snutt-ev-dev, allow
+      p, role:snutt-server, applications, *, default/snutt-ev-batch-dev, allow
+      p, role:snutt-server, exec, create, default/snutt-ev-batch-dev, allow
+      p, role:snutt-server, applications, *, default/snutt-data, allow
+      p, role:snutt-server, exec, create, default/snutt-data, allow
+      p, role:snutt-server, applications, *, default/snutt-timetable, allow
+      p, role:snutt-server, exec, create, default/snutt-timetable, allow
+      p, role:snutt-server, applications, *, default/snutt-timetable-batch, allow
+      p, role:snutt-server, exec, create, default/snutt-timetable-batch, allow
+      p, role:snutt-server, applications, *, default/snutt-ev, allow
+      p, role:snutt-server, exec, create, default/snutt-ev, allow
+      p, role:snutt-server, applications, *, default/snutt-ev-batch, allow
+      p, role:snutt-server, exec, create, default/snutt-ev-batch, allow
     policy.default: role:readonly
 
 dex:

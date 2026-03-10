@@ -6,7 +6,7 @@ metadata:
     app: snutt-valkey
 spec:
   serviceName: snutt-valkey
-  replicas: 0
+  replicas: 1
   selector:
     matchLabels:
       app: snutt-valkey
@@ -17,6 +17,7 @@ spec:
       annotations:
         sidecar.istio.io/inject: "false"
     spec:
+      serviceAccountName: snutt-data
       nodeSelector:
         kubernetes.io/arch: arm64
       containers:
