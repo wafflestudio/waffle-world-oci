@@ -2,11 +2,11 @@ apiVersion: argoproj.io/v1alpha1
 kind: Application
 metadata:
   namespace: argocd
-  name: snutt-ev-dev
+  name: snutt-data-dev
   finalizers:
   - resources-finalizer.argocd.argoproj.io
   annotations:
-    argocd.argoproj.io/sync-wave: "1"
+    argocd.argoproj.io/sync-wave: "0"
 spec:
   project: snutt
   destination:
@@ -15,7 +15,7 @@ spec:
   source:
     repoURL: https://github.com/wafflestudio/waffle-world-oci.git
     targetRevision: main
-    path: argocd/snutt-ev-dev
+    path: argocd/snutt-dev/snutt-data
     directory:
       include: 'snutt-*.yaml'
   syncPolicy:

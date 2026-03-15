@@ -2,7 +2,7 @@ apiVersion: argoproj.io/v1alpha1
 kind: Application
 metadata:
   namespace: argocd
-  name: snutt-ev-batch
+  name: snutt-timetable-batch-dev
   finalizers:
   - resources-finalizer.argocd.argoproj.io
   annotations:
@@ -11,11 +11,11 @@ spec:
   project: snutt
   destination:
     name: in-cluster
-    namespace: snutt-prod
+    namespace: snutt-dev
   source:
     repoURL: https://github.com/wafflestudio/waffle-world-oci.git
     targetRevision: main
-    path: argocd/snutt-ev-batch
+    path: argocd/snutt-dev/snutt-timetable-batch
     directory:
       include: 'snutt-*.yaml'
   syncPolicy:
