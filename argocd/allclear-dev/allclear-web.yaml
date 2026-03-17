@@ -1,14 +1,14 @@
 apiVersion: apps/v1
 kind: Deployment
 metadata:
-  name: allclear-server
+  name: allclear-web
   labels:
-    app: allclear-server
+    app: allclear-web
 spec:
   replicas: 1
   selector:
     matchLabels:
-      app: allclear-server
+      app: allclear-web
   strategy:
     type: RollingUpdate
     rollingUpdate:
@@ -18,17 +18,17 @@ spec:
   template:
     metadata:
       labels:
-        app: allclear-server
+        app: allclear-web
     spec:
       serviceAccountName: allclear
       nodeSelector:
         kubernetes.io/arch: arm64
       containers:
-        - image: yny.ocir.io/ax1dvc8vmenm/allclear/allclear-server:latest # TODO
-          name: allclear-server
+        - image: yny.ocir.io/ax1dvc8vmenm/allclear-dev/allclear-web:latest
+          name: allclear-web
           resources:
             requests:
-              cpu: 50m
+              cpu: 100m
               memory: 128Mi
             limits:
               memory: 256Mi
@@ -58,11 +58,11 @@ metadata:
 apiVersion: v1
 kind: Service
 metadata:
-  name: allclear-server
+  name: allclear-web
 spec:
   type: ClusterIP
   selector:
-    app: allclear-server
+    app: allclear-web
   ports:
     - port: 80
       targetPort: 8080
@@ -70,15 +70,15 @@ spec:
 apiVersion: networking.istio.io/v1alpha3
 kind: VirtualService
 metadata:
-  name: allclear-server
+  name: allclear-web
 spec:
   gateways:
     - istio-ingress/waffle-ingressgateway
     - mesh
   hosts:
-    - allclear-server.allclear.svc.cluster.local
-    - allclear.wafflestudio.com # TODO
+    - allclear-web.allclear-dev.svc.cluster.local
+    - allclear-dev.wafflestudio.com
   http:
     - route:
         - destination:
-            host: allclear-server
+            host: allclear-web

@@ -9,11 +9,11 @@ spec:
   project: default
   destination:
     name: in-cluster
-    namespace: allclear
+    namespace: allclear-prod
   source:
     repoURL: https://github.com/wafflestudio/waffle-world-oci.git
     targetRevision: main
-    path: argocd/allclear
+    path: argocd/allclear-prod
     directory:
       include: 'allclear-*.yaml'
   syncPolicy:
