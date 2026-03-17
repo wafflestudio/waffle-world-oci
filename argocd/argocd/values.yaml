@@ -22,31 +22,15 @@ configs:
       g, wafflestudio:snutt-server, role:snutt-server
       p, role:waffle-k8s-admin, applications, *, */*, allow
       p, role:waffle-k8s-admin, clusters, get, *, allow
+      p, role:waffle-k8s-admin, projects, *, *, allow
       p, role:waffle-k8s-admin, repositories, get, *, allow
       p, role:waffle-k8s-admin, repositories, create, *, allow
       p, role:waffle-k8s-admin, repositories, update, *, allow
       p, role:waffle-k8s-admin, repositories, delete, *, allow
       p, role:waffle-k8s-admin, exec, create, */*, allow
-      p, role:snutt-server, applications, *, default/snutt-data-dev, allow
-      p, role:snutt-server, exec, create, default/snutt-data-dev, allow
-      p, role:snutt-server, applications, *, default/snutt-timetable-dev, allow
-      p, role:snutt-server, exec, create, default/snutt-timetable-dev, allow
-      p, role:snutt-server, applications, *, default/snutt-timetable-batch-dev, allow
-      p, role:snutt-server, exec, create, default/snutt-timetable-batch-dev, allow
-      p, role:snutt-server, applications, *, default/snutt-ev-dev, allow
-      p, role:snutt-server, exec, create, default/snutt-ev-dev, allow
-      p, role:snutt-server, applications, *, default/snutt-ev-batch-dev, allow
-      p, role:snutt-server, exec, create, default/snutt-ev-batch-dev, allow
-      p, role:snutt-server, applications, *, default/snutt-data, allow
-      p, role:snutt-server, exec, create, default/snutt-data, allow
-      p, role:snutt-server, applications, *, default/snutt-timetable, allow
-      p, role:snutt-server, exec, create, default/snutt-timetable, allow
-      p, role:snutt-server, applications, *, default/snutt-timetable-batch, allow
-      p, role:snutt-server, exec, create, default/snutt-timetable-batch, allow
-      p, role:snutt-server, applications, *, default/snutt-ev, allow
-      p, role:snutt-server, exec, create, default/snutt-ev, allow
-      p, role:snutt-server, applications, *, default/snutt-ev-batch, allow
-      p, role:snutt-server, exec, create, default/snutt-ev-batch, allow
+      p, role:snutt-server, projects, get, snutt, allow
+      p, role:snutt-server, applications, *, snutt/*, allow
+      p, role:snutt-server, exec, create, snutt/*, allow
     policy.default: role:readonly
 
 dex:
@@ -131,3 +115,165 @@ server:
     requests:
       cpu: 50m
       memory: 128Mi
+
+extraObjects:
+  - apiVersion: argoproj.io/v1alpha1
+    kind: AppProject
+    metadata:
+      namespace: argocd
+      name: istio-util
+    spec:
+      description: Project for istio-util applications
+      sourceRepos:
+      - '*'
+      destinations:
+      - namespace: '*'
+        server: '*'
+      sourceNamespaces:
+      - argocd
+      clusterResourceWhitelist:
+      - group: '*'
+        kind: '*'
+      namespaceResourceWhitelist:
+      - group: '*'
+        kind: '*'
+  - apiVersion: argoproj.io/v1alpha1
+    kind: AppProject
+    metadata:
+      namespace: argocd
+      name: pupuri
+    spec:
+      description: Project for pupuri applications
+      sourceRepos:
+      - '*'
+      destinations:
+      - namespace: '*'
+        server: '*'
+      sourceNamespaces:
+      - argocd
+      clusterResourceWhitelist:
+      - group: '*'
+        kind: '*'
+      namespaceResourceWhitelist:
+      - group: '*'
+        kind: '*'
+  - apiVersion: argoproj.io/v1alpha1
+    kind: AppProject
+    metadata:
+      namespace: argocd
+      name: siksha
+    spec:
+      description: Project for siksha applications
+      sourceRepos:
+      - '*'
+      destinations:
+      - namespace: '*'
+        server: '*'
+      sourceNamespaces:
+      - argocd
+      clusterResourceWhitelist:
+      - group: '*'
+        kind: '*'
+      namespaceResourceWhitelist:
+      - group: '*'
+        kind: '*'
+  - apiVersion: argoproj.io/v1alpha1
+    kind: AppProject
+    metadata:
+      namespace: argocd
+      name: snutt
+    spec:
+      description: Project for snutt applications
+      sourceRepos:
+      - '*'
+      destinations:
+      - namespace: '*'
+        server: '*'
+      sourceNamespaces:
+      - argocd
+      clusterResourceWhitelist:
+      - group: '*'
+        kind: '*'
+      namespaceResourceWhitelist:
+      - group: '*'
+        kind: '*'
+  - apiVersion: argoproj.io/v1alpha1
+    kind: AppProject
+    metadata:
+      namespace: argocd
+      name: truffle
+    spec:
+      description: Project for truffle applications
+      sourceRepos:
+      - '*'
+      destinations:
+      - namespace: '*'
+        server: '*'
+      sourceNamespaces:
+      - argocd
+      clusterResourceWhitelist:
+      - group: '*'
+        kind: '*'
+      namespaceResourceWhitelist:
+      - group: '*'
+        kind: '*'
+  - apiVersion: argoproj.io/v1alpha1
+    kind: AppProject
+    metadata:
+      namespace: argocd
+      name: wacruit
+    spec:
+      description: Project for wacruit applications
+      sourceRepos:
+      - '*'
+      destinations:
+      - namespace: '*'
+        server: '*'
+      sourceNamespaces:
+      - argocd
+      clusterResourceWhitelist:
+      - group: '*'
+        kind: '*'
+      namespaceResourceWhitelist:
+      - group: '*'
+        kind: '*'
+  - apiVersion: argoproj.io/v1alpha1
+    kind: AppProject
+    metadata:
+      namespace: argocd
+      name: waffledotcom
+    spec:
+      description: Project for waffledotcom applications
+      sourceRepos:
+      - '*'
+      destinations:
+      - namespace: '*'
+        server: '*'
+      sourceNamespaces:
+      - argocd
+      clusterResourceWhitelist:
+      - group: '*'
+        kind: '*'
+      namespaceResourceWhitelist:
+      - group: '*'
+        kind: '*'
+  - apiVersion: argoproj.io/v1alpha1
+    kind: AppProject
+    metadata:
+      namespace: argocd
+      name: allclear
+    spec:
+      description: Project for allclear applications
+      sourceRepos:
+      - '*'
+      destinations:
+      - namespace: '*'
+        server: '*'
+      sourceNamespaces:
+      - argocd
+      clusterResourceWhitelist:
+      - group: '*'
+        kind: '*'
+      namespaceResourceWhitelist:
+      - group: '*'
+        kind: '*'
