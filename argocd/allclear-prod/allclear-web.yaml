@@ -24,7 +24,7 @@ spec:
       nodeSelector:
         kubernetes.io/arch: arm64
       containers:
-        - image: yny.ocir.io/ax1dvc8vmenm/allclear-prod/allclear-web:latest
+        - image: yny.ocir.io/ax1dvc8vmenm/allclear-prod/allclear-web:1
           name: allclear-web
           resources:
             requests:
@@ -33,21 +33,21 @@ spec:
             limits:
               memory: 256Mi
           ports:
-            - containerPort: 8080
+            - containerPort: 3000
           livenessProbe:
             httpGet:
-              path: /health-check
-              port: 8080
+              path: /api/health-check
+              port: 3000
           readinessProbe:
             httpGet:
-              path: /health-check
-              port: 8080
+              path: /api/health-check
+              port: 3000
             timeoutSeconds: 3
             failureThreshold: 5
           startupProbe:
             httpGet:
-              path: /health-check
-              port: 8080
+              path: /api/health-check
+              port: 3000
             failureThreshold: 20
 ---
 apiVersion: v1
@@ -77,7 +77,7 @@ spec:
     - mesh
   hosts:
     - allclear-web.allclear-prod.svc.cluster.local
-    - allclear.wafflestudio.com
+    - all-clear.cc
   http:
     - route:
         - destination:
