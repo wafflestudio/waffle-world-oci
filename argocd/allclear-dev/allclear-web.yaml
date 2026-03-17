@@ -74,8 +74,8 @@ spec:
     - istio-ingress/waffle-ingressgateway
     - mesh
   hosts:
-    - allclear-web.allclear-dev.svc.cluster.local # TODO
-    - allclear-dev.wafflestudio.com # TODO
+    - allclear-web.allclear-dev.svc.cluster.local
+    - dev.all-clear.cc
   http:
     - route:
         - destination:
