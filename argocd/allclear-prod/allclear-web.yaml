@@ -81,6 +81,7 @@ spec:
   hosts:
     - allclear-web.allclear-prod.svc.cluster.local
     - all-clear.cc
+    - www.all-clear.cc
   http:
     - route:
         - destination:
