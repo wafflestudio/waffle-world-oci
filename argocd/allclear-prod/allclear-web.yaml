@@ -26,6 +26,9 @@ spec:
       containers:
         - image: yny.ocir.io/ax1dvc8vmenm/allclear-prod/allclear-web:1
           name: allclear-web
+          envFrom:
+            - secretRef:
+                name: allclear-prod
           resources:
             requests:
               cpu: 100m
