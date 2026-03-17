@@ -39,7 +39,7 @@ spec:
           volumeMounts:
             - name: postgres-data
               # TODO: Confirm whether PGDATA should use a subdirectory like /var/lib/postgresql/data/pgdata.
-              mountPath: /var/lib/postgresql/data
+              mountPath: /var/lib/postgresql
           resources:
             requests:
               cpu: 50m
