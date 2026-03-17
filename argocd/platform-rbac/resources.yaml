@@ -25,3 +25,87 @@ roleRef:
   kind: ClusterRole
   name: admin
   apiGroup: rbac.authorization.k8s.io
+---
+apiVersion: rbac.authorization.k8s.io/v1
+kind: RoleBinding
+metadata:
+  name: allclear-admins
+  namespace: allclear-dev
+subjects:
+- kind: Group
+  name: ocid1.group.oc1..aaaaaaaagsnnohy2sgo74yd44jewalwi5ah3b6mgc3fzrotlgm6zsjg7mpsq
+  apiGroup: rbac.authorization.k8s.io
+roleRef:
+  kind: ClusterRole
+  name: admin
+  apiGroup: rbac.authorization.k8s.io
+---
+apiVersion: rbac.authorization.k8s.io/v1
+kind: RoleBinding
+metadata:
+  name: allclear-admins
+  namespace: allclear-prod
+subjects:
+- kind: Group
+  name: ocid1.group.oc1..aaaaaaaagsnnohy2sgo74yd44jewalwi5ah3b6mgc3fzrotlgm6zsjg7mpsq
+  apiGroup: rbac.authorization.k8s.io
+roleRef:
+  kind: ClusterRole
+  name: admin
+  apiGroup: rbac.authorization.k8s.io
+---
+apiVersion: rbac.authorization.k8s.io/v1
+kind: RoleBinding
+metadata:
+  name: waffledotcom-admins
+  namespace: waffledotcom-dev
+subjects:
+- kind: Group
+  name: ocid1.group.oc1..aaaaaaaavqwxtk4crjlbzlrftkisirube4suoydlyes25fa2ok23nixjgvvq
+  apiGroup: rbac.authorization.k8s.io
+roleRef:
+  kind: ClusterRole
+  name: admin
+  apiGroup: rbac.authorization.k8s.io
+---
+apiVersion: rbac.authorization.k8s.io/v1
+kind: RoleBinding
+metadata:
+  name: waffledotcom-admins
+  namespace: waffledotcom-prod
+subjects:
+- kind: Group
+  name: ocid1.group.oc1..aaaaaaaavqwxtk4crjlbzlrftkisirube4suoydlyes25fa2ok23nixjgvvq
+  apiGroup: rbac.authorization.k8s.io
+roleRef:
+  kind: ClusterRole
+  name: admin
+  apiGroup: rbac.authorization.k8s.io
+---
+apiVersion: rbac.authorization.k8s.io/v1
+kind: RoleBinding
+metadata:
+  name: siksha-admins
+  namespace: siksha-dev
+subjects:
+- kind: Group
+  name: ocid1.group.oc1..aaaaaaaazbytmrmafinbs7nehoht7uwwqunicbndhecurexiq7liprdrfvaq
+  apiGroup: rbac.authorization.k8s.io
+roleRef:
+  kind: ClusterRole
+  name: admin
+  apiGroup: rbac.authorization.k8s.io
+---
+apiVersion: rbac.authorization.k8s.io/v1
+kind: RoleBinding
+metadata:
+  name: siksha-admins
+  namespace: siksha-prod
+subjects:
+- kind: Group
+  name: ocid1.group.oc1..aaaaaaaazbytmrmafinbs7nehoht7uwwqunicbndhecurexiq7liprdrfvaq
+  apiGroup: rbac.authorization.k8s.io
+roleRef:
+  kind: ClusterRole
+  name: admin
+  apiGroup: rbac.authorization.k8s.io
