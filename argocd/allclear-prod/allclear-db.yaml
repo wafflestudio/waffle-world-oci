@@ -23,7 +23,7 @@ spec:
       containers:
         - name: postgres
           # TODO: Pin the exact Postgres version to use in allclear.
-          image: pgvector/pgvector:pg16
+          image: docker.io/pgvector/pgvector:pg16
           env:
             # TODO: Confirm the database name to create on first boot.
             - name: POSTGRES_DB
