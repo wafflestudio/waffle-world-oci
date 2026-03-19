@@ -23,6 +23,8 @@ spec:
       containers:
         - name: mongo
           image: docker.io/library/mongo:8.2.5
+          args:
+            - --auth
           ports:
             - containerPort: 27017
           volumeMounts:
