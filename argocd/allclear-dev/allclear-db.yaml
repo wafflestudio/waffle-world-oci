@@ -27,13 +27,21 @@ spec:
           env:
             # TODO: Confirm the database name to create on first boot.
             - name: POSTGRES_DB
-              value: allclear
+              valueFrom:
+                secretKeyRef:
+                  name: allclear-dev
+                  key: DB_NAME
             # TODO: Confirm the Postgres username.
             - name: POSTGRES_USER
-              value: allclear
-            # TODO: Move this to a Secret before production use.
+              valueFrom:
+                secretKeyRef:
+                  name: allclear-dev
+                  key: DB_USERNAME
             - name: POSTGRES_PASSWORD
-              value: allclear
+              valueFrom:
+                secretKeyRef:
+                  name: allclear-dev
+                  key: DB_PASSWORD
           ports:
             - containerPort: 5432
           volumeMounts:
