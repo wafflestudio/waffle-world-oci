@@ -1,0 +1,84 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: snuclear-web
+  labels:
+    app: snuclear-web
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: snuclear-web
+  strategy:
+    type: RollingUpdate
+    rollingUpdate:
+      maxSurge: 25%
+      maxUnavailable: 25%
+  revisionHistoryLimit: 4
+  template:
+    metadata:
+      labels:
+        app: snuclear-web
+    spec:
+      serviceAccountName: snuclear
+      nodeSelector:
+        kubernetes.io/arch: arm64
+      containers:
+        - image: yny.ocir.io/ax1dvc8vmenm/snuclear-prod/snuclear-web:1
+          name: snuclear-web
+          resources:
+            requests:
+              cpu: 100m
+              memory: 128Mi
+            limits:
+              memory: 256Mi
+          ports:
+            - containerPort: 80
+          livenessProbe:
+            httpGet:
+              path: /healthz
+              port: 80
+          readinessProbe:
+            httpGet:
+              path: /healthz
+              port: 80
+            timeoutSeconds: 3
+            failureThreshold: 5
+          startupProbe:
+            httpGet:
+              path: /healthz
+              port: 80
+            failureThreshold: 10
+---
+apiVersion: v1
+kind: ServiceAccount
+metadata:
+  name: snuclear
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: snuclear-web
+spec:
+  type: ClusterIP
+  selector:
+    app: snuclear-web
+  ports:
+    - port: 80
+      targetPort: 80
+---
+apiVersion: networking.istio.io/v1alpha3
+kind: VirtualService
+metadata:
+  name: snuclear-web
+spec:
+  gateways:
+    - istio-ingress/waffle-ingressgateway
+    - mesh
+  hosts:
+    - snuclear-web.snuclear-prod.svc.cluster.local
+    - snuclear.wafflestudio.com
+  http:
+    - route:
+        - destination:
+            host: snuclear-web
