@@ -83,4 +83,4 @@ spec:
           - DELETE
           - OPTIONS
         allowOrigins:
-          - exact: "http://localhost:3000"
+          - exact: "http://localhost:3000" # 수정필요
