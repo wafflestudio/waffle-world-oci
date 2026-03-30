@@ -1,0 +1,24 @@
+apiVersion: argoproj.io/v1alpha1
+kind: Application
+metadata:
+  namespace: argocd
+  name: hangsha-dev
+  finalizers:
+  - resources-finalizer.argocd.argoproj.io
+spec:
+  project: hangsha
+  destination:
+    name: in-cluster
+    namespace: hangsha-dev
+  source:
+    repoURL: https://github.com/wafflestudio/waffle-world-oci.git
+    targetRevision: main
+    path: argocd/hangsha-dev
+    directory:
+      include: 'hangsha-*.yaml'
+  syncPolicy:
+    automated:
+      prune: true
+      selfHeal: true
+    syncOptions:
+    - CreateNamespace=true
