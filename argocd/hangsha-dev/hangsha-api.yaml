@@ -1,0 +1,91 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: hangsha-api
+  labels:
+    app: hangsha-api
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: hangsha-api
+  strategy:
+    type: RollingUpdate
+    rollingUpdate:
+      maxSurge: 25%
+      maxUnavailable: 25%
+  revisionHistoryLimit: 4
+  template:
+    metadata:
+      labels:
+        app: hangsha-api
+    spec:
+      serviceAccountName: hangsha-api-dev
+      nodeSelector:
+        kubernetes.io/arch: arm64
+      containers:
+        - image: yny.ocir.io/ax1dvc8vmenm/hangsha-dev/hangsha-server:1
+          name: hangsha-api
+          resources:
+            requests:
+              cpu: 50m
+              memory: 256Mi
+            limits:
+              memory: 512Mi # TODO: 임시
+          ports:
+            - containerPort: 8080
+          livenessProbe:
+            httpGet:
+              path: /api/v1/health # TODO: 수정 가능
+              port: 8080
+          readinessProbe:
+            httpGet:
+              path: /api/v1/health
+              port: 8080
+            timeoutSeconds: 3
+            failureThreshold: 5
+          startupProbe:
+            httpGet:
+              path: /api/v1/health
+              port: 8080
+            failureThreshold: 20
+          env:
+            - name: SPRING_PROFILES_ACTIVE
+              value: "dev"
+            # TODO: non-secret vars는 여기에 필요 시 추가하기 (ex. DB)
+---
+apiVersion: v1
+kind: ServiceAccount
+metadata:
+  name: hangsha-api-dev
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: hangsha-api
+spec:
+  type: ClusterIP
+  selector:
+    app: hangsha-api
+  ports:
+    - port: 80
+      targetPort: 8080
+---
+apiVersion: networking.istio.io/v1alpha3
+kind: VirtualService
+metadata:
+  name: hangsha-api
+spec:
+  gateways:
+    - istio-ingress/waffle-ingressgateway
+    - mesh
+  hosts:
+    - hangsha-api-dev.wafflestudio.com
+  http:
+    - route:
+        - destination:
+            host: hangsha-api
+      headers:
+        request:
+          set:
+            X-Forwarded-Proto: "https" # for oauth and cookie
