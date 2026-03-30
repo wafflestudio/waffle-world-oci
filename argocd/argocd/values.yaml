@@ -281,6 +281,26 @@ extraObjects:
     kind: AppProject
     metadata:
       namespace: argocd
+      name: moiming
+    spec:
+      description: Project for moiming applications
+      sourceRepos:
+      - '*'
+      destinations:
+      - namespace: '*'
+        server: '*'
+      sourceNamespaces:
+      - argocd
+      clusterResourceWhitelist:
+      - group: '*'
+        kind: '*'
+      namespaceResourceWhitelist:
+      - group: '*'
+        kind: '*'
+  - apiVersion: argoproj.io/v1alpha1
+    kind: AppProject
+    metadata:
+      namespace: argocd
       name: hangsha
     spec:
       description: Project for hangsha applications
