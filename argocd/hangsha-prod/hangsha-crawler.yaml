@@ -29,7 +29,7 @@ spec:
                   memory: 256Mi
                 limits:
                   cpu: 200m
-                  memory: 512Mi
+                  memory: 384Mi
               env:
                 - name: SPRING_PROFILES_ACTIVE
                   value: "prod"
