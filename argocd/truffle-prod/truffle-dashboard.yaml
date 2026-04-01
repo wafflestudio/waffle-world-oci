@@ -39,7 +39,7 @@ spec:
               value: "prod"
           envFrom:
             - secretRef:
-                name: truffle-secret
+                name: truffle-prod
 ---
 apiVersion: v1
 kind: Service
