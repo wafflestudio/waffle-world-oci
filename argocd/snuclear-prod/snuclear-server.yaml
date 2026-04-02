@@ -1,14 +1,14 @@
 apiVersion: apps/v1
 kind: Deployment
 metadata:
-  name: snuclear-api
+  name: snuclear-server
   labels:
-    app: snuclear-api
+    app: snuclear-server
 spec:
   replicas: 1
   selector:
     matchLabels:
-      app: snuclear-api
+      app: snuclear-server
   strategy:
     type: RollingUpdate
     rollingUpdate:
@@ -18,25 +18,25 @@ spec:
   template:
     metadata:
       labels:
-        app: snuclear-api
+        app: snuclear-server
     spec:
-      serviceAccountName: snuclear-api-prod
+      serviceAccountName: snuclear-server-prod
       nodeSelector:
         kubernetes.io/arch: arm64
       containers:
-        - image: yny.ocir.io/ax1dvc8vmenm/snuclear-prod/snuclear-api:1 # TODO: OCIR 레포 경로 확인
-          name: snuclear-api
+        - image: yny.ocir.io/ax1dvc8vmenm/snuclear-prod/snuclear-server:1
+          name: snuclear-server
           resources:
             requests:
               cpu: 50m
-              memory: 256Mi
+              memory: 128Mi
             limits:
-              memory: 384Mi
+              memory: 256Mi
           ports:
-            - containerPort: 8080 # TODO: 앱이 리슨하는 포트
+            - containerPort: 8080
           livenessProbe:
             httpGet:
-              path: /api/v1/health # TODO: 헬스체크 경로
+              path: /api/v1/health
               port: 8080
           readinessProbe:
             httpGet:
@@ -56,16 +56,16 @@ spec:
 apiVersion: v1
 kind: ServiceAccount
 metadata:
-  name: snuclear-api-prod
+  name: snuclear-server-prod
 ---
 apiVersion: v1
 kind: Service
 metadata:
-  name: snuclear-api
+  name: snuclear-server
 spec:
   type: ClusterIP
   selector:
-    app: snuclear-api
+    app: snuclear-server
   ports:
     - port: 80
       targetPort: 8080
@@ -73,17 +73,17 @@ spec:
 apiVersion: networking.istio.io/v1alpha3
 kind: VirtualService
 metadata:
-  name: snuclear-api
+  name: snuclear-server
 spec:
   gateways:
     - istio-ingress/waffle-ingressgateway
     - mesh
   hosts:
-    - snuclear-api.wafflestudio.com # TODO: Route53에 이 도메인 → OCI NLB 레코드 추가 필요
+    - snuclear-server.wafflestudio.com
   http:
     - route:
         - destination:
-            host: snuclear-api
+            host: snuclear-server
       headers:
         request:
           set:

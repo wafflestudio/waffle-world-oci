@@ -24,7 +24,7 @@ metadata:
   namespace: snuclear-prod
 subjects:
   - kind: Group
-    name: ocid1.group.oc1..TODO # TODO: OCI IAM Group OCID
+    name: ocid1.group.oc1..aaaaaaaapra2li5hpn4p4b4syjou4grgpqompxzdkbxudmbg2smm3a4p275q
 roleRef:
   kind: Role
   name: snuclear-prod-role

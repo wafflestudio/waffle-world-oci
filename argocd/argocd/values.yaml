@@ -301,6 +301,26 @@ extraObjects:
     kind: AppProject
     metadata:
       namespace: argocd
+      name: snuclear
+    spec:
+      description: Project for snuclear applications
+      sourceRepos:
+      - '*'
+      destinations:
+      - namespace: '*'
+        server: '*'
+      sourceNamespaces:
+      - argocd
+      clusterResourceWhitelist:
+      - group: '*'
+        kind: '*'
+      namespaceResourceWhitelist:
+      - group: '*'
+        kind: '*'
+  - apiVersion: argoproj.io/v1alpha1
+    kind: AppProject
+    metadata:
+      namespace: argocd
       name: hangsha
     spec:
       description: Project for hangsha applications

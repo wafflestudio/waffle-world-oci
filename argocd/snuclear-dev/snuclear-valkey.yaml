@@ -1,0 +1,45 @@
+apiVersion: apps/v1
+kind: StatefulSet
+metadata:
+  name: snuclear-valkey
+  labels:
+    app: snuclear-valkey
+spec:
+  serviceName: snuclear-valkey
+  replicas: 1
+  selector:
+    matchLabels:
+      app: snuclear-valkey
+  template:
+    metadata:
+      labels:
+        app: snuclear-valkey
+      annotations:
+        sidecar.istio.io/inject: "false"
+    spec:
+      serviceAccountName: snuclear-server-dev
+      nodeSelector:
+        kubernetes.io/arch: arm64
+      containers:
+        - name: valkey
+          image: docker.io/valkey/valkey:9-alpine
+          ports:
+            - containerPort: 6379
+          resources:
+            requests:
+              cpu: 25m
+              memory: 64Mi
+            limits:
+              memory: 128Mi
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: snuclear-valkey
+spec:
+  type: ClusterIP
+  selector:
+    app: snuclear-valkey
+  ports:
+    - port: 6379
+      targetPort: 6379
