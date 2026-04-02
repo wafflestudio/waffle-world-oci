@@ -1,0 +1,90 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: snuclear-api
+  labels:
+    app: snuclear-api
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: snuclear-api
+  strategy:
+    type: RollingUpdate
+    rollingUpdate:
+      maxSurge: 25%
+      maxUnavailable: 25%
+  revisionHistoryLimit: 4
+  template:
+    metadata:
+      labels:
+        app: snuclear-api
+    spec:
+      serviceAccountName: snuclear-api-dev
+      nodeSelector:
+        kubernetes.io/arch: arm64
+      containers:
+        - image: yny.ocir.io/ax1dvc8vmenm/snuclear-dev/snuclear-api:1 # TODO: OCIR 레포 경로 확인
+          name: snuclear-api
+          resources:
+            requests:
+              cpu: 50m
+              memory: 256Mi
+            limits:
+              memory: 384Mi
+          ports:
+            - containerPort: 8080 # TODO: 앱이 리슨하는 포트
+          livenessProbe:
+            httpGet:
+              path: /api/v1/health # TODO: 헬스체크 경로
+              port: 8080
+          readinessProbe:
+            httpGet:
+              path: /api/v1/health
+              port: 8080
+            timeoutSeconds: 3
+            failureThreshold: 5
+          startupProbe:
+            httpGet:
+              path: /api/v1/health
+              port: 8080
+            failureThreshold: 20
+          env:
+            - name: SPRING_PROFILES_ACTIVE
+              value: "dev"
+---
+apiVersion: v1
+kind: ServiceAccount
+metadata:
+  name: snuclear-api-dev
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: snuclear-api
+spec:
+  type: ClusterIP
+  selector:
+    app: snuclear-api
+  ports:
+    - port: 80
+      targetPort: 8080
+---
+apiVersion: networking.istio.io/v1alpha3
+kind: VirtualService
+metadata:
+  name: snuclear-api
+spec:
+  gateways:
+    - istio-ingress/waffle-ingressgateway
+    - mesh
+  hosts:
+    - snuclear-api-dev.wafflestudio.com # TODO: Route53에 이 도메인 → OCI NLB 레코드 추가 필요
+  http:
+    - route:
+        - destination:
+            host: snuclear-api
+      headers:
+        request:
+          set:
+            X-Forwarded-Proto: "https"
