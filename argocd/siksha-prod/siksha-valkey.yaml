@@ -1,0 +1,45 @@
+apiVersion: apps/v1
+kind: StatefulSet
+metadata:
+  name: siksha-valkey
+  labels:
+    app: siksha-valkey
+spec:
+  serviceName: siksha-valkey
+  replicas: 1
+  selector:
+    matchLabels:
+      app: siksha-valkey
+  template:
+    metadata:
+      labels:
+        app: siksha-valkey
+      annotations:
+        sidecar.istio.io/inject: "false"
+    spec:
+      serviceAccountName: siksha
+      nodeSelector:
+        kubernetes.io/arch: arm64
+      containers:
+        - name: valkey
+          image: docker.io/valkey/valkey:9-alpine
+          ports:
+            - containerPort: 6379
+          resources:
+            requests:
+              cpu: 100m
+              memory: 128Mi
+            limits:
+              memory: 256Mi
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: siksha-valkey
+spec:
+  type: ClusterIP
+  selector:
+    app: siksha-valkey
+  ports:
+    - port: 6379
+      targetPort: 6379
