@@ -73,8 +73,7 @@ spec:
             host: moiming-server
       corsPolicy:
         allowHeaders:
-          - content-type
-          - authorization
+          - "*"
         allowMethods:
           - POST
           - GET
@@ -83,5 +82,5 @@ spec:
           - DELETE
           - OPTIONS
         allowOrigins:
-          - exact: "https://dev.moiming.app"
+          - exact: "https://dev.moiming.wafflestudio.com"
           - exact: "http://localhost:3000"
