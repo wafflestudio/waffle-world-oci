@@ -24,7 +24,7 @@ spec:
       nodeSelector:
         kubernetes.io/arch: arm64
       containers:
-        - image: yny.ocir.io/ax1dvc8vmenm/moiming-dev/moiming-server:5
+        - image: yny.ocir.io/ax1dvc8vmenm/moiming-dev/moiming-server:6
           name: moiming-server
           resources:
             requests:
