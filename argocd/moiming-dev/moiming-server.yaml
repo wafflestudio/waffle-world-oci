@@ -66,7 +66,7 @@ spec:
     - istio-ingress/waffle-ingressgateway
     - mesh
   hosts:
-    - api.dev.moiming.app
+    - api.dev.moiming.wafflestudio.com
   http:
     - name: "dev-moiming-server-route"
       timeout: 10s
