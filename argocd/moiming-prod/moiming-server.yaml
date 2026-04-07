@@ -31,7 +31,7 @@ spec:
               cpu: 50m
               memory: 128Mi
             limits:
-              memory: 256Mi
+              memory: 384Mi
           ports:
             - containerPort: 8080
           env:
@@ -66,7 +66,7 @@ spec:
     - istio-ingress/waffle-ingressgateway
     - mesh
   hosts:
-    - api.moiming.app
+    - api.moiming.wafflestudio.com
   http:
     - name: "prod-moiming-server-route"
       timeout: 10s
@@ -83,5 +83,6 @@ spec:
           - PATCH
           - DELETE
           - OPTIONS
+        allowCredentials: true
         allowOrigins:
           - exact: "https://moiming.wafflestudio.com"
