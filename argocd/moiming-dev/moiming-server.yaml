@@ -74,6 +74,7 @@ spec:
         - destination:
             host: moiming-server
       corsPolicy:
+        allowCredentials: true
         allowHeaders:
           - "*"
         allowMethods:
