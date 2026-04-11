@@ -1,0 +1,102 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: snutt-ev-web
+  labels:
+    app: snutt-ev-web
+  namespace: snutt-prod
+spec:
+  # replicas: HPA
+  selector:
+    matchLabels:
+      app: snutt-ev-web
+  strategy:
+    type: RollingUpdate
+    rollingUpdate:
+      maxSurge: 25%
+      maxUnavailable: 25%
+  revisionHistoryLimit: 4
+  template:
+    metadata:
+      labels:
+        app: snutt-ev-web
+    spec:
+      nodeSelector:
+        kubernetes.io/arch: arm64
+      containers:
+      - image: yny.ocir.io/ax1dvc8vmenm/snutt-prod/snutt-ev-web:117 # 확인 필요
+        name: snutt-ev-web
+        resources:
+          requests:
+            cpu: 200m
+            memory: 512Mi
+          limits:
+            cpu: 400m
+            memory: 512Mi
+        ports:
+        - containerPort: 3000
+        livenessProbe:
+          httpGet:
+            path: /api/health-check
+            port: 3000
+        readinessProbe:
+          httpGet:
+            path: /api/health-check
+            port: 3000
+        startupProbe:
+          httpGet:
+            path: /api/health-check
+            port: 3000
+          failureThreshold: 10
+---
+apiVersion: autoscaling/v2
+kind: HorizontalPodAutoscaler
+metadata:
+  name: snutt-ev-web-hpa
+  labels:
+    app: snutt-ev-web
+  namespace: snutt-prod
+spec:
+  scaleTargetRef:
+    apiVersion: apps/v1
+    kind: Deployment
+    name: snutt-ev-web
+  minReplicas: 1
+  maxReplicas: 3
+  metrics:
+  - type: Resource
+    resource:
+      name: cpu
+      target:
+        type: Utilization
+        averageUtilization: 40
+---
+apiVersion: v1
+kind: Service
+metadata:
+  namespace: snutt-prod
+  name: snutt-ev-web
+spec:
+  type: ClusterIP
+  selector:
+    app: snutt-ev-web
+  ports:
+  - port: 80
+    targetPort: 3000
+---
+apiVersion: networking.istio.io/v1alpha3
+kind: VirtualService
+metadata:
+  namespace: snutt-prod
+  name: snutt-ev-web
+spec:
+  gateways:
+  - istio-ingress/waffle-ingressgateway
+  - mesh
+  hosts:
+  - snutt-ev-web.wafflestudio.com
+  http:
+  - timeout: 10s
+    route:
+    - destination:
+        host: snutt-ev-web
