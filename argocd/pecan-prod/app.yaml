@@ -2,20 +2,20 @@ apiVersion: argoproj.io/v1alpha1
 kind: Application
 metadata:
   namespace: argocd
-  name: waffledotcom-dev
+  name: pecan
   finalizers:
   - resources-finalizer.argocd.argoproj.io
 spec:
-  project: waffledotcom
+  project: pecan
   destination:
     name: in-cluster
-    namespace: waffledotcom-dev
+    namespace: pecan-prod
   source:
     repoURL: https://github.com/wafflestudio/waffle-world-oci.git
     targetRevision: main
-    path: argocd/waffledotcom-dev
+    path: argocd/pecan-prod
     directory:
-      include: 'waffledotcom-*.yaml'
+      include: 'pecan-*.yaml'
   syncPolicy:
     automated:
       prune: true

@@ -1,14 +1,14 @@
 apiVersion: apps/v1
 kind: Deployment
 metadata:
-  name: waffledotcom-server
+  name: siksha-spring-server
   labels:
-    app: waffledotcom-server
+    app: siksha-spring-server
 spec:
   replicas: 1
   selector:
     matchLabels:
-      app: waffledotcom-server
+      app: siksha-spring-server
   strategy:
     type: RollingUpdate
     rollingUpdate:
@@ -18,51 +18,51 @@ spec:
   template:
     metadata:
       labels:
-        app: waffledotcom-server
+        app: siksha-spring-server
     spec:
-      serviceAccountName: waffledotcom
+      serviceAccountName: siksha
       nodeSelector:
         kubernetes.io/arch: arm64
       containers:
-        - image: yny.ocir.io/ax1dvc8vmenm/waffledotcom-prod/waffledotcom-server:main
-          name: waffledotcom-server
+        - image: yny.ocir.io/ax1dvc8vmenm/siksha-prod/siksha-spring-server:1
+          name: siksha-spring-server
           resources:
             requests:
-              cpu: 100m
-              memory: 128Mi
+              cpu: 200m
+              memory: 256Mi
             limits:
-              memory: 128Mi
+              memory: 512Mi
           ports:
             - containerPort: 8080
           livenessProbe:
             httpGet:
-              path: /api/v1/health/
+              path: /actuator/health
               port: 8080
           readinessProbe:
             httpGet:
-              path: /api/v1/health/
+              path: /actuator/health
               port: 8080
             timeoutSeconds: 3
             failureThreshold: 5
           startupProbe:
             httpGet:
-              path: /api/v1/health/
+              path: /actuator/health
               port: 8080
-            failureThreshold: 20
+            failureThreshold: 30
 ---
 apiVersion: v1
 kind: ServiceAccount
 metadata:
-  name: waffledotcom
+  name: siksha
 ---
 apiVersion: v1
 kind: Service
 metadata:
-  name: waffledotcom-server
+  name: siksha-spring-server
 spec:
   type: ClusterIP
   selector:
-    app: waffledotcom-server
+    app: siksha-spring-server
   ports:
     - port: 80
       targetPort: 8080
@@ -70,14 +70,18 @@ spec:
 apiVersion: networking.istio.io/v1alpha3
 kind: VirtualService
 metadata:
-  name: waffledotcom-server
+  name: siksha-spring-server
 spec:
   gateways:
     - istio-ingress/waffle-ingressgateway
     - mesh
   hosts:
-    - wadot-api.wafflestudio.com
+    - siksha-server.wafflestudio.com
   http:
     - route:
         - destination:
-            host: waffledotcom-server
+            host: siksha-spring-server
+      headers:
+        request:
+          set:
+            X-Forwarded-Proto: "https"
