@@ -1,0 +1,90 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: snuclear-server
+  labels:
+    app: snuclear-server
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: snuclear-server
+  strategy:
+    type: RollingUpdate
+    rollingUpdate:
+      maxSurge: 25%
+      maxUnavailable: 25%
+  revisionHistoryLimit: 4
+  template:
+    metadata:
+      labels:
+        app: snuclear-server
+    spec:
+      serviceAccountName: snuclear-server-prod
+      nodeSelector:
+        kubernetes.io/arch: arm64
+      containers:
+        - image: yny.ocir.io/ax1dvc8vmenm/snuclear-prod/snuclear-server:1
+          name: snuclear-server
+          resources:
+            requests:
+              cpu: 50m
+              memory: 256Mi
+            limits:
+              memory: 512Mi
+          ports:
+            - containerPort: 8080
+          livenessProbe:
+            httpGet:
+              path: /api/v1/health
+              port: 8080
+          readinessProbe:
+            httpGet:
+              path: /api/v1/health
+              port: 8080
+            timeoutSeconds: 3
+            failureThreshold: 5
+          startupProbe:
+            httpGet:
+              path: /api/v1/health
+              port: 8080
+            failureThreshold: 20
+          env:
+            - name: SPRING_PROFILES_ACTIVE
+              value: "prod"
+---
+apiVersion: v1
+kind: ServiceAccount
+metadata:
+  name: snuclear-server-prod
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: snuclear-server
+spec:
+  type: ClusterIP
+  selector:
+    app: snuclear-server
+  ports:
+    - port: 80
+      targetPort: 8080
+---
+apiVersion: networking.istio.io/v1alpha3
+kind: VirtualService
+metadata:
+  name: snuclear-server
+spec:
+  gateways:
+    - istio-ingress/waffle-ingressgateway
+    - mesh
+  hosts:
+    - snuclear-server.wafflestudio.com
+  http:
+    - route:
+        - destination:
+            host: snuclear-server
+      headers:
+        request:
+          set:
+            X-Forwarded-Proto: "https"
