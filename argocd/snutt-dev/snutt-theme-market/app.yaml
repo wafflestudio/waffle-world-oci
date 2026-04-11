@@ -2,7 +2,7 @@ apiVersion: argoproj.io/v1alpha1
 kind: Application
 metadata:
   namespace: argocd
-  name: snutt-ev-theme-market-dev
+  name: snutt-theme-market-dev
   finalizers:
   - resources-finalizer.argocd.argoproj.io
   annotations:
