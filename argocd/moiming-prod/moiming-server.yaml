@@ -83,6 +83,5 @@ spec:
           - PATCH
           - DELETE
           - OPTIONS
-        allowCredentials: true
         allowOrigins:
           - exact: "https://moiming.wafflestudio.com"
