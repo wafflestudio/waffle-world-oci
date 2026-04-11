@@ -1,0 +1,82 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: pecan-server
+  labels:
+    app: pecan-server
+  namespace: pecan-prod
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: pecan-server
+  strategy:
+    type: RollingUpdate
+    rollingUpdate:
+      maxSurge: 25%
+      maxUnavailable: 25%
+  revisionHistoryLimit: 4
+  template:
+    metadata:
+      labels:
+        app: pecan-server
+    spec:
+      serviceAccountName: pecan-server
+      nodeSelector:
+        kubernetes.io/arch: arm64
+        phase: prod
+      tolerations:
+        - effect: NoSchedule
+          key: phase
+          operator: Equal
+          value: prod
+      containers:
+      - image: yny.ocir.io/ax1dvc8vmenm/pecan:v0.2.2
+        name: pecan-server
+        securityContext:
+          privileged: true
+        resources:
+          requests:
+            cpu: 200m
+            memory: 256Mi
+          limits:
+            cpu: 200m
+            memory: 256Mi
+        ports:
+          - containerPort: 8080
+---
+apiVersion: v1
+kind: ServiceAccount
+metadata:
+  name: pecan-server
+  namespace: pecan-prod
+---
+apiVersion: v1
+kind: Service
+metadata:
+  namespace: pecan-prod
+  name: pecan-server
+spec:
+  type: ClusterIP
+  selector:
+    app: pecan-server
+  ports:
+  - port: 80
+    targetPort: 8080
+---
+apiVersion: networking.istio.io/v1alpha3
+kind: VirtualService
+metadata:
+  namespace: pecan-prod
+  name: pecan-server
+spec:
+  gateways:
+  - istio-ingress/waffle-ingressgateway
+  - mesh
+  hosts:
+  - pecan-server
+  - pecan.wafflestudio.com
+  http:
+  - route:
+    - destination:
+        host: pecan-server
