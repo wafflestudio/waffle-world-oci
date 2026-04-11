@@ -30,9 +30,6 @@ spec:
           requests:
             cpu: 200m
             memory: 512Mi
-          limits:
-            cpu: 200m
-            memory: 512Mi
         ports:
         - containerPort: 3000
         livenessProbe:
