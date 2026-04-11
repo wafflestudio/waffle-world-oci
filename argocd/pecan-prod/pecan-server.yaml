@@ -24,12 +24,6 @@ spec:
       serviceAccountName: pecan-server
       nodeSelector:
         kubernetes.io/arch: arm64
-        phase: prod
-      tolerations:
-        - effect: NoSchedule
-          key: phase
-          operator: Equal
-          value: prod
       containers:
       - image: yny.ocir.io/ax1dvc8vmenm/pecan:v0.2.2
         name: pecan-server
