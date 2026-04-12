@@ -34,6 +34,9 @@ spec:
               memory: 512Mi
           ports:
             - containerPort: 8080
+          envFrom:
+            - secretRef:
+                name: siksha-prod
           livenessProbe:
             httpGet:
               path: /actuator/health
