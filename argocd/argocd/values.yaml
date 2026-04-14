@@ -31,6 +31,11 @@ configs:
       p, role:snutt-server, projects, get, snutt, allow
       p, role:snutt-server, applications, *, snutt/*, allow
       p, role:snutt-server, exec, create, snutt/*, allow
+      g, wafflestudio:moiming, role:moiming-server
+      p, role:moiming-server, projects, get, moiming, allow
+      p, role:moiming-server, applications, *, moiming/*, allow
+      p, role:moiming-server, exec, create, moiming/*, allow
+
     policy.default: role:readonly
 
 dex:
