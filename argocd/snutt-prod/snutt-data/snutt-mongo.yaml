@@ -32,7 +32,7 @@ spec:
               mountPath: /data/db
           resources:
             requests:
-              cpu: 300m
+              cpu: 30m
               memory: 512Mi
             limits:
               memory: 1Gi
