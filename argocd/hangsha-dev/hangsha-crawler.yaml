@@ -29,7 +29,7 @@ spec:
                   memory: 256Mi
                 limits:
                   cpu: 200m
-                  memory: 384Mi # TODO: 임시
+                  memory: 1Gi
               env:
                 - name: SPRING_PROFILES_ACTIVE
                   value: "dev"
