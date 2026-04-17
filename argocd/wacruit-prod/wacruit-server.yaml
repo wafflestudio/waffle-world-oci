@@ -24,7 +24,7 @@ spec:
       nodeSelector:
         kubernetes.io/arch: arm64
       containers:
-        - image: yny.ocir.io/ax1dvc8vmenm/wacruit-prod/wacruit-server:20
+        - image: yny.ocir.io/ax1dvc8vmenm/wacruit-prod/wacruit-server:21
           name: wacruit-server
           resources:
             requests:
