@@ -6,7 +6,7 @@ nodeExporter:
 
 alertmanager:
   alertmanagerSpec:
-    replicas: 1
+    replicas: 0
     resources:
       requests:
         cpu: 50m
@@ -16,7 +16,7 @@ alertmanager:
 
 grafana:
   enabled: true
-  replicas: 0
+  replicas: 1
   defaultDashboardsTimezone: Asia/Seoul
   admin:
     existingSecret: prometheus-grafana
@@ -60,7 +60,7 @@ prometheus-node-exporter:
 prometheus:
   enabled: true
   prometheusSpec:
-    replicas: 0
+    replicas: 1
     retention: 10d
     resources:
       requests:
