@@ -24,7 +24,7 @@ spec:
       nodeSelector:
         kubernetes.io/arch: arm64
       containers:
-        - image: yny.ocir.io/ax1dvc8vmenm/pupuri-prod/pupuri-bot:113
+        - image: yny.ocir.io/ax1dvc8vmenm/pupuri-prod/pupuri-bot:114
           name: pupuri-bot
           resources:
             requests:
