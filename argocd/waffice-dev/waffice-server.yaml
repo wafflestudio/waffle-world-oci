@@ -80,7 +80,7 @@ spec:
     - mesh
   hosts:
     - waffice-server.waffice-dev.svc.cluster.local
-    - waffice-dev.wafflestudio.com
+    - waffice-api-dev.wafflestudio.com
   http:
     - route:
         - destination:
