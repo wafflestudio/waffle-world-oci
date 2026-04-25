@@ -16,7 +16,7 @@ alertmanager:
 
 grafana:
   enabled: true
-  replicas: 1
+  replicas: 0
   defaultDashboardsTimezone: Asia/Seoul
   admin:
     existingSecret: prometheus-grafana
@@ -60,7 +60,7 @@ prometheus-node-exporter:
 prometheus:
   enabled: true
   prometheusSpec:
-    replicas: 1
+    replicas: 0
     retention: 10d
     resources:
       requests:
