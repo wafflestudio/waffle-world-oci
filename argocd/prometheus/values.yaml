@@ -6,7 +6,7 @@ nodeExporter:
 
 alertmanager:
   alertmanagerSpec:
-    replicas: 0
+    replicas: 1
     resources:
       requests:
         cpu: 50m
