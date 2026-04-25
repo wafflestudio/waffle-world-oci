@@ -51,7 +51,7 @@ spec:
             httpGet:
               path: /health-check
               port: 8080
-            failureThreshold: 20
+            failureThreshold: 30
 ---
 apiVersion: v1
 kind: ServiceAccount
