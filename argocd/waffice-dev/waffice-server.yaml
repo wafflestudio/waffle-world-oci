@@ -1,0 +1,91 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: waffice-server
+  labels:
+    app: waffice-server
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: waffice-server
+  strategy:
+    type: RollingUpdate
+    rollingUpdate:
+      maxSurge: 25%
+      maxUnavailable: 25%
+  revisionHistoryLimit: 4
+  template:
+    metadata:
+      labels:
+        app: waffice-server
+    spec:
+      serviceAccountName: waffice
+      nodeSelector:
+        kubernetes.io/arch: arm64
+      containers:
+        - image: yny.ocir.io/ax1dvc8vmenm/waffice-dev/waffice-server:20260405-055559
+          name: waffice-server
+          resources:
+            requests:
+              cpu: 50m
+              memory: 256Mi
+            limits:
+              memory: 512Mi
+          ports:
+            - containerPort: 8080
+          envFrom:
+            - secretRef:
+                name: waffice-dev
+          livenessProbe:
+            httpGet:
+              path: /health-check
+              port: 8080
+          readinessProbe:
+            httpGet:
+              path: /health-check
+              port: 8080
+            timeoutSeconds: 3
+            failureThreshold: 5
+          startupProbe:
+            httpGet:
+              path: /health-check
+              port: 8080
+            failureThreshold: 20
+---
+apiVersion: v1
+kind: ServiceAccount
+metadata:
+  name: waffice
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: waffice-server
+spec:
+  type: ClusterIP
+  selector:
+    app: waffice-server
+  ports:
+    - port: 80
+      targetPort: 8080
+---
+apiVersion: networking.istio.io/v1alpha3
+kind: VirtualService
+metadata:
+  name: waffice-server
+spec:
+  gateways:
+    - istio-ingress/waffle-ingressgateway
+    - mesh
+  hosts:
+    - waffice-server.waffice-dev.svc.cluster.local
+    - waffice-dev.wafflestudio.com
+  http:
+    - route:
+        - destination:
+            host: waffice-server
+      headers:
+        request:
+          set:
+            X-Forwarded-Proto: "https"
