@@ -32,6 +32,9 @@ clientRbac:
   - kind: Group
     name: ocid1.group.oc1..aaaaaaaavqwxtk4crjlbzlrftkisirube4suoydlyes25fa2ok23nixjgvvq
     apiGroup: rbac.authorization.k8s.io
+  - kind: Group
+    name: ocid1.group.oc1..aaaaaaaazbytmrmafinbs7nehoht7uwwqunicbndhecurexiq7liprdrfvaq
+    apiGroup: rbac.authorization.k8s.io
 
 agentInjector:
   enabled: true
