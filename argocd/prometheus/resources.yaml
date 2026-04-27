@@ -70,7 +70,9 @@ spec:
     creationPolicy: Owner
     template:
       data:
-        DATA_SOURCE_NAME: '{{ .raw | fromJson | dig "user" "" }}:{{ .raw | fromJson | dig "password" "" }}@tcp({{ .raw | fromJson | dig "host" "" }}:3306)/'
+        MYSQLD_EXPORTER_USER: '{{ .raw | fromJson | dig "user" "" }}'
+        MYSQLD_EXPORTER_PASSWORD: '{{ .raw | fromJson | dig "password" "" }}'
+        MYSQLD_EXPORTER_HOST: '{{ .raw | fromJson | dig "host" "" }}'
   data:
     - secretKey: raw
       remoteRef:
@@ -102,15 +104,30 @@ spec:
         - name: mysqld-exporter
           image: docker.io/prom/mysqld-exporter:v0.16.0
           args:
+            - --mysqld.address=$(MYSQLD_EXPORTER_HOST):3306
+            - --mysqld.username=$(MYSQLD_EXPORTER_USER)
             - --no-collect.info_schema.tables # 테이블별 row 수/크기 수집 비활성화 (메트릭 폭증 방지)
             - --collect.perf_schema.eventsstatements # DB별 쿼리 수, 실행시간, 에러 수 수집
             - --collect.perf_schema.eventsstatementssum # DB별 쿼리 요약 통계 수집
           ports:
             - containerPort: 9104
               name: metrics
-          envFrom:
-            - secretRef:
-                name: prometheus-mysql-exporter
+          env:
+            - name: MYSQLD_EXPORTER_USER
+              valueFrom:
+                secretKeyRef:
+                  name: prometheus-mysql-exporter
+                  key: MYSQLD_EXPORTER_USER
+            - name: MYSQLD_EXPORTER_PASSWORD
+              valueFrom:
+                secretKeyRef:
+                  name: prometheus-mysql-exporter
+                  key: MYSQLD_EXPORTER_PASSWORD
+            - name: MYSQLD_EXPORTER_HOST
+              valueFrom:
+                secretKeyRef:
+                  name: prometheus-mysql-exporter
+                  key: MYSQLD_EXPORTER_HOST
           resources:
             requests:
               cpu: 10m
