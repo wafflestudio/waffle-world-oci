@@ -100,7 +100,7 @@ spec:
     spec:
       containers:
         - name: mysqld-exporter
-          image: prom/mysqld-exporter:v0.16.0
+          image: docker.io/prom/mysqld-exporter:v0.16.0
           args:
             - --no-collect.info_schema.tables # 테이블별 row 수/크기 수집 비활성화 (메트릭 폭증 방지)
             - --collect.perf_schema.eventsstatements # DB별 쿼리 수, 실행시간, 에러 수 수집
