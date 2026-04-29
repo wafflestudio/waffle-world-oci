@@ -21,6 +21,7 @@ spec:
         sidecar.istio.io/inject: "true"
       labels:
         app: siksha-api-server
+        sidecar.istio.io/inject: "true"
     spec:
       serviceAccountName: siksha
       nodeSelector:
