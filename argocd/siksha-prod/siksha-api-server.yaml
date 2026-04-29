@@ -30,7 +30,7 @@ spec:
           name: siksha-api-server
           resources:
             requests:
-              cpu: 200m
+              cpu: 20m
               memory: 192Mi
             limits:
               memory: 512Mi
