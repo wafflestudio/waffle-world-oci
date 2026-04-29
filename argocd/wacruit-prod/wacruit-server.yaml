@@ -63,6 +63,7 @@ spec:
   hosts:
     - wacruit-server.wacruit-prod.svc.cluster.local
     - wacruit.wafflestudio.com
+    - www.wafflestudio.com
   http:
     - route:
         - destination:
