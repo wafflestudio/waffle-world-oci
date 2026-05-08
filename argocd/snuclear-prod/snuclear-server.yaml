@@ -5,7 +5,7 @@ metadata:
   labels:
     app: snuclear-server
 spec:
-  replicas: 1
+  # replicas: HPA
   selector:
     matchLabels:
       app: snuclear-server
@@ -29,9 +29,9 @@ spec:
           resources:
             requests:
               cpu: 50m
-              memory: 256Mi
+              memory: 384Mi
             limits:
-              memory: 512Mi
+              memory: 768Mi
           ports:
             - containerPort: 8080
           livenessProbe:
@@ -52,6 +52,27 @@ spec:
           env:
             - name: SPRING_PROFILES_ACTIVE
               value: "prod"
+---
+apiVersion: autoscaling/v2
+kind: HorizontalPodAutoscaler
+metadata:
+  name: snuclear-server-hpa
+  labels:
+    app: snuclear-server
+spec:
+  scaleTargetRef:
+    apiVersion: apps/v1
+    kind: Deployment
+    name: snuclear-server
+  minReplicas: 1
+  maxReplicas: 3
+  metrics:
+    - type: Resource
+      resource:
+        name: memory
+        target:
+          type: AverageValue
+          averageValue: 576Mi # limit의 75%
 ---
 apiVersion: v1
 kind: ServiceAccount
