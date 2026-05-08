@@ -5,6 +5,7 @@ metadata:
   labels:
     app: snuclear-server
 spec:
+  # replicas: HPA
   selector:
     matchLabels:
       app: snuclear-server
