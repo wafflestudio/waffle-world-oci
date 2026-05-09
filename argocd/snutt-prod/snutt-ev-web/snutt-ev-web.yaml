@@ -24,7 +24,7 @@ spec:
       nodeSelector:
         kubernetes.io/arch: arm64
       containers:
-      - image: yny.ocir.io/ax1dvc8vmenm/snutt-prod/snutt-ev-web:1
+      - image: yny.ocir.io/ax1dvc8vmenm/snutt-prod/snutt-ev-web:2
         name: snutt-ev-web
         resources:
           requests:
