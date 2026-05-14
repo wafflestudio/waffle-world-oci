@@ -29,9 +29,9 @@ spec:
           resources:
             requests:
               cpu: 50m
-              memory: 384Mi
+              memory: 256Mi
             limits:
-              memory: 768Mi
+              memory: 512Mi
           ports:
             - containerPort: 8080
           livenessProbe:
@@ -52,8 +52,6 @@ spec:
           env:
             - name: SPRING_PROFILES_ACTIVE
               value: "prod"
-            - name: JAVA_TOOL_OPTIONS
-              value: "-XX:MaxRAM=512m"
 ---
 apiVersion: autoscaling/v2
 kind: HorizontalPodAutoscaler
@@ -71,10 +69,10 @@ spec:
   metrics:
     - type: Resource
       resource:
-        name: memory
+        name: cpu
         target:
-          type: AverageValue
-          averageValue: 576Mi # limit의 75%
+          type: Utilization
+          averageUtilization: 75
 ---
 apiVersion: v1
 kind: ServiceAccount
