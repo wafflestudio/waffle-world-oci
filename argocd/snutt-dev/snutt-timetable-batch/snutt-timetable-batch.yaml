@@ -21,7 +21,7 @@ spec:
           restartPolicy: OnFailure
           serviceAccountName: snutt-timetable-batch-dev
           containers:
-            - image: yny.ocir.io/ax1dvc8vmenm/snutt-dev/snutt-timetable-batch:67
+            - image: yny.ocir.io/ax1dvc8vmenm/snutt-dev/snutt-timetable-batch:68
               name: snutt-timetable-batch-coursebook
               resources:
                 requests:
@@ -61,7 +61,7 @@ spec:
           restartPolicy: OnFailure
           serviceAccountName: snutt-timetable-batch-dev
           containers:
-            - image: yny.ocir.io/ax1dvc8vmenm/snutt-dev/snutt-timetable-batch:67
+            - image: yny.ocir.io/ax1dvc8vmenm/snutt-dev/snutt-timetable-batch:68
               name: snutt-timetable-batch-user-nickname
               resources:
                 requests:
