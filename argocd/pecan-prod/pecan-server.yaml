@@ -25,7 +25,7 @@ spec:
       nodeSelector:
         kubernetes.io/arch: arm64
       containers:
-      - image: yny.ocir.io/ax1dvc8vmenm/pecan:v0.2.5
+      - image: yny.ocir.io/ax1dvc8vmenm/pecan:v0.2.6
         name: pecan-server
         securityContext:
           privileged: true
