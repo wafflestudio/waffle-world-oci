@@ -21,7 +21,7 @@ spec:
           restartPolicy: OnFailure
           serviceAccountName: snutt-timetable-batch
           containers:
-            - image: yny.ocir.io/ax1dvc8vmenm/snutt-prod/snutt-timetable-batch:11
+            - image: yny.ocir.io/ax1dvc8vmenm/snutt-prod/snutt-timetable-batch:12
               name: snutt-timetable-batch-coursebook
               resources:
                 requests:
@@ -61,7 +61,7 @@ spec:
           restartPolicy: OnFailure
           serviceAccountName: snutt-timetable-batch
           containers:
-            - image: yny.ocir.io/ax1dvc8vmenm/snutt-prod/snutt-timetable-batch:11
+            - image: yny.ocir.io/ax1dvc8vmenm/snutt-prod/snutt-timetable-batch:12
               name: snu4t-batch-vacancy-noti
               resources:
                 requests:
@@ -101,7 +101,7 @@ spec:
           restartPolicy: OnFailure
           serviceAccountName: snutt-timetable-batch
           containers:
-            - image: yny.ocir.io/ax1dvc8vmenm/snutt-prod/snutt-timetable-batch:11
+            - image: yny.ocir.io/ax1dvc8vmenm/snutt-prod/snutt-timetable-batch:12
               name: snutt-timetable-batch-user-nickname
               resources:
                 requests:
