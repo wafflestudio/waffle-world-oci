@@ -1,0 +1,87 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: slack-viz-oauth2-proxy
+  labels:
+    app: slack-viz-oauth2-proxy
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: slack-viz-oauth2-proxy
+  strategy:
+    type: RollingUpdate
+    rollingUpdate:
+      maxSurge: 25%
+      maxUnavailable: 25%
+  template:
+    metadata:
+      labels:
+        app: slack-viz-oauth2-proxy
+    spec:
+      nodeSelector:
+        kubernetes.io/arch: arm64
+      containers:
+      - image: quay.io/oauth2-proxy/oauth2-proxy:v7.15.2
+        name: oauth2-proxy
+        args:
+        - --provider=github
+        - --github-org=wafflestudio
+        - --upstream=http://slack-viz-app
+        - --http-address=0.0.0.0:4180
+        - --redirect-url=https://slack.wafflestudio.com/oauth2/callback
+        - --email-domain=*
+        - --cookie-secure=true
+        env:
+        - name: OAUTH2_PROXY_CLIENT_ID
+          valueFrom:
+            secretKeyRef:
+              name: slack-viz-prod
+              key: GITHUB_CLIENT_ID
+        - name: OAUTH2_PROXY_CLIENT_SECRET
+          valueFrom:
+            secretKeyRef:
+              name: slack-viz-prod
+              key: GITHUB_CLIENT_SECRET
+        - name: OAUTH2_PROXY_COOKIE_SECRET
+          valueFrom:
+            secretKeyRef:
+              name: slack-viz-prod
+              key: OAUTH2_PROXY_COOKIE_SECRET
+        ports:
+        - containerPort: 4180
+        resources:
+          requests:
+            cpu: 10m
+            memory: 32Mi
+          limits:
+            memory: 128Mi
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: slack-viz-oauth2-proxy
+spec:
+  type: ClusterIP
+  selector:
+    app: slack-viz-oauth2-proxy
+  ports:
+  - port: 80
+    targetPort: 4180
+---
+apiVersion: networking.istio.io/v1alpha3
+kind: VirtualService
+metadata:
+  name: slack-viz
+spec:
+  gateways:
+  - istio-ingress/waffle-ingressgateway
+  - mesh
+  hosts:
+  - slack.wafflestudio.com
+  http:
+  - route:
+    - destination:
+        host: slack-viz-oauth2-proxy
+        port:
+          number: 80
