@@ -1,0 +1,45 @@
+apiVersion: apps/v1
+kind: StatefulSet
+metadata:
+  name: hangsha-valkey
+  labels:
+    app: hangsha-valkey
+spec:
+  serviceName: hangsha-valkey
+  replicas: 0
+  selector:
+    matchLabels:
+      app: hangsha-valkey
+  template:
+    metadata:
+      labels:
+        app: hangsha-valkey
+      annotations:
+        sidecar.istio.io/inject: "false"
+    spec:
+      serviceAccountName: hangsha-api-prod
+      nodeSelector:
+        kubernetes.io/arch: arm64
+      containers:
+        - name: valkey
+          image: docker.io/valkey/valkey:9-alpine
+          ports:
+            - containerPort: 6379
+          resources:
+            requests:
+              cpu: 100m
+              memory: 128Mi
+            limits:
+              memory: 256Mi
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: hangsha-valkey
+spec:
+  type: ClusterIP
+  selector:
+    app: hangsha-valkey
+  ports:
+    - port: 6379
+      targetPort: 6379
