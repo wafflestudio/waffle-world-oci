@@ -52,7 +52,10 @@ spec:
           env:
             - name: SPRING_PROFILES_ACTIVE
               value: "dev"
-            # TODO: non-secret vars는 여기에 필요 시 추가하기 (ex. DB)
+            - name: SPRING_DATA_REDIS_HOST
+              value: "hangsha-valkey"
+            - name: SPRING_DATA_REDIS_PORT
+              value: "6379"
 ---
 apiVersion: v1
 kind: ServiceAccount
