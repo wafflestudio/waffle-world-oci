@@ -33,6 +33,8 @@ spec:
               env:
                 - name: SPRING_PROFILES_ACTIVE
                   value: "dev"
+                - name: MEILI_HOST
+                  value: "http://hangsha-meilisearch:7700"
                 - name: SPRING_DATA_REDIS_HOST
                   value: "hangsha-valkey"
                 - name: SPRING_DATA_REDIS_PORT

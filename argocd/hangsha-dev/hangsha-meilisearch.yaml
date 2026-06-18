@@ -1,0 +1,61 @@
+apiVersion: apps/v1
+kind: StatefulSet
+metadata:
+  name: hangsha-meilisearch
+  labels:
+    app: hangsha-meilisearch
+spec:
+  serviceName: hangsha-meilisearch
+  replicas: 1
+  selector:
+    matchLabels:
+      app: hangsha-meilisearch
+  template:
+    metadata:
+      labels:
+        app: hangsha-meilisearch
+      annotations:
+        sidecar.istio.io/inject: "false"
+    spec:
+      serviceAccountName: hangsha-api-dev
+      nodeSelector:
+        kubernetes.io/arch: arm64
+      containers:
+        - name: meilisearch
+          image: getmeili/meilisearch:v1.13
+          env:
+            - name: MEILI_ENV
+              value: "development"
+            - name: MEILI_NO_ANALYTICS
+              value: "true"
+          ports:
+            - containerPort: 7700
+          volumeMounts:
+            - name: meili-data
+              mountPath: /meili_data
+          resources:
+            requests:
+              cpu: 100m
+              memory: 256Mi
+            limits:
+              memory: 512Mi
+  volumeClaimTemplates:
+    - metadata:
+        name: meili-data
+      spec:
+        accessModes: ["ReadWriteOnce"]
+        resources:
+          requests:
+            storage: 10Gi
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: hangsha-meilisearch
+spec:
+  type: ClusterIP
+  selector:
+    app: hangsha-meilisearch
+  ports:
+    - port: 7700
+      targetPort: 7700
