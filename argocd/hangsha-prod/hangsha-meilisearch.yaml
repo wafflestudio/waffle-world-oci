@@ -22,7 +22,7 @@ spec:
         kubernetes.io/arch: arm64
       containers:
         - name: meilisearch
-          image: getmeili/meilisearch:v1.13
+          image: docker.io/getmeili/meilisearch:v1.13
           env:
             - name: MEILI_ENV
               value: "production"
