@@ -1,0 +1,194 @@
+name: Update GitOps image tag
+description: >-
+  Update a kustomize overlay's image tag in this GitOps repository and push the
+  change. Intended to be called from a service repository after it builds and
+  pushes a new image to OCIR, replacing the registry-triggered tag bump.
+
+inputs:
+  image:
+    description: 'Image repository without tag (e.g. yny.ocir.io/ax1dvc8vmenm/snutt-dev/snutt-timetable)'
+    required: true
+  tag:
+    description: 'New image tag to set (e.g. the build number)'
+    required: true
+  overlay-path:
+    description: 'Path to the kustomize directory within the GitOps repo (e.g. argocd/snutt-dev/snutt-timetable)'
+    required: true
+  app-id:
+    description: 'GitHub App ID. When set with private-key, the action mints an installation token itself.'
+    required: false
+    default: ''
+  private-key:
+    description: 'GitHub App private key (PEM). Required when app-id is set.'
+    required: false
+    default: ''
+  token:
+    description: 'Pre-issued token with write access to the GitOps repo. Use this instead of app-id/private-key (e.g. a PAT).'
+    required: false
+    default: ''
+  gitops-repository:
+    description: 'owner/name of the GitOps repository to update'
+    required: false
+    default: wafflestudio/waffle-world-oci
+  gitops-branch:
+    description: 'Branch of the GitOps repository to commit to'
+    required: false
+    default: main
+  committer-name:
+    description: 'git user.name for the commit. Defaults to the App bot identity, then github-actions[bot].'
+    required: false
+    default: ''
+  committer-email:
+    description: 'git user.email for the commit. Defaults to the App bot identity, then github-actions[bot].'
+    required: false
+    default: ''
+  kustomize-version:
+    description: 'kustomize version to install and run'
+    required: false
+    default: '5.8.1'
+
+outputs:
+  image:
+    description: 'Full image reference that was set (image:tag)'
+    value: ${{ inputs.image }}:${{ inputs.tag }}
+  commit-sha:
+    description: 'SHA of the commit pushed to the GitOps repository (empty if nothing changed)'
+    value: ${{ steps.commit.outputs.sha }}
+
+runs:
+  using: composite
+  steps:
+    - name: Resolve GitOps repository owner/name
+      id: meta
+      shell: bash
+      env:
+        GITOPS_REPO: ${{ inputs.gitops-repository }}
+        APP_ID: ${{ inputs.app-id }}
+        TOKEN: ${{ inputs.token }}
+      run: |
+        set -euo pipefail
+        if [ -z "$APP_ID" ] && [ -z "$TOKEN" ]; then
+          echo "::error::Provide either app-id + private-key or token."
+          exit 1
+        fi
+        echo "owner=${GITOPS_REPO%%/*}" >> "$GITHUB_OUTPUT"
+        echo "name=${GITOPS_REPO##*/}" >> "$GITHUB_OUTPUT"
+
+    - name: Generate GitHub App token
+      id: app-token
+      if: ${{ inputs.app-id != '' }}
+      uses: actions/create-github-app-token@v1
+      with:
+        app-id: ${{ inputs.app-id }}
+        private-key: ${{ inputs.private-key }}
+        owner: ${{ steps.meta.outputs.owner }}
+        repositories: ${{ steps.meta.outputs.name }}
+
+    - name: Resolve committer identity
+      id: committer
+      shell: bash
+      env:
+        IN_NAME: ${{ inputs.committer-name }}
+        IN_EMAIL: ${{ inputs.committer-email }}
+        APP_SLUG: ${{ steps.app-token.outputs.app-slug }}
+        GH_TOKEN: ${{ steps.app-token.outputs.token || inputs.token }}
+      run: |
+        set -euo pipefail
+        name="$IN_NAME"
+        email="$IN_EMAIL"
+        if [ -z "$name" ] && [ -n "$APP_SLUG" ]; then
+          name="${APP_SLUG}[bot]"
+          uid=$(gh api "/users/${APP_SLUG}[bot]" --jq .id 2>/dev/null || true)
+          if [ -n "$uid" ]; then
+            email="${uid}+${APP_SLUG}[bot]@users.noreply.github.com"
+          else
+            email="${APP_SLUG}[bot]@users.noreply.github.com"
+          fi
+        fi
+        [ -n "$name" ] || name="github-actions[bot]"
+        [ -n "$email" ] || email="41898282+github-actions[bot]@users.noreply.github.com"
+        echo "name=$name" >> "$GITHUB_OUTPUT"
+        echo "email=$email" >> "$GITHUB_OUTPUT"
+
+    - name: Checkout GitOps repository
+      uses: actions/checkout@v4
+      with:
+        repository: ${{ inputs.gitops-repository }}
+        ref: ${{ inputs.gitops-branch }}
+        token: ${{ steps.app-token.outputs.token || inputs.token }}
+        path: .gitops
+        fetch-depth: 0
+
+    - name: Install kustomize
+      shell: bash
+      env:
+        KUSTOMIZE_VERSION: ${{ inputs.kustomize-version }}
+      run: |
+        set -euo pipefail
+        if command -v kustomize >/dev/null 2>&1 && [ "$(kustomize version | grep -o "v${KUSTOMIZE_VERSION}")" = "v${KUSTOMIZE_VERSION}" ]; then
+          echo "kustomize ${KUSTOMIZE_VERSION} already present"
+          exit 0
+        fi
+        os=$(uname | tr '[:upper:]' '[:lower:]')
+        arch=$(uname -m)
+        case "$arch" in
+          x86_64) arch=amd64 ;;
+          aarch64 | arm64) arch=arm64 ;;
+        esac
+        url="https://github.com/kubernetes-sigs/kustomize/releases/download/kustomize%2Fv${KUSTOMIZE_VERSION}/kustomize_v${KUSTOMIZE_VERSION}_${os}_${arch}.tar.gz"
+        curl -fsSL "$url" -o /tmp/kustomize.tar.gz
+        tar -xzf /tmp/kustomize.tar.gz -C /tmp
+        install -m 0755 /tmp/kustomize "$RUNNER_TEMP/kustomize"
+        echo "$RUNNER_TEMP" >> "$GITHUB_PATH"
+
+    - name: Set image tag and commit
+      id: commit
+      shell: bash
+      working-directory: .gitops
+      env:
+        IMAGE: ${{ inputs.image }}
+        TAG: ${{ inputs.tag }}
+        OVERLAY_PATH: ${{ inputs.overlay-path }}
+        BRANCH: ${{ inputs.gitops-branch }}
+        COMMITTER_NAME: ${{ steps.committer.outputs.name }}
+        COMMITTER_EMAIL: ${{ steps.committer.outputs.email }}
+      run: |
+        set -euo pipefail
+
+        if [ ! -f "${OVERLAY_PATH}/kustomization.yaml" ]; then
+          echo "::error::No kustomization.yaml found at ${OVERLAY_PATH}"
+          exit 1
+        fi
+
+        ( cd "${OVERLAY_PATH}" && kustomize edit set image "${IMAGE}:${TAG}" )
+
+        git config user.name "${COMMITTER_NAME}"
+        git config user.email "${COMMITTER_EMAIL}"
+        git add "${OVERLAY_PATH}/kustomization.yaml"
+
+        if git diff --cached --quiet; then
+          echo "No image change for ${OVERLAY_PATH}; nothing to commit."
+          echo "sha=" >> "$GITHUB_OUTPUT"
+          exit 0
+        fi
+
+        label="${OVERLAY_PATH#argocd/}"
+        git commit -m "build: update ${label} to ${TAG}"
+
+        pushed=false
+        for attempt in 1 2 3 4 5; do
+          if git push origin "HEAD:${BRANCH}"; then
+            pushed=true
+            break
+          fi
+          echo "Push attempt ${attempt} failed; rebasing onto ${BRANCH} and retrying."
+          git pull --rebase origin "${BRANCH}"
+          sleep $(( (RANDOM % 5) + 1 ))
+        done
+
+        if [ "$pushed" != true ]; then
+          echo "::error::Failed to push image update after retries."
+          exit 1
+        fi
+
+        echo "sha=$(git rev-parse HEAD)" >> "$GITHUB_OUTPUT"
