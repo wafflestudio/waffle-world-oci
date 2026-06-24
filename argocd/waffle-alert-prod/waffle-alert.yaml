@@ -1,0 +1,88 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: waffle-alert
+  labels:
+    app: waffle-alert
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: waffle-alert
+  strategy:
+    type: RollingUpdate
+    rollingUpdate:
+      maxSurge: 25%
+      maxUnavailable: 25%
+  revisionHistoryLimit: 4
+  template:
+    metadata:
+      labels:
+        app: waffle-alert
+    spec:
+      serviceAccountName: waffle-alert
+      nodeSelector:
+        kubernetes.io/arch: arm64
+      containers:
+        - image: yny.ocir.io/ax1dvc8vmenm/waffle-alert-prod/waffle-alert:latest
+          name: waffle-alert
+          resources:
+            requests:
+              cpu: 100m
+              memory: 384Mi
+            limits:
+              memory: 512Mi
+          ports:
+            - containerPort: 8080
+          livenessProbe:
+            httpGet:
+              path: /actuator/health/liveness
+              port: 8080
+          readinessProbe:
+            httpGet:
+              path: /actuator/health/readiness
+              port: 8080
+            timeoutSeconds: 3
+            failureThreshold: 5
+          startupProbe:
+            httpGet:
+              path: /actuator/health/liveness
+              port: 8080
+            failureThreshold: 20
+          env:
+            - name: SPRING_PROFILES_ACTIVE
+              value: "prod"
+---
+apiVersion: v1
+kind: ServiceAccount
+metadata:
+  name: waffle-alert
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: waffle-alert
+spec:
+  type: ClusterIP
+  selector:
+    app: waffle-alert
+  ports:
+    - port: 80
+      targetPort: 8080
+---
+# Alertmanager(클러스터 내부)가 webhook을 쏘는 경로는 ClusterIP Service로 충분하므로
+# 외부 노출(VirtualService)은 필수가 아니다. 대시보드/외부 접근이 필요해지면 아래를 활성화한다.
+# apiVersion: networking.istio.io/v1alpha3
+# kind: VirtualService
+# metadata:
+#   name: waffle-alert
+# spec:
+#   gateways:
+#     - istio-ingress/waffle-ingressgateway
+#     - mesh
+#   hosts:
+#     - waffle-alert.wafflestudio.com
+#   http:
+#     - route:
+#         - destination:
+#             host: waffle-alert
