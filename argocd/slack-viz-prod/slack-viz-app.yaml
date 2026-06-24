@@ -23,7 +23,7 @@ spec:
       nodeSelector:
         kubernetes.io/arch: arm64
       containers:
-      - image: docker.io/wafflestudio/slack-vuesualizer:main
+      - image: yny.ocir.io/ax1dvc8vmenm/slack-view:1
         name: app
         ports:
         - containerPort: 3000
