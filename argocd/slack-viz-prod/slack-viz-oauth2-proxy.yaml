@@ -32,6 +32,7 @@ spec:
         - --redirect-url=https://slack.wafflestudio.com/oauth2/callback
         - --email-domain=*
         - --cookie-secure=true
+        - --upstream-timeout=300s
         env:
         - name: OAUTH2_PROXY_CLIENT_ID
           valueFrom:
