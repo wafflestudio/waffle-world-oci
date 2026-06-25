@@ -21,7 +21,7 @@ spec:
           restartPolicy: OnFailure
           serviceAccountName: hangsha-crawler-dev
           containers:
-            - image: yny.ocir.io/ax1dvc8vmenm/hangsha-dev/hangsha-batch:32
+            - image: yny.ocir.io/ax1dvc8vmenm/hangsha-dev/hangsha-batch:33
               name: hangsha-crawler
               resources:
                 requests:
