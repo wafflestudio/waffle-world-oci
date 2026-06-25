@@ -33,9 +33,6 @@ spec:
               env:
                 - name: SPRING_PROFILES_ACTIVE
                   value: "prod"
-                # TODO: hangsha-meilisearch replicas를 1로 변경할 때 주석 해제하기
-                # - name: MEILI_HOST
-                #   value: "http://hangsha-meilisearch:7700"
                 # TODO: hangsha-valkey replicas를 1로 변경할 때 주석 해제하기
                 # - name: SPRING_DATA_REDIS_HOST
                 #   value: "hangsha-valkey"
