@@ -1,0 +1,55 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: hangsha-kiwi
+  labels:
+    app: hangsha-kiwi
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: hangsha-kiwi
+  template:
+    metadata:
+      labels:
+        app: hangsha-kiwi
+      annotations:
+        sidecar.istio.io/inject: "false"
+    spec:
+      serviceAccountName: hangsha-api-dev
+      nodeSelector:
+        kubernetes.io/arch: arm64
+      containers:
+        - name: kiwi
+          image: yny.ocir.io/ax1dvc8vmenm/hangsha-dev/hangsha-kiwi:1
+          ports:
+            - containerPort: 8090
+          livenessProbe:
+            httpGet:
+              path: /health
+              port: 8090
+            initialDelaySeconds: 30
+          readinessProbe:
+            httpGet:
+              path: /health
+              port: 8090
+            initialDelaySeconds: 30
+            failureThreshold: 5
+          resources:
+            requests:
+              cpu: 100m
+              memory: 256Mi
+            limits:
+              memory: 512Mi
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: hangsha-kiwi
+spec:
+  type: ClusterIP
+  selector:
+    app: hangsha-kiwi
+  ports:
+    - port: 8090
+      targetPort: 8090

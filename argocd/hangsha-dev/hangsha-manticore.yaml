@@ -1,19 +1,19 @@
 apiVersion: apps/v1
 kind: StatefulSet
 metadata:
-  name: hangsha-meilisearch
+  name: hangsha-manticore
   labels:
-    app: hangsha-meilisearch
+    app: hangsha-manticore
 spec:
-  serviceName: hangsha-meilisearch
+  serviceName: hangsha-manticore
   replicas: 1
   selector:
     matchLabels:
-      app: hangsha-meilisearch
+      app: hangsha-manticore
   template:
     metadata:
       labels:
-        app: hangsha-meilisearch
+        app: hangsha-manticore
       annotations:
         sidecar.istio.io/inject: "false"
     spec:
@@ -21,27 +21,25 @@ spec:
       nodeSelector:
         kubernetes.io/arch: arm64
       containers:
-        - name: meilisearch
-          image: docker.io/getmeili/meilisearch:v1.13
+        - name: manticore
+          image: docker.io/manticoresearch/manticore:27.1.5
           env:
-            - name: MEILI_ENV
-              value: "development"
-            - name: MEILI_NO_ANALYTICS
-              value: "true"
+            - name: EXTRA
+              value: "1"
           ports:
-            - containerPort: 7700
+            - containerPort: 9308
           volumeMounts:
-            - name: meili-data
-              mountPath: /meili_data
+            - name: manticore-data
+              mountPath: /var/lib/manticore
           resources:
             requests:
               cpu: 100m
-              memory: 256Mi
+              memory: 64Mi
             limits:
-              memory: 512Mi
+              memory: 128Mi
   volumeClaimTemplates:
     - metadata:
-        name: meili-data
+        name: manticore-data
       spec:
         accessModes: ["ReadWriteOnce"]
         resources:
@@ -51,11 +49,11 @@ spec:
 apiVersion: v1
 kind: Service
 metadata:
-  name: hangsha-meilisearch
+  name: hangsha-manticore
 spec:
   type: ClusterIP
   selector:
-    app: hangsha-meilisearch
+    app: hangsha-manticore
   ports:
-    - port: 7700
-      targetPort: 7700
+    - port: 9308
+      targetPort: 9308
