@@ -1,0 +1,145 @@
+# SnuClear API 레이턴시 RED 대시보드.
+# kube-prometheus-stack Grafana의 sidecar가 label 'grafana_dashboard: "1"' 를 감지해 자동 로드한다.
+# (searchNamespace: ALL 이므로 snuclear-prod 네임스페이스에 있어도 로드됨)
+# import 과정 불필요. grafana.wafflestudio.com > Dashboards > SnuClear 폴더에서 확인.
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: snuclear-api-latency-dashboard
+  namespace: snuclear-prod
+  labels:
+    grafana_dashboard: "1"
+  annotations:
+    grafana_folder: "SnuClear"
+data:
+  snuclear-api-latency.json: |
+    {
+      "__inputs": [],
+      "__requires": [],
+      "annotations": { "list": [] },
+      "editable": true,
+      "graphTooltip": 1,
+      "title": "SnuClear API Latency (RED)",
+      "uid": "snuclear-api-red",
+      "tags": ["snuclear", "latency", "red"],
+      "timezone": "browser",
+      "schemaVersion": 39,
+      "version": 1,
+      "refresh": "30s",
+      "time": { "from": "now-6h", "to": "now" },
+      "templating": {
+        "list": [
+          {
+            "name": "datasource",
+            "type": "datasource",
+            "query": "prometheus",
+            "current": {},
+            "hide": 0,
+            "label": "Datasource"
+          },
+          {
+            "name": "application",
+            "type": "query",
+            "datasource": "${datasource}",
+            "query": "label_values(http_server_requests_seconds_count, application)",
+            "current": { "text": "snuclear-server", "value": "snuclear-server" },
+            "refresh": 2,
+            "includeAll": false,
+            "label": "Application"
+          },
+          {
+            "name": "env",
+            "type": "query",
+            "datasource": "${datasource}",
+            "query": "label_values(http_server_requests_seconds_count{application=\"$application\"}, env)",
+            "current": { "text": "prod", "value": "prod" },
+            "refresh": 2,
+            "includeAll": false,
+            "label": "Env"
+          }
+        ]
+      },
+      "panels": [
+        {
+          "type": "stat",
+          "title": "Requests / sec",
+          "datasource": "${datasource}",
+          "gridPos": { "h": 4, "w": 6, "x": 0, "y": 0 },
+          "fieldConfig": { "defaults": { "unit": "reqps", "decimals": 1, "color": { "mode": "thresholds" }, "thresholds": { "mode": "absolute", "steps": [ { "color": "green", "value": null } ] } }, "overrides": [] },
+          "options": { "reduceOptions": { "calcs": ["lastNotNull"] }, "graphMode": "area", "colorMode": "value" },
+          "targets": [
+            { "refId": "A", "expr": "sum(rate(http_server_requests_seconds_count{application=\"$application\", env=\"$env\"}[$__rate_interval]))" }
+          ]
+        },
+        {
+          "type": "stat",
+          "title": "Error rate (5xx)",
+          "datasource": "${datasource}",
+          "gridPos": { "h": 4, "w": 6, "x": 6, "y": 0 },
+          "fieldConfig": { "defaults": { "unit": "percentunit", "decimals": 2, "color": { "mode": "thresholds" }, "thresholds": { "mode": "absolute", "steps": [ { "color": "green", "value": null }, { "color": "yellow", "value": 0.01 }, { "color": "red", "value": 0.05 } ] } }, "overrides": [] },
+          "options": { "reduceOptions": { "calcs": ["lastNotNull"] }, "graphMode": "area", "colorMode": "value" },
+          "targets": [
+            { "refId": "A", "expr": "sum(rate(http_server_requests_seconds_count{application=\"$application\", env=\"$env\", status=~\"5..\"}[$__rate_interval])) / clamp_min(sum(rate(http_server_requests_seconds_count{application=\"$application\", env=\"$env\"}[$__rate_interval])), 1e-9)" }
+          ]
+        },
+        {
+          "type": "stat",
+          "title": "Overall p95",
+          "datasource": "${datasource}",
+          "gridPos": { "h": 4, "w": 6, "x": 12, "y": 0 },
+          "fieldConfig": { "defaults": { "unit": "s", "decimals": 3, "color": { "mode": "thresholds" }, "thresholds": { "mode": "absolute", "steps": [ { "color": "green", "value": null }, { "color": "yellow", "value": 0.3 }, { "color": "red", "value": 0.5 } ] } }, "overrides": [] },
+          "options": { "reduceOptions": { "calcs": ["lastNotNull"] }, "graphMode": "area", "colorMode": "value" },
+          "targets": [
+            { "refId": "A", "expr": "histogram_quantile(0.95, sum(rate(http_server_requests_seconds_bucket{application=\"$application\", env=\"$env\"}[$__rate_interval])) by (le))" }
+          ]
+        },
+        {
+          "type": "stat",
+          "title": "Overall p99",
+          "datasource": "${datasource}",
+          "gridPos": { "h": 4, "w": 6, "x": 18, "y": 0 },
+          "fieldConfig": { "defaults": { "unit": "s", "decimals": 3, "color": { "mode": "thresholds" }, "thresholds": { "mode": "absolute", "steps": [ { "color": "green", "value": null }, { "color": "yellow", "value": 0.5 }, { "color": "red", "value": 1 } ] } }, "overrides": [] },
+          "options": { "reduceOptions": { "calcs": ["lastNotNull"] }, "graphMode": "area", "colorMode": "value" },
+          "targets": [
+            { "refId": "A", "expr": "histogram_quantile(0.99, sum(rate(http_server_requests_seconds_bucket{application=\"$application\", env=\"$env\"}[$__rate_interval])) by (le))" }
+          ]
+        },
+        {
+          "type": "table",
+          "title": "Slowest endpoints (sorted by p95)",
+          "datasource": "${datasource}",
+          "gridPos": { "h": 11, "w": 24, "x": 0, "y": 4 },
+          "options": { "showHeader": true, "sortBy": [ { "displayName": "p95", "desc": true } ] },
+          "fieldConfig": {
+            "defaults": { "custom": { "align": "auto" } },
+            "overrides": [
+              { "matcher": { "id": "byName", "options": "p95" }, "properties": [ { "id": "unit", "value": "s" }, { "id": "decimals", "value": 3 }, { "id": "custom.cellOptions", "value": { "type": "color-text" } }, { "id": "thresholds", "value": { "mode": "absolute", "steps": [ { "color": "green", "value": null }, { "color": "yellow", "value": 0.3 }, { "color": "red", "value": 0.5 } ] } } ] },
+              { "matcher": { "id": "byName", "options": "p99" }, "properties": [ { "id": "unit", "value": "s" }, { "id": "decimals", "value": 3 } ] },
+              { "matcher": { "id": "byName", "options": "req/s" }, "properties": [ { "id": "unit", "value": "reqps" }, { "id": "decimals", "value": 1 } ] },
+              { "matcher": { "id": "byName", "options": "err%" }, "properties": [ { "id": "unit", "value": "percentunit" }, { "id": "decimals", "value": 2 } ] }
+            ]
+          },
+          "targets": [
+            { "refId": "p95", "format": "table", "instant": true, "expr": "histogram_quantile(0.95, sum(rate(http_server_requests_seconds_bucket{application=\"$application\", env=\"$env\"}[$__rate_interval])) by (le, uri))" },
+            { "refId": "p99", "format": "table", "instant": true, "expr": "histogram_quantile(0.99, sum(rate(http_server_requests_seconds_bucket{application=\"$application\", env=\"$env\"}[$__rate_interval])) by (le, uri))" },
+            { "refId": "rps", "format": "table", "instant": true, "expr": "sum(rate(http_server_requests_seconds_count{application=\"$application\", env=\"$env\"}[$__rate_interval])) by (uri)" },
+            { "refId": "err", "format": "table", "instant": true, "expr": "sum(rate(http_server_requests_seconds_count{application=\"$application\", env=\"$env\", status=~\"5..\"}[$__rate_interval])) by (uri) / clamp_min(sum(rate(http_server_requests_seconds_count{application=\"$application\", env=\"$env\"}[$__rate_interval])) by (uri), 1e-9)" }
+          ],
+          "transformations": [
+            { "id": "merge", "options": {} },
+            { "id": "organize", "options": { "excludeByName": { "Time": true }, "renameByName": { "uri": "URI", "Value #p95": "p95", "Value #p99": "p99", "Value #rps": "req/s", "Value #err": "err%" }, "indexByName": { "uri": "0", "Value #p95": "1", "Value #p99": "2", "Value #rps": "3", "Value #err": "4" } } }
+          ]
+        },
+        {
+          "type": "timeseries",
+          "title": "p95 latency by endpoint",
+          "datasource": "${datasource}",
+          "gridPos": { "h": 9, "w": 24, "x": 0, "y": 15 },
+          "fieldConfig": { "defaults": { "unit": "s", "custom": { "drawStyle": "line", "lineWidth": 2, "fillOpacity": 5, "showPoints": "never" } }, "overrides": [] },
+          "options": { "legend": { "displayMode": "table", "placement": "right", "calcs": ["max", "lastNotNull"] }, "tooltip": { "mode": "multi", "sort": "desc" } },
+          "targets": [
+            { "refId": "A", "legendFormat": "{{uri}}", "expr": "histogram_quantile(0.95, sum(rate(http_server_requests_seconds_bucket{application=\"$application\", env=\"$env\"}[$__rate_interval])) by (le, uri))" }
+          ]
+        }
+      ]
+    }

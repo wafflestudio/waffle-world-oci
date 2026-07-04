@@ -24,7 +24,7 @@ spec:
       nodeSelector:
         kubernetes.io/arch: arm64
       containers:
-        - image: yny.ocir.io/ax1dvc8vmenm/snuclear-prod/snuclear-server:28
+        - image: yny.ocir.io/ax1dvc8vmenm/snuclear-prod/snuclear-server:29
           name: snuclear-server
           resources:
             requests:
@@ -88,7 +88,8 @@ spec:
   selector:
     app: snuclear-server
   ports:
-    - port: 80
+    - name: http
+      port: 80
       targetPort: 8080
 ---
 apiVersion: networking.istio.io/v1alpha3
@@ -102,6 +103,19 @@ spec:
   hosts:
     - snuclear-server.wafflestudio.com
   http:
+    # 액추에이터 메트릭 경로는 외부 게이트웨이에서 차단(404).
+    # 클러스터 내부 Prometheus는 Service(pod)로 직접 scrape하므로 mesh 트래픽엔 영향 없음.
+    - match:
+        - uri:
+            prefix: /api/v1/prometheus
+          gateways:
+            - istio-ingress/waffle-ingressgateway
+        - uri:
+            prefix: /api/v1/metrics
+          gateways:
+            - istio-ingress/waffle-ingressgateway
+      directResponse:
+        status: 404
     - route:
         - destination:
             host: snuclear-server
