@@ -113,6 +113,7 @@ data:
           "fieldConfig": {
             "defaults": { "custom": { "align": "auto" } },
             "overrides": [
+              { "matcher": { "id": "byName", "options": "p50" }, "properties": [ { "id": "unit", "value": "s" }, { "id": "decimals", "value": 3 } ] },
               { "matcher": { "id": "byName", "options": "p95" }, "properties": [ { "id": "unit", "value": "s" }, { "id": "decimals", "value": 3 }, { "id": "custom.cellOptions", "value": { "type": "color-text" } }, { "id": "thresholds", "value": { "mode": "absolute", "steps": [ { "color": "green", "value": null }, { "color": "yellow", "value": 0.3 }, { "color": "red", "value": 0.5 } ] } } ] },
               { "matcher": { "id": "byName", "options": "p99" }, "properties": [ { "id": "unit", "value": "s" }, { "id": "decimals", "value": 3 } ] },
               { "matcher": { "id": "byName", "options": "req/s" }, "properties": [ { "id": "unit", "value": "reqps" }, { "id": "decimals", "value": 1 } ] },
@@ -120,6 +121,7 @@ data:
             ]
           },
           "targets": [
+            { "refId": "p50", "format": "table", "instant": true, "expr": "histogram_quantile(0.50, sum(rate(http_server_requests_seconds_bucket{application=\"$application\", env=\"$env\"}[$__rate_interval])) by (le, uri))" },
             { "refId": "p95", "format": "table", "instant": true, "expr": "histogram_quantile(0.95, sum(rate(http_server_requests_seconds_bucket{application=\"$application\", env=\"$env\"}[$__rate_interval])) by (le, uri))" },
             { "refId": "p99", "format": "table", "instant": true, "expr": "histogram_quantile(0.99, sum(rate(http_server_requests_seconds_bucket{application=\"$application\", env=\"$env\"}[$__rate_interval])) by (le, uri))" },
             { "refId": "rps", "format": "table", "instant": true, "expr": "sum(rate(http_server_requests_seconds_count{application=\"$application\", env=\"$env\"}[$__rate_interval])) by (uri)" },
@@ -127,7 +129,7 @@ data:
           ],
           "transformations": [
             { "id": "merge", "options": {} },
-            { "id": "organize", "options": { "excludeByName": { "Time": true }, "renameByName": { "uri": "URI", "Value #p95": "p95", "Value #p99": "p99", "Value #rps": "req/s", "Value #err": "err%" }, "indexByName": { "uri": "0", "Value #p95": "1", "Value #p99": "2", "Value #rps": "3", "Value #err": "4" } } }
+            { "id": "organize", "options": { "excludeByName": { "Time": true }, "renameByName": { "uri": "URI", "Value #p50": "p50", "Value #p95": "p95", "Value #p99": "p99", "Value #rps": "req/s", "Value #err": "err%" }, "indexByName": { "uri": "0", "Value #p50": "1", "Value #p95": "2", "Value #p99": "3", "Value #rps": "4", "Value #err": "5" } } }
           ]
         },
         {
