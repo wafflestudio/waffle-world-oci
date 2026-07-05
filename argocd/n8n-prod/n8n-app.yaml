@@ -1,0 +1,102 @@
+apiVersion: v1
+kind: PersistentVolumeClaim
+metadata:
+  name: n8n-data
+spec:
+  accessModes: ["ReadWriteOnce"]
+  resources:
+    requests:
+      storage: 10Gi
+---
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: n8n-app
+  labels:
+    app: n8n-app
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: n8n-app
+  strategy:
+    type: Recreate
+  revisionHistoryLimit: 4
+  template:
+    metadata:
+      labels:
+        app: n8n-app
+    spec:
+      nodeSelector:
+        kubernetes.io/arch: arm64
+      securityContext:
+        fsGroup: 1000
+      containers:
+      - image: docker.io/n8nio/n8n:2.29.5
+        name: n8n
+        ports:
+        - containerPort: 5678
+        env:
+        - name: N8N_HOST
+          value: n8n.wafflestudio.com
+        - name: N8N_PORT
+          value: "5678"
+        - name: N8N_PROTOCOL
+          value: https
+        - name: WEBHOOK_URL
+          value: https://n8n.wafflestudio.com/
+        - name: N8N_EDITOR_BASE_URL
+          value: https://n8n.wafflestudio.com/
+        - name: N8N_RUNNERS_ENABLED
+          value: "true"
+        - name: GENERIC_TIMEZONE
+          value: Asia/Seoul
+        - name: TZ
+          value: Asia/Seoul
+        - name: N8N_ENCRYPTION_KEY
+          valueFrom:
+            secretKeyRef:
+              name: n8n-prod
+              key: N8N_ENCRYPTION_KEY
+        volumeMounts:
+        - name: n8n-data
+          mountPath: /home/node/.n8n
+        resources:
+          requests:
+            cpu: 500m
+            memory: 1Gi
+          limits:
+            memory: 2Gi
+      volumes:
+      - name: n8n-data
+        persistentVolumeClaim:
+          claimName: n8n-data
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: n8n-app
+spec:
+  type: ClusterIP
+  selector:
+    app: n8n-app
+  ports:
+  - port: 80
+    targetPort: 5678
+---
+apiVersion: networking.istio.io/v1alpha3
+kind: VirtualService
+metadata:
+  name: n8n
+spec:
+  gateways:
+  - istio-ingress/waffle-ingressgateway
+  - mesh
+  hosts:
+  - n8n.wafflestudio.com
+  http:
+  - route:
+    - destination:
+        host: n8n-app
+        port:
+          number: 80
