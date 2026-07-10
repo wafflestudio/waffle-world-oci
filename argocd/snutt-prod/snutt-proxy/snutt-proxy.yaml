@@ -1,0 +1,79 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: snutt-proxy
+  labels:
+    app: snutt-proxy
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: snutt-proxy
+  strategy:
+    type: RollingUpdate
+    rollingUpdate:
+      maxSurge: 25%
+      maxUnavailable: 25%
+  revisionHistoryLimit: 4
+  template:
+    metadata:
+      labels:
+        app: snutt-proxy
+    spec:
+      nodeSelector:
+        kubernetes.io/arch: arm64
+      containers:
+        - image: yny.ocir.io/ax1dvc8vmenm/snutt-prod/snutt-proxy:6
+          name: snutt-proxy
+          resources:
+            requests:
+              cpu: 10m
+              memory: 16Mi
+            limits:
+              memory: 64Mi
+          ports:
+            - containerPort: 8080
+          livenessProbe:
+            httpGet:
+              path: /healthz
+              port: 8080
+          readinessProbe:
+            httpGet:
+              path: /healthz
+              port: 8080
+            timeoutSeconds: 3
+            failureThreshold: 5
+          startupProbe:
+            httpGet:
+              path: /healthz
+              port: 8080
+            failureThreshold: 10
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: snutt-proxy
+spec:
+  type: ClusterIP
+  selector:
+    app: snutt-proxy
+  ports:
+    - port: 80
+      targetPort: 8080
+---
+apiVersion: networking.istio.io/v1
+kind: VirtualService
+metadata:
+  name: snutt-proxy
+spec:
+  gateways:
+    - istio-ingress/waffle-ingressgateway
+    - mesh
+  hosts:
+    - snutt-proxy.wafflestudio.com
+  http:
+    - name: "snutt-proxy-route"
+      timeout: 15s
+      route:
+        - destination:
+            host: snutt-proxy
