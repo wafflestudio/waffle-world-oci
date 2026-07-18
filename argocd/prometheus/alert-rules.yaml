@@ -1,0 +1,80 @@
+apiVersion: monitoring.coreos.com/v1
+kind: PrometheusRule
+metadata:
+  name: waffle-alert-rules
+  namespace: prometheus
+  labels:
+    release: prometheus # kube-prometheus-stack ruleSelector가 이 라벨로 픽업
+spec:
+  groups:
+    # ─────────────────────────────────────────────
+    # Node / Infra (namespace 없음 → waffle-alert가 infra로 분류)
+    # ─────────────────────────────────────────────
+    - name: waffle-alert-node
+      rules:
+        - alert: NodeDiskPressure
+          expr: kube_node_status_condition{condition="DiskPressure", status="true"} == 1
+          for: 5m
+          labels:
+            severity: critical
+          annotations:
+            summary: "Node {{ $labels.node }} under disk pressure"
+            description: 'Node {{ $labels.node }} has DiskPressure=True for 5m.'
+
+        - alert: NodeMemoryHighUsage
+          expr: 100 * (1 - node_memory_MemAvailable_bytes / node_memory_MemTotal_bytes) > 90
+          for: 5m
+          labels:
+            severity: critical
+          annotations:
+            summary: "Node {{ $labels.instance }} memory usage high"
+            description: 'Node {{ $labels.instance }} memory at {{ printf "%.1f" $value }}% for 5m.'
+
+    # ─────────────────────────────────────────────
+    # Workload / Team (namespace 있음 → waffle-alert가 team으로 분류)
+    # ─────────────────────────────────────────────
+    - name: waffle-alert-workload
+      rules:
+        # limit 대부분을 쓰도록 설계된 앱(Mongo/Redis/JVM)은 정상 baseline이 높음 → warning(조용히)
+        - alert: PodMemoryLimitHigh
+          expr: |
+            100 * sum by (namespace, pod) (
+              container_memory_working_set_bytes{namespace=~".+-(prod|dev)", container!="", image!="", pod!=""}
+            )
+            /
+            sum by (namespace, pod) (
+              kube_pod_container_resource_limits{namespace=~".+-(prod|dev)", resource="memory", unit="byte", pod!=""} > 0
+            ) > 90
+          for: 30m
+          labels:
+            severity: warning
+          annotations:
+            summary: "Pod {{ $labels.namespace }}/{{ $labels.pod }} near memory limit"
+            description: '{{ $labels.namespace }}/{{ $labels.pod }} memory at {{ printf "%.1f" $value }}% of limit for 30m.'
+
+        - alert: PVCStorageHighUsage
+          expr: |
+            100 * (
+              1 - kubelet_volume_stats_available_bytes{persistentvolumeclaim!=""}
+                  / kubelet_volume_stats_capacity_bytes{persistentvolumeclaim!=""}
+            ) > 90
+          for: 5m
+          labels:
+            severity: critical
+          annotations:
+            summary: "PVC {{ $labels.namespace }}/{{ $labels.persistentvolumeclaim }} storage high"
+            description: '{{ $labels.namespace }}/{{ $labels.persistentvolumeclaim }} at {{ printf "%.1f" $value }}% for 5m.'
+
+    # ─────────────────────────────────────────────
+    # DB / Infra
+    # ─────────────────────────────────────────────
+    - name: waffle-alert-db
+      rules:
+        # 임계치 10건/10분은 잠정값. long_query_time + 실제 baseline 확인 후 조정 필요.
+        - alert: MySQLSlowQueriesHigh
+          expr: increase(mysql_global_status_slow_queries[10m]) > 10
+          labels:
+            severity: warning
+          annotations:
+            summary: "MySQL slow queries high"
+            description: '{{ printf "%.0f" $value }} slow queries in last 10m (threshold 10) on {{ $labels.instance }}.'
