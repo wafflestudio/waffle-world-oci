@@ -4,11 +4,11 @@ metadata:
   name: waffle-alert-rules
   namespace: prometheus
   labels:
-    release: prometheus # kube-prometheus-stack ruleSelector가 이 라벨로 픽업
+    release: prometheus
 spec:
   groups:
     # ─────────────────────────────────────────────
-    # node level alert
+    # node level alert (only infra)
     # ─────────────────────────────────────────────
     - name: waffle-alert-node
       rules:
@@ -22,7 +22,7 @@ spec:
             description: 'Node {{ $labels.node }} has DiskPressure=True for 5m.'
 
         - alert: NodeMemoryHighUsage
-          expr: 100 * (1 - node_memory_MemAvailable_bytes / node_memory_MemTotal_bytes) > 90 # TODO: threshold 조정 
+          expr: 100 * (1 - node_memory_MemAvailable_bytes / node_memory_MemTotal_bytes) > 90 # TODO: threshold 조정
           for: 5m
           labels:
             severity: critical
@@ -31,11 +31,11 @@ spec:
             description: 'Node {{ $labels.instance }} memory at {{ printf "%.1f" $value }}% for 5m.'
 
     # ─────────────────────────────────────────────
-    # Workload / Team (namespace 있음 → waffle-alert가 team으로 분류)
+    # workload level alert (team and infra)
     # ─────────────────────────────────────────────
     - name: waffle-alert-workload
       rules:
-        - alert: PodMemoryLimitHigh # TODO: threshold 조정 
+        - alert: PodMemoryLimitHigh # TODO: threshold 조정
           expr: |
             100 * sum by (namespace, pod) (
               container_memory_working_set_bytes{namespace=~".+-(prod|dev)", container!="", image!="", pod!=""}
@@ -43,7 +43,7 @@ spec:
             /
             sum by (namespace, pod) (
               kube_pod_container_resource_limits{namespace=~".+-(prod|dev)", resource="memory", unit="byte", pod!=""} > 0
-            ) > 90 
+            ) > 90
           for: 30m
           labels:
             severity: warning
@@ -65,12 +65,13 @@ spec:
             description: '{{ $labels.namespace }}/{{ $labels.persistentvolumeclaim }} at {{ printf "%.1f" $value }}% for 5m.'
 
     # ─────────────────────────────────────────────
-    # DB / Infra
+    # DB level alert (only infra)
     # ─────────────────────────────────────────────
     - name: waffle-alert-db
       rules:
+        # TODO: 실제 이상치가 어느정도인지 확인 필요
         - alert: MySQLSlowQueriesHigh
-          expr: increase(mysql_global_status_slow_queries[10m]) > 10 # TODO: threshold 조정 (long_query_time + baseline 확인 후)
+          expr: increase(mysql_global_status_slow_queries[10m]) > 10
           labels:
             severity: warning
           annotations:
