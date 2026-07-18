@@ -21,7 +21,7 @@ spec:
           restartPolicy: OnFailure
           serviceAccountName: snutt-ev-batch-dev
           containers:
-            - image: yny.ocir.io/ax1dvc8vmenm/snutt-dev/snutt-ev-batch:5
+            - image: yny.ocir.io/ax1dvc8vmenm/snutt-dev/snutt-ev-batch:6
               name: snutt-ev-batch-lecture-sync-latest-semester
               resources:
                 requests:
@@ -63,7 +63,7 @@ spec:
           restartPolicy: OnFailure
           serviceAccountName: snutt-ev-batch-dev
           containers:
-            - image: yny.ocir.io/ax1dvc8vmenm/snutt-dev/snutt-ev-batch:5
+            - image: yny.ocir.io/ax1dvc8vmenm/snutt-dev/snutt-ev-batch:6
               name: snutt-ev-batch-lecture-sync-all
               resources:
                 requests:
@@ -106,7 +106,7 @@ spec:
           restartPolicy: OnFailure
           serviceAccountName: snutt-ev-batch-dev
           containers:
-            - image: yny.ocir.io/ax1dvc8vmenm/snutt-dev/snutt-ev-batch:5
+            - image: yny.ocir.io/ax1dvc8vmenm/snutt-dev/snutt-ev-batch:6
               imagePullPolicy: IfNotPresent
               name: snutt-ev-batch-snuev-migration
               resources:
