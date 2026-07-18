@@ -5,6 +5,29 @@ nodeExporter:
   enabled: true
 
 alertmanager:
+  # chart 기본 config(전부 "null" receiver)를 대체. 전부 waffle-alert webhook으로 forward.
+  # 채널/팀/멘션 판단은 waffle-alert가, Alertmanager는 얇은 forwarder + repeat 타이밍만 담당.
+  config:
+    global:
+      resolve_timeout: 5m
+    route:
+      receiver: waffle-alert-webhook
+      group_by: [alertname, namespace]
+      group_wait: 30s
+      group_interval: 5m
+      repeat_interval: 2h # TODO: 추후 재검토
+      routes:
+        - matchers: ['alertname = "Watchdog"']
+          receiver: "null" # default로 수행되는 불필요한 alert는 받지 않음
+        - matchers: ['severity = "critical"']
+          repeat_interval: 30m # TODO: 추후 재검토
+    receivers:
+      - name: "null"
+      - name: waffle-alert-webhook
+        webhook_configs:
+          - url: http://waffle-alert.waffle-alert-prod.svc.cluster.local/api/v1/alerts/webhook
+            send_resolved: true
+    inhibit_rules: [] # TODO: 동일 종류 얼러트에 대해 severity가 나눠지는 경우에만 설정
   alertmanagerSpec:
     replicas: 1
     resources:

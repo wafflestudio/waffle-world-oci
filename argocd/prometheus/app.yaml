@@ -27,7 +27,7 @@ spec:
     targetRevision: main
     path: argocd/prometheus
     directory:
-      include: 'resources.yaml'
+      include: '{resources.yaml,alert-rules.yaml}'
   syncPolicy:
     syncOptions:
     # We keep SSA enabled; CRDs are managed by a separate Application (prometheus-operator-crds).
