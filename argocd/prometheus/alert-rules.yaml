@@ -8,7 +8,7 @@ metadata:
 spec:
   groups:
     # ─────────────────────────────────────────────
-    # Node / Infra (namespace 없음 → waffle-alert가 infra로 분류)
+    # node level alert
     # ─────────────────────────────────────────────
     - name: waffle-alert-node
       rules:
@@ -22,7 +22,7 @@ spec:
             description: 'Node {{ $labels.node }} has DiskPressure=True for 5m.'
 
         - alert: NodeMemoryHighUsage
-          expr: 100 * (1 - node_memory_MemAvailable_bytes / node_memory_MemTotal_bytes) > 90
+          expr: 100 * (1 - node_memory_MemAvailable_bytes / node_memory_MemTotal_bytes) > 90 # TODO: threshold 조정 
           for: 5m
           labels:
             severity: critical
@@ -35,8 +35,7 @@ spec:
     # ─────────────────────────────────────────────
     - name: waffle-alert-workload
       rules:
-        # limit 대부분을 쓰도록 설계된 앱(Mongo/Redis/JVM)은 정상 baseline이 높음 → warning(조용히)
-        - alert: PodMemoryLimitHigh
+        - alert: PodMemoryLimitHigh # TODO: threshold 조정 
           expr: |
             100 * sum by (namespace, pod) (
               container_memory_working_set_bytes{namespace=~".+-(prod|dev)", container!="", image!="", pod!=""}
@@ -44,7 +43,7 @@ spec:
             /
             sum by (namespace, pod) (
               kube_pod_container_resource_limits{namespace=~".+-(prod|dev)", resource="memory", unit="byte", pod!=""} > 0
-            ) > 90
+            ) > 90 
           for: 30m
           labels:
             severity: warning
@@ -70,9 +69,8 @@ spec:
     # ─────────────────────────────────────────────
     - name: waffle-alert-db
       rules:
-        # 임계치 10건/10분은 잠정값. long_query_time + 실제 baseline 확인 후 조정 필요.
         - alert: MySQLSlowQueriesHigh
-          expr: increase(mysql_global_status_slow_queries[10m]) > 10
+          expr: increase(mysql_global_status_slow_queries[10m]) > 10 # TODO: threshold 조정 (long_query_time + baseline 확인 후)
           labels:
             severity: warning
           annotations:
