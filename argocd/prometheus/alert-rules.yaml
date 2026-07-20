@@ -6,6 +6,11 @@ metadata:
   labels:
     release: prometheus
 spec:
+  # 새 룰을 추가할 때는 labels에 반드시 `source: waffle`을 포함해야 한다.
+  # Alertmanager route가 source="waffle"인 alert만 waffle-alert webhook으로 보내고
+  # 나머지(= kube-prometheus-stack 기본 룰)는 전부 "null" receiver로 drop하기 때문에,
+  # 이 라벨이 빠지면 알림이 아무 에러 없이 조용히 사라진다.
+  # 라우팅 설정: values.yaml의 alertmanager.config.route 참고.
   groups:
     # ─────────────────────────────────────────────
     # node level alert (only infra)
@@ -16,6 +21,7 @@ spec:
           expr: kube_node_status_condition{condition="DiskPressure", status="true"} == 1
           for: 5m
           labels:
+            source: waffle
             severity: critical
           annotations:
             summary: "Node {{ $labels.node }} under disk pressure"
@@ -25,6 +31,7 @@ spec:
           expr: 100 * (1 - node_memory_MemAvailable_bytes / node_memory_MemTotal_bytes) > 90 # TODO: threshold 조정
           for: 5m
           labels:
+            source: waffle
             severity: critical
           annotations:
             summary: "Node {{ $labels.instance }} memory usage high"
@@ -46,6 +53,7 @@ spec:
             ) > 90
           for: 30m
           labels:
+            source: waffle
             severity: warning
           annotations:
             summary: "Pod {{ $labels.namespace }}/{{ $labels.pod }} near memory limit"
@@ -59,6 +67,7 @@ spec:
             ) > 90
           for: 5m
           labels:
+            source: waffle
             severity: critical
           annotations:
             summary: "PVC {{ $labels.namespace }}/{{ $labels.persistentvolumeclaim }} storage high"
@@ -73,6 +82,7 @@ spec:
         - alert: MySQLSlowQueriesHigh
           expr: increase(mysql_global_status_slow_queries[10m]) > 10
           labels:
+            source: waffle
             severity: warning
           annotations:
             summary: "MySQL slow queries high"
