@@ -5,22 +5,26 @@ nodeExporter:
   enabled: true
 
 alertmanager:
-  # chart 기본 config(전부 "null" receiver)를 대체. 전부 waffle-alert webhook으로 forward.
+  # chart 기본 config(전부 "null" receiver)를 대체.
+  # alert-rules.yaml에 직접 정의한 룰(source="waffle")만 waffle-alert webhook으로 forward하고,
+  # kube-prometheus-stack이 기본 생성하는 룰은 전부 drop한다.
   # 채널/팀/멘션 판단은 waffle-alert가, Alertmanager는 얇은 forwarder + repeat 타이밍만 담당.
   config:
     global:
       resolve_timeout: 5m
     route:
-      receiver: waffle-alert-webhook
+      receiver: "null" # 기본 룰 포함, 매칭되지 않는 alert는 전부 drop
       group_by: [alertname, namespace]
       group_wait: 30s
       group_interval: 5m
       repeat_interval: 2h # TODO: 추후 재검토
       routes:
-        - matchers: ['alertname = "Watchdog"']
-          receiver: "null" # default로 수행되는 불필요한 alert는 받지 않음
-        - matchers: ['severity = "critical"']
-          repeat_interval: 30m # TODO: 추후 재검토
+        - matchers: ['source = "waffle"']
+          receiver: waffle-alert-webhook
+          routes:
+            # receiver는 부모 route에서 상속. repeat_interval만 덮어쓴다.
+            - matchers: ['severity = "critical"']
+              repeat_interval: 30m # TODO: 추후 재검토
     receivers:
       - name: "null"
       - name: waffle-alert-webhook
