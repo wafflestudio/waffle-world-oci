@@ -22,8 +22,8 @@ alertmanager:
         - matchers: ['source = "waffle"']
           receiver: waffle-alert-webhook
           routes:
+            # receiver는 부모 route에서 상속. repeat_interval만 덮어쓴다.
             - matchers: ['severity = "critical"']
-              receiver: waffle-alert-webhook
               repeat_interval: 30m # TODO: 추후 재검토
     receivers:
       - name: "null"
