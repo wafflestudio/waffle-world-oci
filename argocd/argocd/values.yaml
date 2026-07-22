@@ -35,10 +35,10 @@ configs:
       p, role:moiming-server, projects, get, moiming, allow
       p, role:moiming-server, applications, *, moiming/*, allow
       p, role:moiming-server, exec, create, moiming/*, allow
-      g, wafflestudio:wacruit-server, role:wacruit-server
-      p, role:wacruit-server, projects, get, wacruit, allow
-      p, role:wacruit-server, applications, *, wacruit/*, allow
-      p, role:wacruit-server, exec, create, wacruit/*, allow
+      g, wafflestudio:waffledotcom-server, role:waffledotcom-server
+      p, role:waffledotcom-server, projects, get, waffledotcom, allow
+      p, role:waffledotcom-server, applications, *, waffledotcom/*, allow
+      p, role:waffledotcom-server, exec, create, waffledotcom/*, allow
 
     policy.default: role:readonly
 
