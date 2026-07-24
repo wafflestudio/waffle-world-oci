@@ -17,14 +17,15 @@ alertmanager:
       group_by: [alertname, namespace]
       group_wait: 30s
       group_interval: 5m
-      repeat_interval: 2h # TODO: 추후 재검토
+      repeat_interval: 6h
       routes:
         - matchers: ['source = "waffle"']
           receiver: waffle-alert-webhook
           routes:
-            # receiver는 부모 route에서 상속. repeat_interval만 덮어쓴다.
+            - matchers: ['alertname = "PodMemoryLimitHigh"']
+              repeat_interval: 1d # 노이지함을 방지
             - matchers: ['severity = "critical"']
-              repeat_interval: 30m # TODO: 추후 재검토
+              repeat_interval: 3h
     receivers:
       - name: "null"
       - name: waffle-alert-webhook

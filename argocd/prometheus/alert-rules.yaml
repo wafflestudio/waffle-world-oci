@@ -42,7 +42,7 @@ spec:
     # ─────────────────────────────────────────────
     - name: waffle-alert-workload
       rules:
-        - alert: PodMemoryLimitHigh # TODO: threshold 조정
+        - alert: PodMemoryLimitHigh
           expr: |
             100 * sum by (namespace, pod) (
               container_memory_working_set_bytes{namespace=~".+-(prod|dev)", container!="", image!="", pod!=""}
@@ -50,7 +50,7 @@ spec:
             /
             sum by (namespace, pod) (
               kube_pod_container_resource_limits{namespace=~".+-(prod|dev)", resource="memory", unit="byte", pod!=""} > 0
-            ) > 90
+            ) > 95
           for: 30m
           labels:
             source: waffle
