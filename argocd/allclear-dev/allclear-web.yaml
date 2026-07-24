@@ -24,7 +24,7 @@ spec:
       nodeSelector:
         kubernetes.io/arch: arm64
       containers:
-        - image: yny.ocir.io/ax1dvc8vmenm/allclear-dev/allclear-web:88
+        - image: yny.ocir.io/ax1dvc8vmenm/allclear-dev/allclear-web:89
           name: allclear-web
           envFrom:
             - secretRef:
