@@ -1,0 +1,59 @@
+apiVersion: apps/v1
+kind: StatefulSet
+metadata:
+  name: hangsha-manticore
+  labels:
+    app: hangsha-manticore
+spec:
+  serviceName: hangsha-manticore
+  replicas: 1
+  selector:
+    matchLabels:
+      app: hangsha-manticore
+  template:
+    metadata:
+      labels:
+        app: hangsha-manticore
+      annotations:
+        sidecar.istio.io/inject: "false"
+    spec:
+      serviceAccountName: hangsha-api-prod
+      nodeSelector:
+        kubernetes.io/arch: arm64
+      containers:
+        - name: manticore
+          image: docker.io/manticoresearch/manticore:27.1.5
+          env:
+            - name: EXTRA
+              value: "1"
+          ports:
+            - containerPort: 9308
+          volumeMounts:
+            - name: manticore-data
+              mountPath: /var/lib/manticore
+          resources:
+            requests:
+              cpu: 100m
+              memory: 64Mi
+            limits:
+              memory: 128Mi
+  volumeClaimTemplates:
+    - metadata:
+        name: manticore-data
+      spec:
+        accessModes: ["ReadWriteOnce"]
+        resources:
+          requests:
+            storage: 20Gi
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: hangsha-manticore
+spec:
+  type: ClusterIP
+  selector:
+    app: hangsha-manticore
+  ports:
+    - port: 9308
+      targetPort: 9308
