@@ -23,7 +23,7 @@ runs:
   steps:
     - name: Generate GitHub App token
       id: app-token
-      uses: actions/create-github-app-token@v1
+      uses: actions/create-github-app-token@v3
       with:
         app-id: '2842871'
         private-key: ${{ inputs.private-key }}
@@ -31,7 +31,7 @@ runs:
         repositories: waffle-world-oci
 
     - name: Checkout GitOps repository
-      uses: actions/checkout@v4
+      uses: actions/checkout@v7
       with:
         repository: wafflestudio/waffle-world-oci
         token: ${{ steps.app-token.outputs.token }}
@@ -47,19 +47,23 @@ runs:
       run: |
         set -euo pipefail
 
-        # Image references this overlay renders, one per line. IMAGE is compared
-        # against these as a fixed string rather than substituted into the
-        # pattern, so a '.' in a registry host cannot act as a wildcard and a
-        # '|' cannot break the expression.
+        # Image references this overlay renders, one per line. Read as YAML
+        # rather than by matching text, so an 'image:' inside a string value
+        # (a manifest embedded in a ConfigMap, say) is not mistaken for a
+        # container image.
         rendered_images() {
-          kustomize build . | sed -n 's/^ *-* *image: //p'
+          kustomize build . | yq ea -N '.. | select(has("image")) | .image'
         }
 
         git config user.name 'waffle-image-update[bot]'
         git config user.email '260899885+waffle-image-update[bot]@users.noreply.github.com'
 
         cd "${OVERLAY_PATH}"
-        label="${OVERLAY_PATH#argocd/}"
+
+        # <env>/<service>, matching the existing commit messages. Taken from the
+        # image rather than the overlay path, because one overlay can hold
+        # several images and the path alone would not say which one changed.
+        label="${IMAGE#*/*/}"
 
         for attempt in 1 2 3 4 5; do
           # Re-apply the edit onto the current remote tip each attempt, so a
