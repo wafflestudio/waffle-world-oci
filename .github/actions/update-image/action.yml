@@ -1,0 +1,95 @@
+name: Update GitOps image tag
+description: >-
+  Update a kustomize overlay's image tag in this GitOps repository and push the
+  change. Intended to be called from a service repository after it builds and
+  pushes a new image to OCIR, replacing the registry-triggered tag bump.
+
+inputs:
+  image:
+    description: 'Image repository without tag (e.g. yny.ocir.io/ax1dvc8vmenm/snutt-dev/snutt-timetable)'
+    required: true
+  tag:
+    description: 'New image tag to set (e.g. the build number)'
+    required: true
+  overlay-path:
+    description: 'Path to the kustomize directory within this repo (e.g. argocd/snutt-dev/snutt-timetable)'
+    required: true
+  private-key:
+    description: 'Private key (PEM) of the waffle-image-update GitHub App'
+    required: true
+
+runs:
+  using: composite
+  steps:
+    - name: Generate GitHub App token
+      id: app-token
+      uses: actions/create-github-app-token@v1
+      with:
+        app-id: '2842871'
+        private-key: ${{ inputs.private-key }}
+        owner: wafflestudio
+        repositories: waffle-world-oci
+
+    - name: Checkout GitOps repository
+      uses: actions/checkout@v4
+      with:
+        repository: wafflestudio/waffle-world-oci
+        token: ${{ steps.app-token.outputs.token }}
+        path: .gitops
+
+    - name: Set image tag and commit
+      shell: bash
+      working-directory: .gitops
+      env:
+        IMAGE: ${{ inputs.image }}
+        TAG: ${{ inputs.tag }}
+        OVERLAY_PATH: ${{ inputs.overlay-path }}
+      run: |
+        set -euo pipefail
+
+        # Tags rendered for IMAGE by this overlay, one per line.
+        rendered_tags() {
+          kustomize build . | sed -n "s|^ *-* *image: ${IMAGE}:||p"
+        }
+
+        git config user.name 'waffle-image-update[bot]'
+        git config user.email '260899885+waffle-image-update[bot]@users.noreply.github.com'
+
+        cd "${OVERLAY_PATH}"
+        label="${OVERLAY_PATH#argocd/}"
+
+        for attempt in 1 2 3 4 5; do
+          # Re-apply the edit onto the current remote tip each attempt, so a
+          # concurrent update to another overlay cannot revert this one.
+          git fetch --quiet origin main
+          git reset --quiet --hard origin/main
+
+          kustomize edit set image "${IMAGE}:${TAG}"
+
+          # 'kustomize edit set image' adds a new entry instead of failing when
+          # the image name matches nothing, so without this a typo in image or
+          # overlay-path would commit a no-op and report success while the old
+          # tag stays deployed.
+          if ! rendered_tags | grep -qxF "${TAG}"; then
+            echo "::error::${label} does not render ${IMAGE}:${TAG}. It renders:"
+            kustomize build . | sed -n 's/^ *-* *image: /  /p' | sort -u
+            exit 1
+          fi
+
+          if git diff --quiet -- kustomization.yaml; then
+            echo "${label} is already at ${TAG}."
+            exit 0
+          fi
+
+          git commit --quiet -m "build: update ${label} to ${TAG}" -- kustomization.yaml
+
+          if git push --quiet origin HEAD:main; then
+            exit 0
+          fi
+
+          echo "Push attempt ${attempt} failed; retrying on top of main."
+          sleep $(( (RANDOM % 5) + 1 ))
+        done
+
+        echo "::error::could not push after 5 attempts"
+        exit 1
