@@ -16,8 +16,6 @@ spec:
     repoURL: https://github.com/wafflestudio/waffle-world-oci.git
     targetRevision: main
     path: argocd/snutt-dev/snutt-ev
-    directory:
-      include: 'snutt-*.yaml'
   syncPolicy:
     automated:
       prune: true

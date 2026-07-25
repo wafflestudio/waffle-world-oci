@@ -23,7 +23,7 @@ spec:
       nodeSelector:
         kubernetes.io/arch: arm64
       containers:
-        - image: yny.ocir.io/ax1dvc8vmenm/snutt-prod/snutt-proxy:6
+        - image: yny.ocir.io/ax1dvc8vmenm/snutt-prod/snutt-proxy
           name: snutt-proxy
           resources:
             requests:
