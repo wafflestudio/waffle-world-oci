@@ -24,7 +24,7 @@ spec:
       nodeSelector:
         kubernetes.io/arch: arm64
       containers:
-        - image: yny.ocir.io/ax1dvc8vmenm/hangsha-dev/hangsha-server:40
+        - image: yny.ocir.io/ax1dvc8vmenm/hangsha-dev/hangsha-server:59
           name: hangsha-api
           resources:
             requests:

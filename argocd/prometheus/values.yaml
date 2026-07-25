@@ -5,6 +5,34 @@ nodeExporter:
   enabled: true
 
 alertmanager:
+  # chart 기본 config(전부 "null" receiver)를 대체.
+  # alert-rules.yaml에 직접 정의한 룰(source="waffle")만 waffle-alert webhook으로 forward하고,
+  # kube-prometheus-stack이 기본 생성하는 룰은 전부 drop한다.
+  # 채널/팀/멘션 판단은 waffle-alert가, Alertmanager는 얇은 forwarder + repeat 타이밍만 담당.
+  config:
+    global:
+      resolve_timeout: 5m
+    route:
+      receiver: "null" # 기본 룰 포함, 매칭되지 않는 alert는 전부 drop
+      group_by: [alertname, namespace]
+      group_wait: 30s
+      group_interval: 5m
+      repeat_interval: 6h
+      routes:
+        - matchers: ['source = "waffle"']
+          receiver: waffle-alert-webhook
+          routes:
+            - matchers: ['alertname = "PodMemoryLimitHigh"']
+              repeat_interval: 1d # 노이지함을 방지
+            - matchers: ['severity = "critical"']
+              repeat_interval: 3h
+    receivers:
+      - name: "null"
+      - name: waffle-alert-webhook
+        webhook_configs:
+          - url: http://waffle-alert.waffle-alert-prod.svc.cluster.local/api/v1/alerts/webhook
+            send_resolved: true
+    inhibit_rules: [] # TODO: 동일 종류 얼러트에 대해 severity가 나눠지는 경우에만 설정
   alertmanagerSpec:
     replicas: 1
     resources:
