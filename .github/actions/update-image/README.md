@@ -18,8 +18,8 @@ registry-triggered function.
 
 Argo CD renders each overlay with kustomize and syncs the new tag.
 
-`kustomize` is preinstalled on GitHub's `ubuntu-24.04` runner images, so the
-action does not install it.
+`kustomize` and `yq` are preinstalled on GitHub's `ubuntu-24.04` runner images,
+so the action does not install them.
 
 ## Inputs
 
@@ -40,8 +40,10 @@ matches nothing in the overlay, rather than failing. Left unchecked, a typo in
 deploys nothing, while the previous tag stays live.
 
 After editing, the action rebuilds the overlay and requires `image:tag` to appear
-as a rendered container image. If it does not, the run fails and lists the images
-the overlay does render.
+as a rendered container image. The rendered output is read as YAML rather than
+matched as text, so an `image:` inside a string value, such as a manifest
+embedded in a ConfigMap, is not mistaken for a container image. If no container
+matches, the run fails and lists the images the overlay does render.
 
 The edit is re-applied from the current remote tip on every push attempt, so a
 concurrent update to another overlay cannot revert this one.

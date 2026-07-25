@@ -47,12 +47,12 @@ runs:
       run: |
         set -euo pipefail
 
-        # Image references this overlay renders, one per line. IMAGE is compared
-        # against these as a fixed string rather than substituted into the
-        # pattern, so a '.' in a registry host cannot act as a wildcard and a
-        # '|' cannot break the expression.
+        # Image references this overlay renders, one per line. Read as YAML
+        # rather than by matching text, so an 'image:' inside a string value
+        # (a manifest embedded in a ConfigMap, say) is not mistaken for a
+        # container image.
         rendered_images() {
-          kustomize build . | sed -n 's/^ *-* *image: //p'
+          kustomize build . | yq ea -N '.. | select(has("image")) | .image'
         }
 
         git config user.name 'waffle-image-update[bot]'
