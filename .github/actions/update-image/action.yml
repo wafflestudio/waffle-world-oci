@@ -59,7 +59,11 @@ runs:
         git config user.email '260899885+waffle-image-update[bot]@users.noreply.github.com'
 
         cd "${OVERLAY_PATH}"
-        label="${OVERLAY_PATH#argocd/}"
+
+        # <env>/<service>, matching the existing commit messages. Taken from the
+        # image rather than the overlay path, because one overlay can hold
+        # several images and the path alone would not say which one changed.
+        label="${IMAGE#*/*/}"
 
         for attempt in 1 2 3 4 5; do
           # Re-apply the edit onto the current remote tip each attempt, so a
