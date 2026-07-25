@@ -47,9 +47,12 @@ runs:
       run: |
         set -euo pipefail
 
-        # Tags rendered for IMAGE by this overlay, one per line.
-        rendered_tags() {
-          kustomize build . | sed -n "s|^ *-* *image: ${IMAGE}:||p"
+        # Image references this overlay renders, one per line. IMAGE is compared
+        # against these as a fixed string rather than substituted into the
+        # pattern, so a '.' in a registry host cannot act as a wildcard and a
+        # '|' cannot break the expression.
+        rendered_images() {
+          kustomize build . | sed -n 's/^ *-* *image: //p'
         }
 
         git config user.name 'waffle-image-update[bot]'
@@ -70,9 +73,9 @@ runs:
           # the image name matches nothing, so without this a typo in image or
           # overlay-path would commit a no-op and report success while the old
           # tag stays deployed.
-          if ! rendered_tags | grep -qxF "${TAG}"; then
+          if ! rendered_images | grep -qxF "${IMAGE}:${TAG}"; then
             echo "::error::${label} does not render ${IMAGE}:${TAG}. It renders:"
-            kustomize build . | sed -n 's/^ *-* *image: /  /p' | sort -u
+            rendered_images | sort -u | sed 's/^/  /'
             exit 1
           fi
 
