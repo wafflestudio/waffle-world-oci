@@ -11,12 +11,33 @@ registry-triggered function.
    `private-key`), scoped to the GitOps repository. A pre-issued `token` can be
    passed instead.
 2. Checks out the GitOps repository (`wafflestudio/waffle-world-oci` by default).
-3. Runs `kustomize edit set image <image>:<tag>` in the given overlay directory,
-   which updates the `newTag` field in that overlay's `kustomization.yaml`.
-4. Commits the change as `build: update <overlay-path without argocd/> to <tag>`
-   and pushes to the target branch, retrying with a rebase on conflicts.
+3. Builds the overlay and checks that it renders a container using `image`,
+   failing if it does not (see Validation below).
+4. Runs `kustomize edit set image <image>:<tag>` in the given overlay directory,
+   which updates the `newTag` field in that overlay's `kustomization.yaml`, then
+   rebuilds to confirm the new reference is actually rendered.
+5. Commits the change as `build: update <overlay-path without argocd/> to <tag>`
+   and pushes to the target branch. On a rejected push it resets onto the remote
+   tip, re-applies the edit, and retries.
 
 Argo CD renders each overlay with kustomize and syncs the new tag.
+
+## Validation
+
+`kustomize edit set image` appends a new entry to `images:` when the given name
+matches nothing in the overlay, rather than failing. Left unchecked, a typo in
+`image` or a wrong `overlay-path` produces a green workflow run and a commit that
+deploys nothing, while the previous tag stays live.
+
+After editing, the action rebuilds the overlay and requires `image:tag` to appear
+as a rendered container image. If it does not, the run fails and lists the images
+the overlay does render.
+
+The edit is re-applied from the current remote tip on every push attempt, so a
+concurrent update to another overlay cannot revert this one.
+
+Re-running a workflow run sets that run's tag again. Re-running the latest run is
+a no-op; re-running an older one moves the overlay back to the older tag.
 
 ## Authentication
 

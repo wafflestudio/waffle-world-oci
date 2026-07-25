@@ -155,40 +155,51 @@ runs:
       run: |
         set -euo pipefail
 
-        if [ ! -f "${OVERLAY_PATH}/kustomization.yaml" ]; then
-          echo "::error::No kustomization.yaml found at ${OVERLAY_PATH}"
-          exit 1
-        fi
-
-        ( cd "${OVERLAY_PATH}" && kustomize edit set image "${IMAGE}:${TAG}" )
+        # Fails if the overlay does not render IMAGE:TAG. 'kustomize edit set
+        # image' appends a new entry instead of failing when the image name
+        # matches nothing, so without this a typo in image or overlay-path would
+        # commit a no-op and report success while the old tag stays deployed.
+        assert_rendered() {
+          # -x so a shorter tag cannot match a longer rendered one as a prefix.
+          if ! kustomize build . | sed 's/^ *-* *//' | grep -qxF "image: ${IMAGE}:${TAG}"; then
+            echo "::error::${OVERLAY_PATH} does not render ${IMAGE}:${TAG}."
+            echo "::error::Check the image and overlay-path inputs. It renders:"
+            kustomize build . | sed -n 's/^ *-* *image: /  /p' | sort -u
+            exit 1
+          fi
+        }
 
         git config user.name "${COMMITTER_NAME}"
         git config user.email "${COMMITTER_EMAIL}"
-        git add "${OVERLAY_PATH}/kustomization.yaml"
 
-        if git diff --cached --quiet; then
-          echo "No image change for ${OVERLAY_PATH}; nothing to commit."
-          echo "sha=" >> "$GITHUB_OUTPUT"
-          exit 0
-        fi
-
+        cd "${OVERLAY_PATH}"
         label="${OVERLAY_PATH#argocd/}"
-        git commit -m "build: update ${label} to ${TAG}"
 
-        pushed=false
         for attempt in 1 2 3 4 5; do
-          if git push origin "HEAD:${BRANCH}"; then
-            pushed=true
-            break
+          # Re-apply the edit onto the current remote tip each attempt, so a
+          # concurrent update to another overlay cannot revert this one.
+          git fetch --quiet origin "${BRANCH}"
+          git reset --quiet --hard "origin/${BRANCH}"
+
+          kustomize edit set image "${IMAGE}:${TAG}"
+          assert_rendered
+
+          if git diff --quiet -- kustomization.yaml; then
+            echo "${label} is already at ${TAG}; nothing to commit."
+            echo "sha=" >> "$GITHUB_OUTPUT"
+            exit 0
           fi
-          echo "Push attempt ${attempt} failed; rebasing onto ${BRANCH} and retrying."
-          git pull --rebase origin "${BRANCH}"
+
+          git commit --quiet -m "build: update ${label} to ${TAG}" -- kustomization.yaml
+
+          if git push --quiet origin "HEAD:${BRANCH}"; then
+            echo "sha=$(git rev-parse HEAD)" >> "$GITHUB_OUTPUT"
+            exit 0
+          fi
+
+          echo "Push attempt ${attempt} failed; retrying on top of ${BRANCH}."
           sleep $(( (RANDOM % 5) + 1 ))
         done
 
-        if [ "$pushed" != true ]; then
-          echo "::error::Failed to push image update after retries."
-          exit 1
-        fi
-
-        echo "sha=$(git rev-parse HEAD)" >> "$GITHUB_OUTPUT"
+        echo "::error::Failed to push image update after retries."
+        exit 1
