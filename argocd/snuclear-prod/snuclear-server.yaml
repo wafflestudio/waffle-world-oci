@@ -24,7 +24,7 @@ spec:
       nodeSelector:
         kubernetes.io/arch: arm64
       containers:
-        - image: yny.ocir.io/ax1dvc8vmenm/snuclear-prod/snuclear-server:34
+        - image: yny.ocir.io/ax1dvc8vmenm/snuclear-prod/snuclear-server:35
           name: snuclear-server
           resources:
             requests:
