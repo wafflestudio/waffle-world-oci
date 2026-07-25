@@ -14,8 +14,6 @@ spec:
     repoURL: https://github.com/wafflestudio/waffle-world-oci.git
     targetRevision: main
     path: argocd/slack-viz-prod
-    directory:
-      include: 'slack-viz-*.yaml'
   syncPolicy:
     automated:
       prune: true

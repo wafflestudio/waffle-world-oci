@@ -21,7 +21,7 @@ spec:
         kubernetes.io/arch: arm64
       containers:
         - name: kiwi
-          image: yny.ocir.io/ax1dvc8vmenm/hangsha-dev/hangsha-kiwi:1
+          image: yny.ocir.io/ax1dvc8vmenm/hangsha-dev/hangsha-kiwi
           ports:
             - containerPort: 8090
           livenessProbe:

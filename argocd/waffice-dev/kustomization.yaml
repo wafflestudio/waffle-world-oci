@@ -1,0 +1,10 @@
+apiVersion: kustomize.config.k8s.io/v1beta1
+kind: Kustomization
+
+resources:
+- waffice-secret.yaml
+- waffice-server.yaml
+
+images:
+- name: yny.ocir.io/ax1dvc8vmenm/waffice-dev/waffice-server
+  newTag: "20260725-104015"

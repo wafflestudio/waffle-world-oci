@@ -1,0 +1,12 @@
+apiVersion: kustomize.config.k8s.io/v1beta1
+kind: Kustomization
+
+resources:
+- slack-viz-app.yaml
+- slack-viz-mongodb.yaml
+- slack-viz-oauth2-proxy.yaml
+- slack-viz-secret.yaml
+
+images:
+- name: yny.ocir.io/ax1dvc8vmenm/slack-view
+  newTag: "2"

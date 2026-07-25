@@ -14,8 +14,6 @@ spec:
     repoURL: https://github.com/wafflestudio/waffle-world-oci.git
     targetRevision: main
     path: argocd/snuclear-dev
-    directory:
-      include: 'snuclear-*.yaml'
   syncPolicy:
     automated:
       prune: true

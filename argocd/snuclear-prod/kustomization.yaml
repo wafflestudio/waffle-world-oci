@@ -1,0 +1,11 @@
+apiVersion: kustomize.config.k8s.io/v1beta1
+kind: Kustomization
+
+resources:
+- snuclear-role.yaml
+- snuclear-server.yaml
+- snuclear-valkey.yaml
+
+images:
+- name: yny.ocir.io/ax1dvc8vmenm/snuclear-prod/snuclear-server
+  newTag: "35"

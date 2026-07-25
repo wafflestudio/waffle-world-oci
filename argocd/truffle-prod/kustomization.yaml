@@ -1,0 +1,13 @@
+apiVersion: kustomize.config.k8s.io/v1beta1
+kind: Kustomization
+
+resources:
+- truffle-consumer.yaml
+- truffle-dashboard.yaml
+- truffle-secret.yaml
+
+images:
+- name: yny.ocir.io/ax1dvc8vmenm/truffle-prod/truffle-consumer
+  newTag: "19"
+- name: yny.ocir.io/ax1dvc8vmenm/truffle-prod/truffle-dashboard
+  newTag: "19"

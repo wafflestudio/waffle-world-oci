@@ -1,0 +1,10 @@
+apiVersion: kustomize.config.k8s.io/v1beta1
+kind: Kustomization
+
+resources:
+- moiming-server.yaml
+- moiming-valkey.yaml
+
+images:
+- name: yny.ocir.io/ax1dvc8vmenm/moiming-prod/moiming-server
+  newTag: "1"

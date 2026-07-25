@@ -14,8 +14,6 @@ spec:
     repoURL: https://github.com/wafflestudio/waffle-world-oci.git
     targetRevision: main
     path: argocd/pupuri-prod
-    directory:
-      include: 'pupuri-*.yaml'
   syncPolicy:
     automated:
       prune: true
