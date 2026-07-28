@@ -24,7 +24,7 @@ spec:
       nodeSelector:
         kubernetes.io/arch: arm64
       containers:
-        - image: yny.ocir.io/ax1dvc8vmenm/waffice-dev/waffice-server:20260728-141419
+        - image: yny.ocir.io/ax1dvc8vmenm/waffice-dev/waffice-server:20260728-150351
           name: waffice-server
           resources:
             requests:
