@@ -1,0 +1,102 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: waffice-server
+  labels:
+    app: waffice-server
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: waffice-server
+  strategy:
+    type: RollingUpdate
+    rollingUpdate:
+      maxSurge: 25%
+      maxUnavailable: 25%
+  revisionHistoryLimit: 4
+  template:
+    metadata:
+      labels:
+        app: waffice-server
+    spec:
+      serviceAccountName: waffice
+      nodeSelector:
+        kubernetes.io/arch: arm64
+      containers:
+        - image: yny.ocir.io/ax1dvc8vmenm/waffice-prod/waffice-server:20260728-141419
+          name: waffice-server
+          resources:
+            requests:
+              cpu: 50m
+              memory: 256Mi
+            limits:
+              memory: 512Mi
+          ports:
+            - containerPort: 8080
+          env:
+            - name: OCI_OBJECT_STORAGE_AUTH
+              value: instance_principal
+            - name: OCI_NAMESPACE
+              value: ax1dvc8vmenm
+            - name: OCI_BUCKET
+              value: waffice-asset
+            - name: OCI_REGION
+              value: ap-chuncheon-1
+            - name: OCI_PUBLIC_BASE_URL
+              value: https://objectstorage.ap-chuncheon-1.oraclecloud.com/n/ax1dvc8vmenm/b/waffice-asset/o
+          envFrom:
+            - secretRef:
+                name: waffice-prod
+          livenessProbe:
+            httpGet:
+              path: /health-check
+              port: 8080
+          readinessProbe:
+            httpGet:
+              path: /health-check
+              port: 8080
+            timeoutSeconds: 3
+            failureThreshold: 5
+          startupProbe:
+            httpGet:
+              path: /health-check
+              port: 8080
+            failureThreshold: 30
+---
+apiVersion: v1
+kind: ServiceAccount
+metadata:
+  name: waffice
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: waffice-server
+spec:
+  type: ClusterIP
+  selector:
+    app: waffice-server
+  ports:
+    - port: 80
+      targetPort: 8080
+---
+apiVersion: networking.istio.io/v1alpha3
+kind: VirtualService
+metadata:
+  name: waffice-server
+spec:
+  gateways:
+    - istio-ingress/waffle-ingressgateway
+    - mesh
+  hosts:
+    - waffice-server.waffice-prod.svc.cluster.local
+    - waffice-api.wafflestudio.com
+  http:
+    - route:
+        - destination:
+            host: waffice-server
+      headers:
+        request:
+          set:
+            X-Forwarded-Proto: "https"
