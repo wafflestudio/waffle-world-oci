@@ -52,6 +52,10 @@ spec:
           env:
             - name: SPRING_PROFILES_ACTIVE
               value: "prod"
+            - name: MANTICORE_BASE_URL
+              value: "http://hangsha-manticore:9308"
+            - name: KIWI_BASE_URL
+              value: "http://hangsha-kiwi:8090"
             # TODO: hangsha-valkey replicas를 1로 변경할 때 주석 해제하기
             # - name: SPRING_DATA_REDIS_HOST
             #   value: "hangsha-valkey"
