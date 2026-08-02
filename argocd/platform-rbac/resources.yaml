@@ -137,31 +137,3 @@ roleRef:
   kind: ClusterRole
   name: admin
   apiGroup: rbac.authorization.k8s.io
----
-apiVersion: rbac.authorization.k8s.io/v1
-kind: RoleBinding
-metadata:
-  name: moiming-admins
-  namespace: moiming-dev
-subjects:
-- kind: Group
-  name: ocid1.group.oc1..aaaaaaaabjhmwg4thdmpqxho64n7vqqlxlcukgpnuf5qb2xvuwt576b2v5ia
-  apiGroup: rbac.authorization.k8s.io
-roleRef:
-  kind: ClusterRole
-  name: admin
-  apiGroup: rbac.authorization.k8s.io
----
-apiVersion: rbac.authorization.k8s.io/v1
-kind: RoleBinding
-metadata:
-  name: moiming-admins
-  namespace: moiming-prod
-subjects:
-- kind: Group
-  name: ocid1.group.oc1..aaaaaaaabjhmwg4thdmpqxho64n7vqqlxlcukgpnuf5qb2xvuwt576b2v5ia
-  apiGroup: rbac.authorization.k8s.io
-roleRef:
-  kind: ClusterRole
-  name: admin
-  apiGroup: rbac.authorization.k8s.io

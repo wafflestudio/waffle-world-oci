@@ -31,10 +31,6 @@ configs:
       p, role:snutt-server, projects, get, snutt, allow
       p, role:snutt-server, applications, *, snutt/*, allow
       p, role:snutt-server, exec, create, snutt/*, allow
-      g, wafflestudio:moiming, role:moiming-server
-      p, role:moiming-server, projects, get, moiming, allow
-      p, role:moiming-server, applications, *, moiming/*, allow
-      p, role:moiming-server, exec, create, moiming/*, allow
       g, wafflestudio:waffledotcom, role:waffledotcom-server
       p, role:waffledotcom-server, projects, get, waffledotcom, allow
       p, role:waffledotcom-server, applications, *, waffledotcom/*, allow
@@ -273,26 +269,6 @@ extraObjects:
       name: allclear
     spec:
       description: Project for allclear applications
-      sourceRepos:
-      - '*'
-      destinations:
-      - namespace: '*'
-        server: '*'
-      sourceNamespaces:
-      - argocd
-      clusterResourceWhitelist:
-      - group: '*'
-        kind: '*'
-      namespaceResourceWhitelist:
-      - group: '*'
-        kind: '*'
-  - apiVersion: argoproj.io/v1alpha1
-    kind: AppProject
-    metadata:
-      namespace: argocd
-      name: moiming
-    spec:
-      description: Project for moiming applications
       sourceRepos:
       - '*'
       destinations:
