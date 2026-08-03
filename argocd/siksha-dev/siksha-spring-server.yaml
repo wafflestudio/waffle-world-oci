@@ -24,7 +24,7 @@ spec:
       nodeSelector:
         kubernetes.io/arch: arm64
       containers:
-        - image: yny.ocir.io/ax1dvc8vmenm/siksha-dev/siksha-spring-server:117
+        - image: yny.ocir.io/ax1dvc8vmenm/siksha-dev/siksha-spring-server:118
           name: siksha-spring-server
           resources:
             requests:
