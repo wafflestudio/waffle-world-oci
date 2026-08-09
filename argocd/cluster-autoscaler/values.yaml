@@ -24,8 +24,9 @@ extraArgs:
   scale-down-delay-after-add: 10m
   scale-down-unneeded-time: 10m
   # 시스템 파드가 있어도 강제로 노드를 삭제할지 여부 (필요시 true로 변경)
-  skip-nodes-with-system-pods: false 
+  skip-nodes-with-system-pods: false
   skip-nodes-with-local-storage: false
+  scale-down-utilization-threshold: "0.7"
 
 # 6. RBAC (필수 권한 생성)
 rbac:
