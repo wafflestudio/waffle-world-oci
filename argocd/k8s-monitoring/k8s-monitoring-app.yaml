@@ -41,6 +41,9 @@ spec:
         - image: yny.ocir.io/ax1dvc8vmenm/k8s-monitoring:0.0.6
           imagePullPolicy: Always
           name: app
+          env:
+            - name: ALERT_PROVIDER
+              value: "discord"
           envFrom:
             - secretRef:
                 name: k8s-monitoring-secret
