@@ -28,7 +28,7 @@ spec:
           name: siksha-spring-server
           resources:
             requests:
-              cpu: 200m
+              cpu: 30m
               memory: 256Mi
             limits:
               memory: 1024Mi
