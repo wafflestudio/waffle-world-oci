@@ -33,7 +33,7 @@ spec:
               mountPath: /var/lib/manticore
           resources:
             requests:
-              cpu: 100m
+              cpu: 30m
               memory: 64Mi
             limits:
               memory: 128Mi
