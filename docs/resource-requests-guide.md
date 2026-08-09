@@ -79,14 +79,14 @@ kubectl top nodes
 | siksha-prod | siksha-valkey | 100m | 15m | 2m |
 | siksha-dev | siksha-spring-server | 100m | 20m | 4m |
 | slack-viz-prod | slack-viz-mongodb | 200m | 20m | 4m |
-| slack-viz-prod | slack-viz-app | 100m | 10m | 0m |
+| slack-viz-prod | slack-viz-app | 100m | 20m | 0m |
 | hangsha-prod | hangsha-kiwi | 100m | 15m | 2m |
 | hangsha-prod | hangsha-manticore | 100m | 30m | 9m |
 | hangsha-prod | hangsha-valkey | 100m | 15m | - |
 | hangsha-dev | hangsha-kiwi | 100m | 15m | 2m |
 | hangsha-dev | hangsha-manticore | 100m | 30m | 10m |
 | allclear-prod | allclear-valkey | 100m | 15m | 2m |
-| allclear-prod | allclear-db | 100m | 10m | 1m |
+| allclear-prod | allclear-db | 100m | 30m | 1m |
 | allclear-dev | allclear-web | 100m | 10m | 1m |
 | waffle-alert-prod | waffle-alert | 100m | 10m | 1m |
 

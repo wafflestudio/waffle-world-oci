@@ -40,7 +40,7 @@ spec:
               key: NUXT_DEMO_WORKSPACE_TOKEN
         resources:
           requests:
-            cpu: 10m
+            cpu: 20m
             memory: 512Mi
           limits:
             cpu: 500m
