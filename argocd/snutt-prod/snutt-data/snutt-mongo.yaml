@@ -22,7 +22,7 @@ spec:
         kubernetes.io/arch: arm64
       containers:
         - name: mongo
-          image: docker.io/library/mongo:8.2.7
+          image: docker.io/library/mongo:8.3.8
           args:
             - --auth
           ports:
