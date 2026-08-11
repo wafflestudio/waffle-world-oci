@@ -31,11 +31,10 @@ spec:
           privileged: true
         resources:
           requests:
-            cpu: 20m
-            memory: 256Mi
+            cpu: 1000m
+            memory: 8Gi
           limits:
-            cpu: 200m
-            memory: 256Mi
+            memory: 16Gi
         ports:
           - containerPort: 8080
 ---

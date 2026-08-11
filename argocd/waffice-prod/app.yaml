@@ -2,20 +2,18 @@ apiVersion: argoproj.io/v1alpha1
 kind: Application
 metadata:
   namespace: argocd
-  name: moiming-prod
+  name: waffice-prod
   finalizers:
   - resources-finalizer.argocd.argoproj.io
-  annotations:
-    argocd.argoproj.io/sync-wave: "1"
 spec:
-  project: moiming
+  project: default
   destination:
     name: in-cluster
-    namespace: moiming-prod
+    namespace: waffice-prod
   source:
     repoURL: https://github.com/wafflestudio/waffle-world-oci.git
     targetRevision: main
-    path: argocd/moiming-prod
+    path: argocd/waffice-prod
   syncPolicy:
     automated:
       prune: true

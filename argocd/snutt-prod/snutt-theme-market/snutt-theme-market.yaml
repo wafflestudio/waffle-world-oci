@@ -28,7 +28,7 @@ spec:
         name: snutt-theme-market
         resources:
           requests:
-            cpu: 100m
+            cpu: 15m
             memory: 384Mi
         ports:
         - containerPort: 3000

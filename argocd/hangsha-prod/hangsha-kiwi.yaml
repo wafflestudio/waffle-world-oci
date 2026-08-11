@@ -16,12 +16,12 @@ spec:
       annotations:
         sidecar.istio.io/inject: "false"
     spec:
-      serviceAccountName: hangsha-api-dev
+      serviceAccountName: hangsha-api-prod
       nodeSelector:
         kubernetes.io/arch: arm64
       containers:
         - name: kiwi
-          image: yny.ocir.io/ax1dvc8vmenm/hangsha-dev/hangsha-kiwi
+          image: yny.ocir.io/ax1dvc8vmenm/hangsha-prod/hangsha-kiwi:1
           ports:
             - containerPort: 8090
           livenessProbe:

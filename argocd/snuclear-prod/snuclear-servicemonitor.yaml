@@ -1,0 +1,17 @@
+# snuclear-server의 /api/v1/prometheus 를 Prometheus가 15초마다 scrape.
+# label 'release: prometheus' 가 있어야 kube-prometheus-stack operator가 수집한다.
+apiVersion: monitoring.coreos.com/v1
+kind: ServiceMonitor
+metadata:
+  name: snuclear-server
+  namespace: snuclear-prod
+  labels:
+    release: prometheus
+spec:
+  selector:
+    matchLabels:
+      app: snuclear-server
+  endpoints:
+    - port: http
+      path: /api/v1/prometheus
+      interval: 15s
