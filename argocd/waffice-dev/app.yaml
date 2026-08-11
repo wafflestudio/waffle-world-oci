@@ -14,8 +14,6 @@ spec:
     repoURL: https://github.com/wafflestudio/waffle-world-oci.git
     targetRevision: main
     path: argocd/waffice-dev
-    directory:
-      include: 'waffice-*.yaml'
   syncPolicy:
     automated:
       prune: true

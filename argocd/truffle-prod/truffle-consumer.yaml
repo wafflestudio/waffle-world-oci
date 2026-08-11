@@ -24,7 +24,7 @@ spec:
       nodeSelector:
         kubernetes.io/arch: arm64
       containers:
-        - image: yny.ocir.io/ax1dvc8vmenm/truffle-prod/truffle-consumer:19
+        - image: yny.ocir.io/ax1dvc8vmenm/truffle-prod/truffle-consumer
           name: truffle-consumer
           resources:
             requests:

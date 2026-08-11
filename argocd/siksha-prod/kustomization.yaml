@@ -1,0 +1,17 @@
+apiVersion: kustomize.config.k8s.io/v1beta1
+kind: Kustomization
+
+resources:
+- siksha-api-server.yaml
+- siksha-crawler.yaml
+- siksha-secret.yaml
+- siksha-spring-server.yaml
+- siksha-valkey.yaml
+
+images:
+- name: yny.ocir.io/ax1dvc8vmenm/siksha-prod/siksha-api-server
+  newTag: "1"
+- name: yny.ocir.io/ax1dvc8vmenm/siksha-prod/siksha-crawler
+  newTag: "1"
+- name: yny.ocir.io/ax1dvc8vmenm/siksha-prod/siksha-spring-server
+  newTag: "13"

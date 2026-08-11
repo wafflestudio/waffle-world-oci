@@ -24,7 +24,7 @@ spec:
       nodeSelector:
         kubernetes.io/arch: arm64
       containers:
-        - image: yny.ocir.io/ax1dvc8vmenm/wacruit-prod/wacruit-judge-server:14
+        - image: yny.ocir.io/ax1dvc8vmenm/wacruit-prod/wacruit-judge-server
           name: wacruit-judge-worker
           command: ["./scripts/workers"]
           securityContext:

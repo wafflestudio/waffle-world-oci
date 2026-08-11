@@ -1,0 +1,10 @@
+apiVersion: kustomize.config.k8s.io/v1beta1
+kind: Kustomization
+
+resources:
+- k8s-monitoring-app.yaml
+- k8s-monitoring-secrets.yaml
+
+images:
+- name: yny.ocir.io/ax1dvc8vmenm/k8s-monitoring
+  newTag: "0.0.6"

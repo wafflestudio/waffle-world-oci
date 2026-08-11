@@ -24,7 +24,7 @@ spec:
       nodeSelector:
         kubernetes.io/arch: arm64
       containers:
-        - image: yny.ocir.io/ax1dvc8vmenm/waffle-alert-prod/waffle-alert:latest
+        - image: yny.ocir.io/ax1dvc8vmenm/waffle-alert-prod/waffle-alert
           name: waffle-alert
           resources:
             requests:

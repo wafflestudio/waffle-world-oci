@@ -14,8 +14,6 @@ spec:
     repoURL: https://github.com/wafflestudio/waffle-world-oci.git
     targetRevision: main
     path: argocd/truffle-prod
-    directory:
-      include: 'truffle-*.yaml'
   syncPolicy:
     automated:
       prune: true
