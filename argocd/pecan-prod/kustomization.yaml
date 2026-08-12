@@ -6,4 +6,4 @@ resources:
 
 images:
 - name: yny.ocir.io/ax1dvc8vmenm/pecan
-  newTag: "v0.2.6"
+  newTag: v0.2.8
