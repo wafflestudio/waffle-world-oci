@@ -1,7 +1,7 @@
 apiVersion: kustomize.config.k8s.io/v1beta1
 kind: Kustomization
 resources:
-  - snutt-timetable.yaml
+- snutt-timetable.yaml
 images:
-  - name: yny.ocir.io/ax1dvc8vmenm/snutt-prod/snutt-timetable
-    newTag: "18"
+- name: yny.ocir.io/ax1dvc8vmenm/snutt-prod/snutt-timetable
+  newTag: "19"
