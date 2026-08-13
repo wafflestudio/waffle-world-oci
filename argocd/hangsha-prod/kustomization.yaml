@@ -4,10 +4,14 @@ kind: Kustomization
 resources:
 - hangsha-api.yaml
 - hangsha-crawler.yaml
+- hangsha-kiwi.yaml
+- hangsha-manticore.yaml
 - hangsha-valkey.yaml
 
 images:
 - name: yny.ocir.io/ax1dvc8vmenm/hangsha-prod/hangsha-batch
   newTag: "5"
+- name: yny.ocir.io/ax1dvc8vmenm/hangsha-prod/hangsha-kiwi
+  newTag: "1"
 - name: yny.ocir.io/ax1dvc8vmenm/hangsha-prod/hangsha-server
   newTag: "5"
