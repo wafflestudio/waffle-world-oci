@@ -31,12 +31,26 @@ loki:
     tsdb_shipper:
       active_index_directory: /var/loki/tsdb-index
       cache_location: /var/loki/tsdb-cache
-  ruler:
+  # ruler(단수)가 아니라 rulerConfig가 실제 Loki 프로세스 config.yaml의 최상위 `ruler:` 섹션에
+  # 렌더링되는 필드다 (templates/config.yaml의 `{{ include "loki.rulerConfig" . }}` 확인,
+  # loki.ruler라는 값은 무시된다 - helm template로 실제 검증).
+  rulerConfig:
     enable_api: true
     storage:
       type: local
       local:
-        directory: /var/loki/rules
+        # kiwigrid sidecar 컨테이너(singleBinary pod 내장, env: LABEL=loki_rule, FOLDER=/rules)가
+        # loki_rule="1" 라벨 붙은 ConfigMap을 감시해서 이 경로(/rules, emptyDir)에 rule 파일을
+        # 채운다 — /var/loki/rules(PVC)가 아니라 반드시 이 sidecar 마운트 경로와 일치해야
+        # 한다 (statefulset.yaml 렌더링으로 sc-rules-volume이 /rules에 마운트되는 것을 확인).
+        directory: /rules
+    # kube-prometheus-stack이 배포한 Alertmanager(v2 API)로 직접 alert를 push한다.
+    # 기존 Prometheus metric alert와 같은 Alertmanager를 공유하므로, source=waffle 라벨만
+    # 붙이면 argocd/prometheus/values.yaml의 alertmanager.config.route가 그대로 처리한다.
+    alertmanager_url: http://prometheus-kube-prometheus-alertmanager.prometheus.svc.cluster.local:9093
+    enable_alertmanager_v2: true
+    evaluation_interval: 1m
+    poll_interval: 1m
   limits_config:
     retention_period: 336h # 14d. prometheus retention(10d)보다 여유있게.
     # 기본값(4MB/s)이 Alloy가 클러스터 전체 pod 로그를 한꺼번에 밀어넣는 초기 backfill에서도
@@ -98,3 +112,12 @@ monitoring:
     enabled: false
   lokiCanary:
     enabled: false
+
+# SingleBinary 모드에서는 ruler가 별도 Deployment가 아니라 singleBinary 프로세스 자체가
+# `-target=all`로 겸한다. 헬름차트의 ruler.directories 편의 기능은 templates/ruler/
+# configmap-ruler.yaml이 `{{- if $isDistributed }}`로 감싸져 있어 SingleBinary/SimpleScalable
+# 모드에서는 렌더링되지 않는다(helm template로 실제 확인: 빈 결과). 대신 singleBinary pod에는
+# kiwigrid k8s-sidecar 컨테이너가 이미 내장되어 있어 `loki_rule` 라벨이 붙은 ConfigMap을 감시,
+# /rules(emptyDir, loki.ruler.storage.local.directory와 동일 경로)에 자동으로 파일을 채워준다.
+# 그 ConfigMap은 argocd/loki/resources.yaml에서 raw manifest로 직접 관리한다
+# (이 레포의 prometheus alert-rules.yaml과 같은 패턴).
