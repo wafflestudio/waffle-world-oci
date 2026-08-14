@@ -1,0 +1,24 @@
+# prometheus-grafana의 datasource sidecar(kube-prometheus-stack 기본값으로 이미 활성화되어
+# 있음: grafana.sidecar.datasources.enabled=true, label=grafana_datasource, labelValue="1")가
+# 이 ConfigMap을 읽어서 Loki datasource를 등록한다.
+# sidecar의 searchNamespace가 지정되지 않으면(기본 null) 자기 자신이 떠 있는 네임스페이스(prometheus)
+# 안에서만 검색하므로, 이 ConfigMap도 prometheus 네임스페이스에 둔다.
+# loki 자체는 별도 Application(argocd/loki)이 관리하지만, 이 ConfigMap은 grafana(prometheus
+# Application 소유)에 종속된 리소스이므로 여기서 관리해 소유권 충돌을 피한다.
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: loki-grafana-datasource
+  namespace: prometheus
+  labels:
+    grafana_datasource: "1"
+data:
+  loki-datasource.yaml: |-
+    apiVersion: 1
+    datasources:
+      - name: Loki
+        type: loki
+        access: proxy
+        url: http://loki.loki.svc.cluster.local:3100
+        isDefault: false
+        editable: false

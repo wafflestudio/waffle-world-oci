@@ -2,7 +2,7 @@ apiVersion: argoproj.io/v1alpha1
 kind: Application
 metadata:
   namespace: argocd
-  name: prometheus
+  name: loki
   finalizers:
   - resources-finalizer.argocd.argoproj.io
   annotations:
@@ -11,24 +11,27 @@ spec:
   project: default
   destination:
     name: in-cluster
-    namespace: prometheus
+    namespace: loki
   sources:
-  - repoURL: https://prometheus-community.github.io/helm-charts
-    chart: kube-prometheus-stack
-    targetRevision: 84.5.0
+  - repoURL: https://grafana.github.io/helm-charts
+    chart: loki
+    targetRevision: 7.3.0
     helm:
-      releaseName: prometheus
+      releaseName: loki
       valueFiles:
-      - $values/argocd/prometheus/values.yaml
+      - $values/argocd/loki/values.yaml
   - repoURL: https://github.com/wafflestudio/waffle-world-oci.git
     targetRevision: main
     ref: values
   - repoURL: https://github.com/wafflestudio/waffle-world-oci.git
     targetRevision: main
-    path: argocd/prometheus
+    path: argocd/loki
     directory:
-      include: '{resources.yaml,alert-rules.yaml,loki-datasource.yaml}'
+      include: '{resources.yaml}'
   syncPolicy:
+    automated:
+      prune: true
+      selfHeal: true
     syncOptions:
-    # We keep SSA enabled; CRDs are managed by a separate Application (prometheus-operator-crds).
+    - CreateNamespace=true
     - ServerSideApply=true

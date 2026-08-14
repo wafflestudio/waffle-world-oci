@@ -1,0 +1,85 @@
+# SingleBinary + filesystem storage.
+# 이 클러스터는 이미 하나의 데이터스토어(prometheus)를 20Gi PVC로 운영하는 규모라
+# object storage(S3/GCS/MinIO)를 새로 구축하는 대신 filesystem 백엔드로 시작한다.
+# 로그량이 늘어나 SimpleScalable(object storage 필수)로 옮겨야 하면 그때 재검토한다.
+deploymentMode: SingleBinary
+
+loki:
+  # 단일 인스턴스 + 클러스터 내부에서만 접근하므로 멀티테넌시 인증을 끈다.
+  # (기본값 true인 채로 두면 모든 push/query 요청에 X-Scope-OrgID 헤더가 필요해진다)
+  auth_enabled: false
+  commonConfig:
+    replication_factor: 1
+  storage:
+    type: filesystem
+  schemaConfig:
+    configs:
+      - from: "2024-04-01"
+        store: tsdb
+        object_store: filesystem
+        schema: v13
+        index:
+          prefix: loki_index_
+          period: 24h
+  storage_config:
+    filesystem:
+      chunks_directory: /var/loki/chunks
+      rules_directory: /var/loki/rules
+  ruler:
+    enable_api: true
+    storage:
+      type: local
+      local:
+        directory: /var/loki/rules
+  limits_config:
+    retention_period: 336h # 14d. prometheus retention(10d)보다 여유있게.
+
+singleBinary:
+  replicas: 1
+  persistence:
+    storageClass: oci-bv
+    accessModes: ["ReadWriteOnce"]
+    size: 10Gi
+  resources:
+    requests:
+      cpu: 50m
+      memory: 256Mi
+    limits:
+      memory: 512Mi
+  podAnnotations:
+    sidecar.istio.io/inject: "false"
+
+# nginx gateway는 read/write path 분리(SimpleScalable/Distributed)를 위한 컴포넌트.
+# SingleBinary는 서비스 하나로 충분하므로 끈다.
+gateway:
+  enabled: false
+
+read:
+  replicas: 0
+write:
+  replicas: 0
+backend:
+  replicas: 0
+
+# 이 규모(수 GB/day 미만)에서는 memcached 캐시가 오버스펙이라 끈다.
+chunksCache:
+  enabled: false
+resultsCache:
+  enabled: false
+
+# 내장 오브젝트 스토리지(MinIO)는 filesystem 모드를 쓰므로 불필요.
+minio:
+  enabled: false
+
+test:
+  enabled: false
+lokiCanary:
+  enabled: false
+
+monitoring:
+  serviceMonitor:
+    enabled: false
+  selfMonitoring:
+    enabled: false
+  lokiCanary:
+    enabled: false
