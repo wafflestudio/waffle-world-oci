@@ -1,0 +1,32 @@
+apiVersion: argoproj.io/v1alpha1
+kind: Application
+metadata:
+  namespace: argocd
+  name: loki-alloy
+  finalizers:
+  - resources-finalizer.argocd.argoproj.io
+  annotations:
+    argocd.argoproj.io/sync-wave: "1"
+spec:
+  project: default
+  destination:
+    name: in-cluster
+    namespace: loki
+  sources:
+  - repoURL: https://grafana.github.io/helm-charts
+    chart: alloy
+    targetRevision: 1.11.1
+    helm:
+      releaseName: loki-alloy
+      valueFiles:
+      - $values/argocd/loki-alloy/values.yaml
+  - repoURL: https://github.com/wafflestudio/waffle-world-oci.git
+    targetRevision: main
+    ref: values
+  syncPolicy:
+    automated:
+      prune: true
+      selfHeal: true
+    syncOptions:
+    - CreateNamespace=true
+    - ServerSideApply=true

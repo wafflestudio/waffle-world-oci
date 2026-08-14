@@ -1,0 +1,69 @@
+# DaemonSet으로 모든 노드에 떠서 각 노드가 갖고 있는 pod 로그를 Kubernetes API를 통해
+# tail(loki.source.kubernetes)하여 loki로 push한다. hostPath 로그 파일 마운트가 필요 없어
+# 이 클러스터 규모/구성에서 가장 단순하다.
+alloy:
+  configMap:
+    create: true
+    content: |
+      discovery.kubernetes "pod" {
+        role = "pod"
+        selectors {
+          role  = "pod"
+          field = "spec.nodeName=" + coalesce(sys.env("HOSTNAME"), constants.hostname)
+        }
+      }
+
+      discovery.relabel "pod_logs" {
+        targets = discovery.kubernetes.pod.targets
+
+        rule {
+          source_labels = ["__meta_kubernetes_namespace"]
+          action        = "replace"
+          target_label  = "namespace"
+        }
+
+        rule {
+          source_labels = ["__meta_kubernetes_pod_name"]
+          action        = "replace"
+          target_label  = "pod"
+        }
+
+        rule {
+          source_labels = ["__meta_kubernetes_pod_container_name"]
+          action        = "replace"
+          target_label  = "container"
+        }
+
+        rule {
+          source_labels = ["__meta_kubernetes_pod_label_app"]
+          action        = "replace"
+          target_label  = "app"
+        }
+      }
+
+      loki.source.kubernetes "pod_logs" {
+        targets    = discovery.relabel.pod_logs.output
+        forward_to = [loki.write.default.receiver]
+      }
+
+      loki.write "default" {
+        endpoint {
+          url = "http://loki.loki.svc.cluster.local:3100/loki/api/v1/push"
+        }
+      }
+
+  storagePath: /tmp/alloy
+
+  resources:
+    requests:
+      cpu: 20m
+      memory: 64Mi
+    limits:
+      memory: 128Mi
+
+# 클러스터 전체 노드(arm64/amd64 혼재)에 다 떠야 하는 DaemonSet이므로
+# 아키텍처를 고정하는 nodeSelector는 넣지 않는다.
+controller:
+  type: daemonset
+  podAnnotations:
+    sidecar.istio.io/inject: "false"
