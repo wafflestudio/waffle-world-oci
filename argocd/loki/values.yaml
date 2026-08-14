@@ -12,6 +12,15 @@ loki:
     replication_factor: 1
   storage:
     type: filesystem
+    filesystem:
+      # 차트 기본값(chunks_directory/rules_directory)이 Loki 3.x 바이너리가 기대하는
+      # local.FSConfig 스키마(directory 단일 필드)와 어긋나 "field not found" 파싱
+      # 에러로 크래시했다 (실제 클러스터 배포 후 발견). 헬름 values는 deep-merge되므로
+      # 구식 필드를 단순 override가 아니라 null로 명시적으로 지워야 config.yaml에서
+      # 사라진다.
+      chunks_directory: null
+      rules_directory: null
+      directory: /var/loki/chunks
   schemaConfig:
     configs:
       - from: "2024-04-01"
@@ -23,8 +32,10 @@ loki:
           period: 24h
   storage_config:
     filesystem:
-      chunks_directory: /var/loki/chunks
-      rules_directory: /var/loki/rules
+      directory: /var/loki/chunks
+    tsdb_shipper:
+      active_index_directory: /var/loki/tsdb-index
+      cache_location: /var/loki/tsdb-cache
   ruler:
     enable_api: true
     storage:
