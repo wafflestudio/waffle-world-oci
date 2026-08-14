@@ -39,6 +39,12 @@ loki:
         directory: /var/loki/rules
   limits_config:
     retention_period: 336h # 14d. prometheus retention(10d)보다 여유있게.
+    # 기본값(4MB/s)이 Alloy가 클러스터 전체 pod 로그를 한꺼번에 밀어넣는 초기 backfill에서도
+    # 초과되어 "ingestion rate limit exceeded"로 로그가 드롭되는 것을 실제 배포 후 확인했다.
+    # ERROR 로그만 필터링(argocd/loki-alloy/values.yaml)해도 배포 직후 버스트는 여전히 있을 수
+    # 있어 burst 쪽을 더 넉넉히 잡는다.
+    ingestion_rate_mb: 16
+    ingestion_burst_size_mb: 32
 
 singleBinary:
   replicas: 1
@@ -51,7 +57,10 @@ singleBinary:
       cpu: 50m
       memory: 256Mi
     limits:
-      memory: 512Mi
+      # 클러스터 전체 서비스 로그가 이 단일 인스턴스로 집중되므로 512Mi는 OOM 여유가 부족해
+      # 보여 1Gi로 상향. ERROR만 필터링해 유입량 자체는 줄이되, 배포 직후 버스트나 장애 시
+      # 에러 폭주에도 여유를 둔다.
+      memory: 1Gi
   podAnnotations:
     sidecar.istio.io/inject: "false"
 
