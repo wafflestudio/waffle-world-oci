@@ -14,4 +14,4 @@ images:
 - name: yny.ocir.io/ax1dvc8vmenm/hangsha-prod/hangsha-kiwi
   newTag: "1"
 - name: yny.ocir.io/ax1dvc8vmenm/hangsha-prod/hangsha-server
-  newTag: "5"
+  newTag: "8"
