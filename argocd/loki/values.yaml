@@ -10,17 +10,12 @@ loki:
   auth_enabled: false
   commonConfig:
     replication_factor: 1
+  # loki.storage.filesystem(common.storage로 렌더링)은 common.FilesystemConfig 타입이라
+  # chunks_directory/rules_directory가 정확한 필드명 — 차트 기본값 그대로 두고 건드리지 않는다.
+  # (storage_config.filesystem 아래는 다른 타입(local.FSConfig)이라 directory 단일 필드를 쓴다 —
+  # 이름이 같은 "filesystem" 블록이 위치에 따라 다른 스키마로 파싱되므로 혼동 주의.)
   storage:
     type: filesystem
-    filesystem:
-      # 차트 기본값(chunks_directory/rules_directory)이 Loki 3.x 바이너리가 기대하는
-      # local.FSConfig 스키마(directory 단일 필드)와 어긋나 "field not found" 파싱
-      # 에러로 크래시했다 (실제 클러스터 배포 후 발견). 헬름 values는 deep-merge되므로
-      # 구식 필드를 단순 override가 아니라 null로 명시적으로 지워야 config.yaml에서
-      # 사라진다.
-      chunks_directory: null
-      rules_directory: null
-      directory: /var/loki/chunks
   schemaConfig:
     configs:
       - from: "2024-04-01"
