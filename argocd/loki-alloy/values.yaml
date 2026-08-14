@@ -63,11 +63,31 @@ alloy:
       loki.process "error_only" {
         forward_to = [loki.write.default.receiver]
 
+        // 실제 배포 후 검증: stage.match의 selector에서 {namespace=~".+"}나 {job="..."}
+        // 처럼 discovery.relabel이 붙인 stream label을 label matcher로 참조하면, line
+        // filter(!~)가 무시되고 전체 라인이 그대로 통과하는 것을 확인했다
+        // (siksha-prod/snutt-prod의 INFO 로그, 심지어 valkey 정상 운영 로그까지 전혀
+        // 안 걸러지고 Loki에 그대로 적재됨). Loki/Alloy 공식 문서 예시들도 전부
+        // "먼저 stage.labels 등으로 이 파이프라인 안에서 라벨을 만든 뒤, 그 라벨만
+        // selector에서 참조"하는 패턴이라, stream label을 selector에 직접 쓰는 건
+        // 검증된 사용법이 아니다. 대신 이 파이프라인 안에서 stage.template으로 상수
+        // 라벨을 만들어(모든 로그에 always="1") selector 조건을 그걸로만 만족시킨다.
+        stage.template {
+          source   = "always"
+          template = "1"
+        }
+
+        stage.labels {
+          values = {
+            always = "",
+          }
+        }
+
         stage.match {
           // River 백틱(raw string)을 써서 YAML block scalar 이스케이프와 River 문자열
           // 이스케이프가 이중으로 겹치는 걸 피한다 (\b 같은 정규식 이스케이프가
           // "\\\\b"로 겹겹이 꼬이는 문제 방지). 백틱 안에서는 백슬래시를 그대로 쓴다.
-          selector = `{namespace=~".+"} !~ "(?i)\b(error|warn|fatal|panic)\b"`
+          selector = `{always="1"} !~ "(?i)\b(error|warn|fatal|panic)\b"`
           action   = "drop"
           drop_counter_reason = "not_error_level"
         }
