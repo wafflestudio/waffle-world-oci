@@ -5,6 +5,15 @@ alloy:
   configMap:
     create: true
     content: |
+      // 실제 배포 후 진단용 임시 활성화: waffle-alert-prod의 강제 ERROR 로그가 Alloy
+      // discovery/tailing까지는 정상 확인되는데(로그로 확인) Loki에는 전혀 도달하지 않고,
+      // Alloy 재시작으로도 해결 안 되는 것을 실제로 확인했다. loki.write 단계에서 무슨 일이
+      // 벌어지는지 http://<alloy-pod>:12345 UI의 Live Debugging 탭으로 직접 관찰하기 위해
+      // 켠다. 민감정보 노출 우려로 기본 비활성화된 기능이라 원인 파악 후 다시 꺼야 한다.
+      livedebugging {
+        enabled = true
+      }
+
       discovery.kubernetes "pod" {
         role = "pod"
         selectors {
