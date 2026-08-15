@@ -29,6 +29,9 @@ spec:
     directory:
       include: '{resources.yaml,alert-rules.yaml,loki-datasource.yaml}'
   syncPolicy:
+    automated:
+      prune: true
+      selfHeal: true
     syncOptions:
     # We keep SSA enabled; CRDs are managed by a separate Application (prometheus-operator-crds).
     - ServerSideApply=true
