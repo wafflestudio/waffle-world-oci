@@ -84,10 +84,19 @@ alloy:
         }
 
         stage.match {
-          // River 백틱(raw string)을 써서 YAML block scalar 이스케이프와 River 문자열
-          // 이스케이프가 이중으로 겹치는 걸 피한다 (\b 같은 정규식 이스케이프가
-          // "\\\\b"로 겹겹이 꼬이는 문제 방지). 백틱 안에서는 백슬래시를 그대로 쓴다.
-          selector = `{always="1"} !~ "(?i)\b(error|warn|fatal|panic)\b"`
+          // 이 selector 문자열은 River 백틱(raw string)을 한 번 거친 뒤, stage.match가
+          // 내부적으로 쓰는 mini-LogQL 파서(logql.ParseExpr)의 문자열 리터럴 렉서를
+          // 한 번 더 거친다. 그 렉서는 quoted string 토큰에 Go의 strconv.Unquote를
+          // 적용하는데, 이때 "\b"는 정규식 word boundary가 아니라 backspace(0x08)
+          // 문자로 해석된다 - River 레벨에서 raw string을 썼는지와 무관하게, 이 안쪽
+          // 문자열 리터럴 자체가 또 한 번 escape 처리를 받기 때문이다.
+          // 실제로 이 버그 때문에 "(?i)\b(...)\b" 정규식이 ERROR 로그를 포함한 어떤
+          // 줄에도 매칭되지 않았고, 그 결과 이 stage.match(action=drop, !~ 조건)가
+          // 모든 로그를 100% drop하는 사고로 이어졌다(운영 배포 후 실측 확인, live
+          // debugging으로 loki.process.error_only의 IN=OUT+dropped, OUT=0 확인).
+          // "\\b"(백슬래시 두 개)로 써야 Unquote를 거친 뒤에도 정규식 엔진에 "\b" 한
+          // 글자 쌍이 그대로 전달된다.
+          selector = `{always="1"} !~ "(?i)\\b(error|warn|fatal|panic)\\b"`
           action   = "drop"
           drop_counter_reason = "not_error_level"
         }
