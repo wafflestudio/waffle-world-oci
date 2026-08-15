@@ -6,4 +6,4 @@ resources:
 
 images:
 - name: yny.ocir.io/ax1dvc8vmenm/snutt-dev/snutt-theme-market
-  newTag: "3"
+  newTag: "4"
