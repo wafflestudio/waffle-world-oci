@@ -2,3 +2,52 @@ apiVersion: v1
 kind: Namespace
 metadata:
   name: loki
+---
+# singleBinary pod에 내장된 kiwigrid k8s-sidecar(env: LABEL=loki_rule, FOLDER=/rules,
+# RESOURCE=both)가 loki_rule="1" 라벨이 붙은 ConfigMap을 감시해서 /rules 아래에 파일로
+# 풀어준다. auth_enabled=false라 Loki가 기대하는 테넌트는 "fake" 하나뿐이므로,
+# k8s-sidecar-target-directory 어노테이션으로 /rules/fake/ 서브디렉토리에 배치되게 한다
+# (기본 FOLDER_ANNOTATION 키를 그대로 사용 — 헬름차트가 커스터마이즈하지 않음, helm
+# template로 실제 확인).
+#
+# 별도 alert-rules.yaml 파일로 안 만들고 여기 raw manifest로 관리하는 이유: Loki 헬름차트의
+# ruler.directories 편의 기능은 SimpleScalable/Distributed 모드 전용
+# (templates/ruler/configmap-ruler.yaml이 `{{- if $isDistributed }}`로 감싸져 있어
+# SingleBinary에서는 렌더링되지 않음 - helm template로 실제 확인), 그래서 argocd/loki/
+# values.yaml에 인라인할 수 없다.
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: loki-error-log-alert-rules
+  namespace: loki
+  labels:
+    loki_rule: "1"
+  annotations:
+    k8s-sidecar-target-directory: "fake"
+data:
+  error-logs.yaml: |
+    groups:
+      - name: waffle-alert-logs
+        rules:
+          - alert: ApplicationErrorLog
+            # Alloy가 이미 ERROR/WARN/FATAL/PANIC 로그만 Loki로 보내고 있으므로
+            # (argocd/loki-alloy), 여기서는 그걸 다시 필터링하지 않고 존재 자체를 감지한다.
+            #
+            # trace_id 추출(pattern/label_format)은 이번 스코프에서 제외한다 - 이걸 로그에
+            # 찍는 팀이 없어 항상 폴백 경로만 타는 죽은 코드였다. namespace+pod+app만으로
+            # grouping하면 충분하고, waffle-alert 쪽도 이 alert(ruleName=ApplicationErrorLog)를
+            # 받으면 namespace+시간창 기준으로 Loki를 조회하는 것으로 단순화한다.
+            expr: |
+              sum by (namespace, pod, app) (
+                count_over_time({always="1"}[2m])
+              ) > 0
+            for: 0s
+            labels:
+              source: waffle
+              severity: warning
+            annotations:
+              summary: "{{ $labels.namespace }}/{{ $labels.app }} error log detected"
+              description: '{{ $labels.namespace }}/{{ $labels.pod }}에서 에러 로그가 감지됨.'
+              namespace: "{{ $labels.namespace }}"
+              pod: "{{ $labels.pod }}"
+              app: "{{ $labels.app }}"

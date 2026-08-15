@@ -17,6 +17,10 @@ data:
     apiVersion: 1
     datasources:
       - name: Loki
+        # uid를 명시적으로 고정한다 - 지정 안 하면 Grafana가 provisioning 시점마다 예측
+        # 불가능한 값을 생성해, waffle-alert가 만드는 Grafana Explore 딥링크(datasource uid를
+        # URL에 하드코딩해야 함)가 재배포마다 깨진다.
+        uid: loki
         type: loki
         access: proxy
         url: http://loki.loki.svc.cluster.local:3100
