@@ -1,6 +1,3 @@
-# DaemonSet으로 모든 노드에 떠서 각 노드가 갖고 있는 pod 로그를 Kubernetes API를 통해
-# tail(loki.source.kubernetes)하여 loki로 push한다. hostPath 로그 파일 마운트가 필요 없어
-# 이 클러스터 규모/구성에서 가장 단순하다.
 alloy:
   configMap:
     create: true
@@ -46,32 +43,9 @@ alloy:
         forward_to = [loki.process.error_only.receiver]
       }
 
-      // 서비스마다 로그 포맷이 제각각(FastAPI/uvicorn, Spring Boot, PostgreSQL 등)이라
-      // 필드 파싱이 아니라 라인 본문에 에러 레벨 키워드가 대소문자 무관하게 포함되는지로만
-      // 느슨하게 걸러낸다. 클러스터 전체 로그를 전량 수집하면 초기 backfill만으로도
-      // Loki의 ingestion rate limit을 넘겨 로그가 드롭되는 것을 실제 배포 후 확인했다
-      // (전량 수집 자체가 이 작은 클러스터 규모에 안 맞음).
-      //
-      // 멀티라인 스택트레이스(Caused by / at ... 계속줄)는 여기서 병합하지 않는다 —
-      // 이어지는 줄엔 레벨 키워드가 없어 잘려나가지만, 첫 줄(언제/어느 서비스에서 터졌는지)은
-      // 남으므로 이후 traceId로 Loki를 재쿼리해 전체 맥락을 복원하는 방식(waffle-alert 단계)과
-      // 자연스럽게 맞는다.
-      //
-      // \b(word boundary)로 error/warn이 다른 단어의 일부로 우연히 매칭되는 오탐(예:
-      // "error_count: 0" 같은 정상 INFO 로그)을 줄이고, PostgreSQL이 쓰는 fatal/panic
-      // 레벨도 함께 잡는다.
       loki.process "error_only" {
         forward_to = [loki.write.default.receiver]
 
-        // 실제 배포 후 검증: stage.match의 selector에서 {namespace=~".+"}나 {job="..."}
-        // 처럼 discovery.relabel이 붙인 stream label을 label matcher로 참조하면, line
-        // filter(!~)가 무시되고 전체 라인이 그대로 통과하는 것을 확인했다
-        // (siksha-prod/snutt-prod의 INFO 로그, 심지어 valkey 정상 운영 로그까지 전혀
-        // 안 걸러지고 Loki에 그대로 적재됨). Loki/Alloy 공식 문서 예시들도 전부
-        // "먼저 stage.labels 등으로 이 파이프라인 안에서 라벨을 만든 뒤, 그 라벨만
-        // selector에서 참조"하는 패턴이라, stream label을 selector에 직접 쓰는 건
-        // 검증된 사용법이 아니다. 대신 이 파이프라인 안에서 stage.template으로 상수
-        // 라벨을 만들어(모든 로그에 always="1") selector 조건을 그걸로만 만족시킨다.
         stage.template {
           source   = "always"
           template = "1"
@@ -84,10 +58,7 @@ alloy:
         }
 
         stage.match {
-          // River 백틱(raw string)을 써서 YAML block scalar 이스케이프와 River 문자열
-          // 이스케이프가 이중으로 겹치는 걸 피한다 (\b 같은 정규식 이스케이프가
-          // "\\\\b"로 겹겹이 꼬이는 문제 방지). 백틱 안에서는 백슬래시를 그대로 쓴다.
-          selector = `{always="1"} !~ "(?i)\b(error|warn|fatal|panic)\b"`
+          selector = `{always="1"} !~ "(?i)\\b(error|warn|fatal|panic)\\b"`
           action   = "drop"
           drop_counter_reason = "not_error_level"
         }
@@ -106,13 +77,8 @@ alloy:
       cpu: 20m
       memory: 128Mi
     limits:
-      # ERROR/WARN 필터링은 loki.process 단계에서 걸러내지만, 그 전 단계(discovery,
-      # 파이프라인 버퍼)는 노드의 모든 pod 로그를 일단 받아서 처리한다. 배포 직후
-      # backfill이나 로그 폭주 구간에 128Mi로는 OOMKilled 위험이 있어 상향.
       memory: 256Mi
 
-# 클러스터 전체 노드(arm64/amd64 혼재)에 다 떠야 하는 DaemonSet이므로
-# 아키텍처를 고정하는 nodeSelector는 넣지 않는다.
 controller:
   type: daemonset
   podAnnotations:
