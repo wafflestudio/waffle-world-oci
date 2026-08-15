@@ -33,33 +33,13 @@ data:
             # Alloy가 이미 ERROR/WARN/FATAL/PANIC 로그만 Loki로 보내고 있으므로
             # (argocd/loki-alloy), 여기서는 그걸 다시 필터링하지 않고 존재 자체를 감지한다.
             #
-            # trace_id는 `| pattern`으로 로그 라인에서 뽑는다. pattern 파서는 매칭 실패해도
-            # 라인 자체를 버리지 않고 통과시키되(Loki 소스 PatternParser.Process 확인:
-            # 매칭 실패 시 unconditionally `return line, true`), 매칭 안 된 필드는 라벨이
-            # unset 상태가 된다. by(...) grouping에서 unset 라벨이 예측 불가하게 취급될 수
-            # 있어(빈 문자열 취급 여부가 문서화되어 있지 않음), label_format + default
-            # 함수로 명시적으로 "none" 기본값을 채워 안전하게 만든다.
-            #
-            # 아직 어떤 서비스도 traceId를 로그에 찍고 있지 않음(2026-08-14 기준 확인)이
-            # 정상 상태이며, 이 경우 trace_id="none"이 된다 — waffle-alert 쪽에서 trace_id가
-            # "none"이면 namespace+시간창 기반으로 폴백 조회하도록 설계되어 있어 이 alert
-            # 자체는 trace_id 유무와 무관하게 항상 정상 동작한다. 서비스가 나중에 MDC 등으로
-            # traceId 로깅을 시작하면 이 alert가 자동으로 더 정밀해진다 (rule 수정 불필요).
-            #
-            # by(namespace, pod, app, trace_id)로 grouping에 trace_id를 포함시킨 것은
-            # 의도적이다: 같은 trace_id의 에러는 하나의 alert로 묶이고, waffle-alert가 그
-            # trace_id로 Loki를 재쿼리해 전체 맥락(스택트레이스 등)을 복원한다. trace_id가
-            # 없는 로그는 전부 trace_id="none"이라는 단일 그룹으로 묶이므로 카디널리티
-            # 폭발 우려는 없다 (Alloy가 이미 ERROR 로그만 걸러 전체 볼륨의 0.1% 수준으로
-            # 줄여둔 상태 - 실측 확인됨).
+            # trace_id 추출(pattern/label_format)은 이번 스코프에서 제외한다 - 이걸 로그에
+            # 찍는 팀이 없어 항상 폴백 경로만 타는 죽은 코드였다. namespace+pod+app만으로
+            # grouping하면 충분하고, waffle-alert 쪽도 이 alert(ruleName=ApplicationErrorLog)를
+            # 받으면 namespace+시간창 기준으로 Loki를 조회하는 것으로 단순화한다.
             expr: |
-              sum by (namespace, pod, app, trace_id) (
-                count_over_time(
-                  {always="1"}
-                    | pattern `<_>trace_id=<trace_id> <_>`
-                    | label_format trace_id=`{{ .trace_id | default "none" }}`
-                    [2m]
-                )
+              sum by (namespace, pod, app) (
+                count_over_time({always="1"}[2m])
               ) > 0
             for: 0s
             labels:
@@ -67,10 +47,7 @@ data:
               severity: warning
             annotations:
               summary: "{{ $labels.namespace }}/{{ $labels.app }} error log detected"
-              description: >-
-                {{ $labels.namespace }}/{{ $labels.pod }}에서 에러 로그가 감지됨.
-                {{ if ne $labels.trace_id "none" }}trace_id={{ $labels.trace_id }}{{ else }}trace_id 없음 (namespace+시간창으로 조회됨){{ end }}
+              description: '{{ $labels.namespace }}/{{ $labels.pod }}에서 에러 로그가 감지됨.'
               namespace: "{{ $labels.namespace }}"
               pod: "{{ $labels.pod }}"
               app: "{{ $labels.app }}"
-              trace_id: "{{ $labels.trace_id }}"
