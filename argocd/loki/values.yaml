@@ -59,6 +59,11 @@ loki:
     # 있어 burst 쪽을 더 넉넉히 잡는다.
     ingestion_rate_mb: 16
     ingestion_burst_size_mb: 32
+  # retention_period는 값만 설정해선 아무 효과가 없다 - compactor.retention_enabled를
+  # 켜야 실제로 오래된 chunk/index를 지운다. 이게 빠져 있어서 10Gi PVC가 무제한으로
+  # 쌓이기만 하고 있었던 걸 뒤늦게 발견해 추가한다.
+  compactor:
+    retention_enabled: true
 
 singleBinary:
   replicas: 1
