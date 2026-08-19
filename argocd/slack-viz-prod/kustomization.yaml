@@ -9,4 +9,4 @@ resources:
 
 images:
 - name: yny.ocir.io/ax1dvc8vmenm/slack-view
-  newTag: "2"
+  newTag: "7"
