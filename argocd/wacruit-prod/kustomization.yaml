@@ -10,4 +10,4 @@ images:
 - name: yny.ocir.io/ax1dvc8vmenm/wacruit-prod/wacruit-judge-server
   newTag: "14"
 - name: yny.ocir.io/ax1dvc8vmenm/wacruit-prod/wacruit-server
-  newTag: "24"
+  newTag: "25"
