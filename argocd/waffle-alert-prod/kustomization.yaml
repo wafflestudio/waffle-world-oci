@@ -6,4 +6,4 @@ resources:
 
 images:
 - name: yny.ocir.io/ax1dvc8vmenm/waffle-alert-prod/waffle-alert
-  newTag: "10"
+  newTag: "11"
