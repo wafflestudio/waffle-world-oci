@@ -10,7 +10,7 @@ resources:
 
 images:
 - name: yny.ocir.io/ax1dvc8vmenm/hangsha-prod/hangsha-batch
-  newTag: "10"
+  newTag: "12"
 - name: yny.ocir.io/ax1dvc8vmenm/hangsha-prod/hangsha-kiwi
   newTag: "1"
 - name: yny.ocir.io/ax1dvc8vmenm/hangsha-prod/hangsha-server
