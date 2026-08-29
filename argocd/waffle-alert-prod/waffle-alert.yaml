@@ -58,6 +58,35 @@ kind: ServiceAccount
 metadata:
   name: waffle-alert
 ---
+# waffle-alert가 쿠버네티스 API의 watch 스트림을 구독하기 위한 권한
+apiVersion: rbac.authorization.k8s.io/v1
+kind: ClusterRole
+metadata:
+  name: waffle-alert-k8s-watch
+rules:
+  - apiGroups: [""]
+    resources: ["pods"]
+    verbs: ["get", "list", "watch", "patch"]
+  - apiGroups: [""]
+    resources: ["nodes"]
+    verbs: ["get", "list", "watch"]
+  - apiGroups: ["batch"]
+    resources: ["jobs"]
+    verbs: ["get", "list", "watch"]
+---
+apiVersion: rbac.authorization.k8s.io/v1
+kind: ClusterRoleBinding
+metadata:
+  name: waffle-alert-k8s-watch
+roleRef:
+  apiGroup: rbac.authorization.k8s.io
+  kind: ClusterRole
+  name: waffle-alert-k8s-watch
+subjects:
+  - kind: ServiceAccount
+    name: waffle-alert
+    namespace: waffle-alert-prod
+---
 apiVersion: v1
 kind: Service
 metadata:
