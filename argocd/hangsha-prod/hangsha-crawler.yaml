@@ -6,7 +6,8 @@ metadata:
     app: hangsha-crawler
 spec:
   concurrencyPolicy: Forbid
-  schedule: "0 */3 * * *"
+  timeZone: Asia/Seoul
+  schedule: "0 12,19 * * 1-5"
   successfulJobsHistoryLimit: 2
   failedJobsHistoryLimit: 3
   jobTemplate:
