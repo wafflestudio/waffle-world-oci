@@ -4,4 +4,4 @@ resources:
 - snutt-timetable.yaml
 images:
 - name: yny.ocir.io/ax1dvc8vmenm/snutt-dev/snutt-timetable
-  newTag: "83"
+  newTag: "84"
