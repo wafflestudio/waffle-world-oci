@@ -15,7 +15,7 @@ spec:
   sources:
   - repoURL: https://grafana.github.io/helm-charts
     chart: alloy
-    targetRevision: 1.11.1
+    targetRevision: 1.12.1
     helm:
       releaseName: loki-alloy
       valueFiles:
