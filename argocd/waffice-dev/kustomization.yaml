@@ -7,4 +7,4 @@ resources:
 
 images:
 - name: yny.ocir.io/ax1dvc8vmenm/waffice-dev/waffice-server
-  newTag: "20260806-123707"
+  newTag: 20260905-160658
