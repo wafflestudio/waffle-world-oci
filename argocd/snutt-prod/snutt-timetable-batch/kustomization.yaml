@@ -4,4 +4,4 @@ resources:
 - snutt-timetable-batch.yaml
 images:
 - name: yny.ocir.io/ax1dvc8vmenm/snutt-prod/snutt-timetable-batch
-  newTag: "19"
+  newTag: "20"
