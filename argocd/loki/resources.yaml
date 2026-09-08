@@ -38,13 +38,16 @@ data:
             # grouping하면 충분하고, waffle-alert 쪽도 이 alert(ruleName=ApplicationErrorLog)를
             # 받으면 namespace+시간창 기준으로 Loki를 조회하는 것으로 단순화한다.
             #
-            # kube-system/kube-node-lease/kube-public은 어떤 서비스팀도 소유하지 않는 클러스터
-            # 시스템 컴포넌트라 이 rule의 대상에서 제외한다. oke-node-problem-detector,
-            # oke-dataplane-observability-agent처럼 정상 초기화/상태 로그에 흔한 문자열이
-            # error/fatal/panic과 겹쳐 team-infra-alert에 노이즈로 들어오는 걸 실제 확인했다.
+            # kube-system/kube-node-lease/kube-public/k8s-monitoring은 어떤 서비스팀도
+            # 소유하지 않는 클러스터 시스템 컴포넌트라 이 rule의 대상에서 제외한다.
+            # oke-node-problem-detector, oke-dataplane-observability-agent처럼 정상
+            # 초기화/상태 로그에 흔한 문자열이 error/fatal/panic과 겹쳐 team-infra-alert에
+            # 노이즈로 들어오는 걸 실제 확인했다. k8s-monitoring은 waffle-alert의 K8s watch로
+            # 대체된 구 컴포넌트(K8sEventMapper 참고)로, 여기 앱이 남긴 옛 Pod 상태 로그
+            # 텍스트가 다른 서비스팀 namespace(snutt-prod 등) 이름을 포함해 오해를 유발했다.
             expr: |
               sum by (namespace, pod, app) (
-                count_over_time({always="1", namespace!~"kube-system|kube-node-lease|kube-public"}[2m])
+                count_over_time({always="1", namespace!~"kube-system|kube-node-lease|kube-public|k8s-monitoring"}[2m])
               ) > 0
             for: 0s
             labels:
