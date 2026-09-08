@@ -30,16 +30,21 @@ data:
       - name: waffle-alert-logs
         rules:
           - alert: ApplicationErrorLog
-            # Alloy가 이미 ERROR/WARN/FATAL/PANIC 로그만 Loki로 보내고 있으므로
+            # Alloy가 이미 ERROR/FATAL/PANIC 로그만 Loki로 보내고 있으므로
             # (argocd/loki-alloy), 여기서는 그걸 다시 필터링하지 않고 존재 자체를 감지한다.
             #
             # trace_id 추출(pattern/label_format)은 이번 스코프에서 제외한다 - 이걸 로그에
             # 찍는 팀이 없어 항상 폴백 경로만 타는 죽은 코드였다. namespace+pod+app만으로
             # grouping하면 충분하고, waffle-alert 쪽도 이 alert(ruleName=ApplicationErrorLog)를
             # 받으면 namespace+시간창 기준으로 Loki를 조회하는 것으로 단순화한다.
+            #
+            # kube-system/kube-node-lease/kube-public은 어떤 서비스팀도 소유하지 않는 클러스터
+            # 시스템 컴포넌트라 이 rule의 대상에서 제외한다. oke-node-problem-detector,
+            # oke-dataplane-observability-agent처럼 정상 초기화/상태 로그에 흔한 문자열이
+            # error/fatal/panic과 겹쳐 team-infra-alert에 노이즈로 들어오는 걸 실제 확인했다.
             expr: |
               sum by (namespace, pod, app) (
-                count_over_time({always="1"}[2m])
+                count_over_time({always="1", namespace!~"kube-system|kube-node-lease|kube-public"}[2m])
               ) > 0
             for: 0s
             labels:
