@@ -57,8 +57,12 @@ alloy:
           }
         }
 
+        # warn은 재시작/설정 리로드처럼 정상 운영 로그에도 흔히 찍혀 waffle-alert
+        # ApplicationErrorLog 알림에 노이즈로 들어왔다(예: otelcol "Config updated,
+        # restart service", kube-system node-problem-detector 초기화 로그가 문자열에
+        # "warn"을 포함해 오탐). error/fatal/panic만 남긴다.
         stage.match {
-          selector = `{always="1"} !~ "(?i)\\b(error|warn|fatal|panic)\\b"`
+          selector = `{always="1"} !~ "(?i)\\b(error|fatal|panic)\\b"`
           action   = "drop"
           drop_counter_reason = "not_error_level"
         }
