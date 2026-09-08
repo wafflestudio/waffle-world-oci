@@ -62,8 +62,16 @@ loki:
   # retention_period는 값만 설정해선 아무 효과가 없다 - compactor.retention_enabled를
   # 켜야 실제로 오래된 chunk/index를 지운다. 이게 빠져 있어서 10Gi PVC가 무제한으로
   # 쌓이기만 하고 있었던 걸 뒤늦게 발견해 추가한다.
+  #
+  # retention_enabled: true만 켜고 배포하면 Loki가 기동 시점에 config validation에서
+  # 죽는다("CONFIG ERROR: invalid compactor config: compactor.delete-request-store should
+  # be configured when retention is enabled") - 실제 클러스터에서 재현 확인. retention_enabled는
+  # delete_request_store(삭제 요청을 기록할 스토리지)를 반드시 함께 요구한다. object storage를
+  # 안 쓰는 SingleBinary+filesystem 구성이므로 나머지 storage처럼 filesystem을 그대로 쓴다.
   compactor:
+    working_directory: /var/loki/compactor
     retention_enabled: true
+    delete_request_store: filesystem
 
 singleBinary:
   replicas: 1
