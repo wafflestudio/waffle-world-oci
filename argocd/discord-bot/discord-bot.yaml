@@ -1,0 +1,45 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: discord-bot
+  labels:
+    app: discord-bot
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: discord-bot
+  strategy:
+    type: Recreate
+  revisionHistoryLimit: 2
+  template:
+    metadata:
+      labels:
+        app: discord-bot
+    spec:
+      nodeSelector:
+        kubernetes.io/arch: arm64
+      containers:
+      - name: discord-bot
+        image: yny.ocir.io/ax1dvc8vmenm/discord-bot
+        imagePullPolicy: Always
+        #시크릿
+        volumeMounts:
+        - name: discord-bot-secret
+          mountPath: /var/run/secrets/discord-bot
+          readOnly: true
+        resources:
+          requests:
+            cpu: 20m
+            memory: 64Mi
+          limits:
+            memory: 128Mi
+
+      #시크릿
+      volumes:
+      - name: discord-bot-secret
+        secret:
+          secretName: discord-bot
+          items:
+          - key: token
+            path: token
