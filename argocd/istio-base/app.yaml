@@ -23,4 +23,4 @@ spec:
   source:
     repoURL: https://istio-release.storage.googleapis.com/charts
     chart: base
-    targetRevision: 1.29.2
+    targetRevision: 1.30.4
