@@ -25,7 +25,7 @@ runs:
       id: app-token
       uses: actions/create-github-app-token@v3
       with:
-        app-id: '2842871'
+        client-id: 'Iv23lijiSk5hqJhw5DsY'
         private-key: ${{ inputs.private-key }}
         owner: wafflestudio
         repositories: waffle-world-oci
