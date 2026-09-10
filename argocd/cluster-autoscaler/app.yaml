@@ -27,7 +27,7 @@ spec:
     # 소스 1: 공식 Helm Chart (로직)
     - repoURL: https://kubernetes.github.io/autoscaler
       chart: cluster-autoscaler
-      targetRevision: 9.57.0
+      targetRevision: 9.59.0
       helm:
         valueFiles:
           - $values/argocd/cluster-autoscaler/values.yaml
