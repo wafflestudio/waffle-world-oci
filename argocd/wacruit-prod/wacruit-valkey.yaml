@@ -1,0 +1,45 @@
+apiVersion: apps/v1
+kind: StatefulSet
+metadata:
+  name: wacruit-valkey
+  labels:
+    app: wacruit-valkey
+spec:
+  serviceName: wacruit-valkey
+  replicas: 1
+  selector:
+    matchLabels:
+      app: wacruit-valkey
+  template:
+    metadata:
+      labels:
+        app: wacruit-valkey
+      annotations:
+        sidecar.istio.io/inject: "false"
+    spec:
+      serviceAccountName: wacruit
+      nodeSelector:
+        kubernetes.io/arch: arm64
+      containers:
+        - name: valkey
+          image: docker.io/valkey/valkey:9-alpine
+          ports:
+            - containerPort: 6379
+          resources:
+            requests:
+              cpu: 15m
+              memory: 128Mi
+            limits:
+              memory: 256Mi
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: wacruit-valkey
+spec:
+  type: ClusterIP
+  selector:
+    app: wacruit-valkey
+  ports:
+    - port: 6379
+      targetPort: 6379

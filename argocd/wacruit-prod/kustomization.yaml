@@ -5,6 +5,7 @@ resources:
 - wacruit-judge-server.yaml
 - wacruit-judge-worker.yaml
 - wacruit-server.yaml
+- wacruit-valkey.yaml
 
 images:
 - name: yny.ocir.io/ax1dvc8vmenm/wacruit-prod/wacruit-judge-server

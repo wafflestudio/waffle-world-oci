@@ -26,6 +26,11 @@ spec:
       containers:
         - image: yny.ocir.io/ax1dvc8vmenm/wacruit-prod/wacruit-server
           name: wacruit-server
+          env:
+            - name: REDIS_HOST
+              value: "wacruit-valkey"
+            - name: REDIS_PORT
+              value: 6379
           resources:
             requests:
               cpu: 10m
