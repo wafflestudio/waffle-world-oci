@@ -14,4 +14,4 @@ images:
 - name: yny.ocir.io/ax1dvc8vmenm/siksha-prod/siksha-crawler
   newTag: "4"
 - name: yny.ocir.io/ax1dvc8vmenm/siksha-prod/siksha-spring-server
-  newTag: "15"
+  newTag: "16"
