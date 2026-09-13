@@ -31,9 +31,9 @@ spec:
         resources:
           requests:
             cpu: 20m
-            memory: 64Mi
+            memory: 32Mi
           limits:
-            memory: 128Mi
+            memory: 64Mi
 
       #시크릿
       volumes:
@@ -43,3 +43,7 @@ spec:
           items:
           - key: token
             path: token
+          - key: announce_channel_id
+            path: announce_channel_id
+          - key: n8n_token
+            path: n8n_token
