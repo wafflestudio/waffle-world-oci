@@ -82,7 +82,7 @@ singleBinary:
   resources:
     requests:
       cpu: 50m
-      memory: 256Mi
+      memory: 192Mi
     limits:
       # 클러스터 전체 서비스 로그가 이 단일 인스턴스로 집중되므로 512Mi는 OOM 여유가 부족해
       # 보여 1Gi로 상향. ERROR만 필터링해 유입량 자체는 줄이되, 배포 직후 버스트나 장애 시

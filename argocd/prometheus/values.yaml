@@ -128,6 +128,13 @@ prometheus:
           - source_labels: [__meta_kubernetes_pod_container_port_name]
             action: keep
             regex: ".*-envoy-prom"
+        # Request/response byte histograms account for 9,280 active series but are
+        # not used by this repository's alerts or dashboards. Retain counters and
+        # latency histograms while dropping only these high-cardinality buckets.
+        metric_relabel_configs:
+          - source_labels: [__name__]
+            action: drop
+            regex: "istio_(request|response)_bytes_bucket"
       - job_name: "istio-mesh"
         kubernetes_sd_configs:
           - role: endpoints
