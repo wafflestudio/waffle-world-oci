@@ -7,3 +7,11 @@ global:
       limits:
         cpu: 300m
         memory: 256Mi
+
+# The control-plane pod used 83-92Mi over the last 7 days. Keep nearly 3x the
+# observed peak as the scheduling guarantee and a 5x hard-limit headroom.
+resources:
+  requests:
+    memory: 256Mi
+  limits:
+    memory: 512Mi

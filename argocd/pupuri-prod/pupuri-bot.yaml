@@ -31,7 +31,8 @@ spec:
               cpu: 20m
               memory: 128Mi
             limits:
-              memory: 128Mi
+              # Temporary burst headroom until the unbounded dashboard query is fixed.
+              memory: 256Mi
           ports:
             - containerPort: 3000
 ---
