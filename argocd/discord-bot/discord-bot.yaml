@@ -35,17 +35,8 @@ spec:
           limits:
             memory: 64Mi
 
-      #시크릿
+      #시크릿.
       volumes:
       - name: discord-bot-secret
         secret:
           secretName: discord-bot
-        items:
-          - key: token
-            path: token
-          - key: announce_channel_id
-            path: announce_channel_id
-          - key: n8n_token
-            path: n8n_token
-          - key: n8n_webhook_url
-            path: n8n_webhook_url
