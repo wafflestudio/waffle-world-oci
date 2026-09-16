@@ -26,6 +26,11 @@ spec:
       containers:
         - image: yny.ocir.io/ax1dvc8vmenm/siksha-dev/siksha-spring-server
           name: siksha-spring-server
+          env:
+            # The image defaults InitialRAMPercentage to 60, committing most of the
+            # container limit at startup. Keep the same max heap but start at 25%.
+            - name: JAVA_TOOL_OPTIONS
+              value: "-XX:InitialRAMPercentage=25.0 -XX:MaxRAMPercentage=60.0 -XX:+UseSerialGC -Xss256k"
           resources:
             requests:
               cpu: 20m
