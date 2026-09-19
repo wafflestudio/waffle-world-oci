@@ -1,0 +1,45 @@
+apiVersion: batch/v1
+kind: CronJob
+metadata:
+  name: snutt-batch-sugang-snu-sync
+  labels:
+    app: snutt-batch-sugang-snu-sync
+spec:
+  concurrencyPolicy: Forbid
+  schedule: "0 */12 * * *"
+  successfulJobsHistoryLimit: 2
+  failedJobsHistoryLimit: 3
+  jobTemplate:
+    spec:
+      template:
+        metadata:
+          annotations:
+            sidecar.istio.io/inject: "false"
+        spec:
+          nodeSelector:
+            kubernetes.io/arch: arm64
+          restartPolicy: OnFailure
+          serviceAccountName: snutt-batch-dev
+          containers:
+            - image: yny.ocir.io/ax1dvc8vmenm/snutt-dev/snutt-batch
+              name: snutt-batch-sugang-snu-sync
+              resources:
+                requests:
+                  cpu: 50m
+                  memory: 256Mi
+                limits:
+                  cpu: 200m
+                  memory: 2Gi
+              env:
+                - name: JOB_NAME
+                  value: "sugangSnuSync"
+                - name: SPRING_PROFILES_ACTIVE
+                  value: "dev"
+              envFrom:
+                - secretRef:
+                    name: snutt-v2
+---
+apiVersion: v1
+kind: ServiceAccount
+metadata:
+  name: snutt-batch-dev
