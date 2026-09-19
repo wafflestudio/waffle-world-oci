@@ -4,4 +4,4 @@ resources:
 - snutt-batch.yaml
 images:
 - name: yny.ocir.io/ax1dvc8vmenm/snutt-dev/snutt-batch
-  newTag: 76665d70df65
+  newTag: 88b534d169d7
