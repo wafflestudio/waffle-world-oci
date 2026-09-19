@@ -10,4 +10,4 @@ images:
 - name: yny.ocir.io/ax1dvc8vmenm/snutt-dev/snutt-api
   newTag: d72e6bd72bcc
 - name: yny.ocir.io/ax1dvc8vmenm/snutt-dev/snutt-batch
-  newTag: d72e6bd72bcc
+  newTag: 84a0d295ff19
