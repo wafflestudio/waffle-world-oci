@@ -5,4 +5,4 @@ resources:
 - snutt-api.yaml
 images:
 - name: yny.ocir.io/ax1dvc8vmenm/snutt-dev/snutt-api
-  newTag: 76665d70df65
+  newTag: 88b534d169d7
