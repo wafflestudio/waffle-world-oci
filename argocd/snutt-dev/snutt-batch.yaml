@@ -25,10 +25,9 @@ spec:
               name: snutt-batch-sugang-snu-sync
               resources:
                 requests:
-                  cpu: 50m
-                  memory: 256Mi
-                limits:
                   cpu: 200m
+                  memory: 512Mi
+                limits:
                   memory: 2Gi
               env:
                 - name: JOB_NAME
