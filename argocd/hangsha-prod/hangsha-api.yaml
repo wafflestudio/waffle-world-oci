@@ -52,6 +52,8 @@ spec:
           env:
             - name: SPRING_PROFILES_ACTIVE
               value: "prod"
+            - name: DISCORD_APPLICATION_PUBLIC_KEY
+              value: "abcc1a5c4e8f6724a4ce0e1de3d68e65f32fe0c5a8f65451d41a1409a1f19311"
             - name: MANTICORE_BASE_URL
               value: "http://hangsha-manticore:9308"
             - name: KIWI_BASE_URL
