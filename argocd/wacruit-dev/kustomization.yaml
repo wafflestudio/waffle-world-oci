@@ -11,4 +11,4 @@ images:
 - name: yny.ocir.io/ax1dvc8vmenm/wacruit-dev/wacruit-judge-server
   newTag: "28"
 - name: yny.ocir.io/ax1dvc8vmenm/wacruit-dev/wacruit-server
-  newTag: "149"
+  newTag: "151"
