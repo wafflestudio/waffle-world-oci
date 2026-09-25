@@ -31,7 +31,7 @@ alertmanager:
       - name: waffle-alert-webhook
         webhook_configs:
           - url: http://waffle-alert.waffle-alert-prod.svc.cluster.local/api/v1/alerts/webhook
-            send_resolved: true
+            send_resolved: false # 해소 알림은 Discord로 보내지 않는다
     inhibit_rules: [] # TODO: 동일 종류 얼러트에 대해 severity가 나눠지는 경우에만 설정
   alertmanagerSpec:
     replicas: 1
