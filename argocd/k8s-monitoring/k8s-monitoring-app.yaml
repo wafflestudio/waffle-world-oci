@@ -11,7 +11,8 @@ metadata:
     app: app
   namespace: k8s-monitoring
 spec:
-  replicas: 1
+  # waffle-alert의 K8s watch(Pod/Job/Node)가 이 앱의 알림을 대체해서 더 이상 띄우지 않는다.
+  replicas: 0
   selector:
     matchLabels:
       app: app
