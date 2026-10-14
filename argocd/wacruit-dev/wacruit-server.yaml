@@ -30,7 +30,7 @@ spec:
             - name: REDIS_HOST
               value: "wacruit-valkey"
             - name: REDIS_PORT
-              value: 6379
+              value: "6379"
           resources:
             requests:
               cpu: 10m
