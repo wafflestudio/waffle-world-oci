@@ -1,0 +1,38 @@
+# prometheus Application의 세 번째 source(argocd/prometheus)를 kustomize로 빌드한다.
+# values.yaml은 helm source가 $values로 참조하므로 여기 resources에 넣지 않는다.
+apiVersion: kustomize.config.k8s.io/v1beta1
+kind: Kustomization
+
+resources:
+- resources.yaml
+- alert-rules.yaml
+- loki-datasource.yaml
+
+# Grafana 대시보드 JSON을 ConfigMap으로 만든다. grafana의 dashboard sidecar가
+# label 'grafana_dashboard: "1"'을 감지해 grafana_folder 폴더로 자동 로드한다.
+# Grafana storage가 emptyDir이라 UI에서 import한 대시보드는 pod 재시작 시 사라지므로,
+# 유지할 대시보드는 JSON을 여기 추가해 프로비저닝한다. (UI에서 수정한 내용은 저장되지 않음 - JSON을 고칠 것)
+generatorOptions:
+  disableNameSuffixHash: true
+  labels:
+    grafana_dashboard: "1"
+  annotations:
+    grafana_folder: "Waffle"
+
+configMapGenerator:
+- name: grafana-dashboard-mysql-per-db
+  namespace: prometheus
+  files:
+  - grafana-dashboard-mysql-per-db.json
+- name: grafana-dashboard-namespace-comparison
+  namespace: prometheus
+  files:
+  - grafana-dashboard-namespace-comparison.json
+- name: grafana-dashboard-team-namespace-detail
+  namespace: prometheus
+  files:
+  - grafana-dashboard-team-namespace-detail.json
+- name: grafana-dashboard-team-resource-usage
+  namespace: prometheus
+  files:
+  - grafana-dashboard-team-resource-usage.json

@@ -25,9 +25,8 @@ spec:
     ref: values
   - repoURL: https://github.com/wafflestudio/waffle-world-oci.git
     targetRevision: main
+    # kustomization.yaml로 빌드 (매니페스트 + 대시보드 ConfigMap)
     path: argocd/prometheus
-    directory:
-      include: '{resources.yaml,alert-rules.yaml,loki-datasource.yaml}'
   syncPolicy:
     automated:
       prune: true
