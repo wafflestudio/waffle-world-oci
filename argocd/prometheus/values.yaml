@@ -31,7 +31,7 @@ alertmanager:
       - name: waffle-alert-webhook
         webhook_configs:
           - url: http://waffle-alert.waffle-alert-prod.svc.cluster.local/api/v1/alerts/webhook
-            send_resolved: true
+            send_resolved: false # 해소 알림은 Discord로 보내지 않는다
     inhibit_rules: [] # TODO: 동일 종류 얼러트에 대해 severity가 나눠지는 경우에만 설정
   alertmanagerSpec:
     replicas: 1
@@ -69,6 +69,10 @@ grafana:
   grafana.ini:
     server:
       root_url: https://grafana.wafflestudio.com
+    users:
+      # Viewer도 Explore를 쓸 수 있게 한다 (waffle-alert가 Discord에 붙이는 Explore 딥링크용).
+      # 대시보드 저장 권한은 주지 않는다. Viewer는 원래 데이터소스 쿼리 권한이 있어서 데이터 노출 범위는 그대로다.
+      viewers_can_edit: true
     auth.github:
       enabled: true
       allow_sign_up: true

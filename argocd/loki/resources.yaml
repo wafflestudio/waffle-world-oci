@@ -54,8 +54,9 @@ data:
               source: waffle
               severity: warning
             annotations:
-              summary: "{{ $labels.namespace }}/{{ $labels.app }} error log detected"
-              description: '{{ $labels.namespace }}/{{ $labels.pod }}에서 에러 로그가 감지됨.'
+              # waffle-alert는 title(summary)만 굵게 보여주고 그 아래에 로그 원문을 붙인다.
+              # description은 title과 내용이 겹쳐서 두지 않는다.
+              summary: "Error log detected in {{ $labels.namespace }}/{{ $labels.pod }}"
               namespace: "{{ $labels.namespace }}"
               pod: "{{ $labels.pod }}"
               app: "{{ $labels.app }}"

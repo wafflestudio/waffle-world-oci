@@ -8,4 +8,4 @@ resources:
 
 images:
 - name: yny.ocir.io/ax1dvc8vmenm/snuclear-prod/snuclear-server
-  newTag: "35"
+  newTag: "38"
