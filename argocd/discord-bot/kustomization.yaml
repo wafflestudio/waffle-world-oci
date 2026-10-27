@@ -7,4 +7,4 @@ resources:
 
 images:
 - name: yny.ocir.io/ax1dvc8vmenm/discord-bot
-  newTag: 5f9fb6a36048287e010148f5b1526e2d618df538
+  newTag: 903a3928138da96aa6a4d02a0c9717c8755dc447
