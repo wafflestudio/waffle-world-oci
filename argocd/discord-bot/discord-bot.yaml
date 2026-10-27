@@ -28,6 +28,9 @@ spec:
         - name: discord-bot-secret
           mountPath: /var/run/secrets/discord-bot
           readOnly: true
+        - name: github-app
+          mountPath: /var/run/secrets/github-app
+          readOnly: true
         resources:
           requests:
             cpu: 5m
@@ -42,3 +45,6 @@ spec:
       - name: discord-bot-secret
         secret:
           secretName: discord-bot
+      - name: github-app
+        secret:
+          secretName: dicoco-github-app
