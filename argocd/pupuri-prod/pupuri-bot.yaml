@@ -5,7 +5,7 @@ metadata:
   labels:
     app: pupuri-bot
 spec:
-  replicas: 1
+  replicas: 0
   selector:
     matchLabels:
       app: pupuri-bot
