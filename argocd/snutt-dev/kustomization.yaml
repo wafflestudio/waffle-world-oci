@@ -8,6 +8,6 @@ resources:
 - snutt-batch.yaml
 images:
 - name: yny.ocir.io/ax1dvc8vmenm/snutt-dev/snutt-api
-  newTag: 9635ace6552b
+  newTag: d06d3af313d2
 - name: yny.ocir.io/ax1dvc8vmenm/snutt-dev/snutt-batch
   newTag: 9635ace6552b
