@@ -44,7 +44,7 @@ spec:
                 - name: DISCORD_SOURCE_CHANNEL_ID
                   value: "1498234190825656490"
                 - name: DISCORD_REMINDER_CHANNEL_ID
-                  value: "1496835457726681208"
+                  value: "1498234190825656490"
               volumeMounts:
                 - name: discord-bot-secret
                   mountPath: /var/run/secrets/discord-bot
