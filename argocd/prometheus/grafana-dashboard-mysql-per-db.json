@@ -33,7 +33,7 @@
       "targets": [
         {
           "datasource": { "type": "prometheus", "uid": "prometheus" },
-          "expr": "rate(mysql_perf_schema_events_statements_sum_total{schema!~\"performance_schema|information_schema|mysql|sys|\"}[5m])",
+          "expr": "sum by (schema) (rate(mysql_perf_schema_events_statements_total{schema!~\"performance_schema|information_schema|mysql|sys|\"}[5m]))",
           "legendFormat": "{{schema}}",
           "refId": "A"
         }
@@ -65,7 +65,7 @@
       "targets": [
         {
           "datasource": { "type": "prometheus", "uid": "prometheus" },
-          "expr": "rate(mysql_perf_schema_events_statements_sum_timer_wait{schema!~\"performance_schema|information_schema|mysql|sys|\"}[5m]) / rate(mysql_perf_schema_events_statements_sum_total{schema!~\"performance_schema|information_schema|mysql|sys|\"}[5m]) / 1e9",
+          "expr": "sum by (schema) (rate(mysql_perf_schema_events_statements_seconds_total{schema!~\"performance_schema|information_schema|mysql|sys|\"}[5m])) / sum by (schema) (rate(mysql_perf_schema_events_statements_total{schema!~\"performance_schema|information_schema|mysql|sys|\"}[5m])) * 1000",
           "legendFormat": "{{schema}}",
           "refId": "A"
         }
@@ -97,7 +97,7 @@
       "targets": [
         {
           "datasource": { "type": "prometheus", "uid": "prometheus" },
-          "expr": "rate(mysql_perf_schema_events_statements_sum_errors{schema!~\"performance_schema|information_schema|mysql|sys|\"}[5m])",
+          "expr": "sum by (schema) (rate(mysql_perf_schema_events_statements_errors_total{schema!~\"performance_schema|information_schema|mysql|sys|\"}[5m]))",
           "legendFormat": "{{schema}}",
           "refId": "A"
         }
@@ -122,7 +122,7 @@
       "targets": [
         {
           "datasource": { "type": "prometheus", "uid": "prometheus" },
-          "expr": "rate(mysql_perf_schema_events_statements_sum_warnings{schema!~\"performance_schema|information_schema|mysql|sys|\"}[5m])",
+          "expr": "sum by (schema) (rate(mysql_perf_schema_events_statements_warnings_total{schema!~\"performance_schema|information_schema|mysql|sys|\"}[5m]))",
           "legendFormat": "{{schema}}",
           "refId": "A"
         }
@@ -154,7 +154,7 @@
       "targets": [
         {
           "datasource": { "type": "prometheus", "uid": "prometheus" },
-          "expr": "rate(mysql_perf_schema_events_statements_sum_rows_affected{schema!~\"performance_schema|information_schema|mysql|sys|\"}[5m])",
+          "expr": "sum by (schema) (rate(mysql_perf_schema_events_statements_rows_affected_total{schema!~\"performance_schema|information_schema|mysql|sys|\"}[5m]))",
           "legendFormat": "{{schema}}",
           "refId": "A"
         }
@@ -179,7 +179,7 @@
       "targets": [
         {
           "datasource": { "type": "prometheus", "uid": "prometheus" },
-          "expr": "rate(mysql_perf_schema_events_statements_sum_rows_sent{schema!~\"performance_schema|information_schema|mysql|sys|\"}[5m])",
+          "expr": "sum by (schema) (rate(mysql_perf_schema_events_statements_rows_sent_total{schema!~\"performance_schema|information_schema|mysql|sys|\"}[5m]))",
           "legendFormat": "{{schema}}",
           "refId": "A"
         }
