@@ -4,6 +4,8 @@ kind: Kustomization
 resources:
 - discord-bot.yaml
 - discord-bot-secret.yaml
+- ops-reminder-secret.yaml
+- ops-reminder-cronjob.yaml
 
 images:
 - name: yny.ocir.io/ax1dvc8vmenm/discord-bot
