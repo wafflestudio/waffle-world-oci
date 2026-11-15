@@ -3,3 +3,4 @@ kind: Kustomization
 resources:
   - spring-seminar-db.yaml
   - spring-seminar-secret.yaml
+  - spring-seminar-quota.yaml

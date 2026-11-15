@@ -1,0 +1,14 @@
+# Caps seminar workloads so they can't crowd out production; every pod must set cpu/memory requests and a memory limit.
+apiVersion: v1
+kind: ResourceQuota
+metadata:
+  name: spring-seminar
+spec:
+  hard:
+    pods: "11"
+    requests.cpu: 1500m
+    requests.memory: 4Gi
+    limits.memory: 6Gi
+    persistentvolumeclaims: "1"
+    services.loadbalancers: "0"
+    services.nodeports: "0"
