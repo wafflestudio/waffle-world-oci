@@ -30,12 +30,12 @@ spec:
                 - name: NOTION_TOKEN
                   valueFrom:
                     secretKeyRef:
-                      name: dicoco-ops-reminder
+                      name: discord-bot
                       key: notion_token
                 - name: OPENROUTER_KEY
                   valueFrom:
                     secretKeyRef:
-                      name: dicoco-ops-reminder
+                      name: discord-bot
                       key: openrouter_key
                 - name: OPENROUTER_MODEL
                   value: openai/gpt-4.1-mini
