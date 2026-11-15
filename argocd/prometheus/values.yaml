@@ -67,6 +67,9 @@ grafana:
       provider:
         foldersFromFilesStructure: true
   grafana.ini:
+    analytics:
+      # Usage stats collection logs a daily missing-AMP-plugin error; we don't need grafana.com reporting.
+      reporting_enabled: false
     server:
       root_url: https://grafana.wafflestudio.com
     users:
