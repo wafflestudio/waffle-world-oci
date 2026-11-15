@@ -6,8 +6,7 @@ spec:
   schedule: "0 10 * * *"
   timeZone: Asia/Seoul
   concurrencyPolicy: Forbid
-  # Enable after the Vault secret and the dicoco image containing /ops-reminder exist.
-  suspend: true
+  suspend: false
   startingDeadlineSeconds: 1800
   successfulJobsHistoryLimit: 3
   failedJobsHistoryLimit: 3
