@@ -104,6 +104,11 @@ redis:
       memory: 64Mi
 
 repoServer:
+  # /healthz takes 1-2s while re-rendering all apps after a merge; the default 1s timeout fails.
+  livenessProbe:
+    timeoutSeconds: 4
+  readinessProbe:
+    timeoutSeconds: 4
   resources:
     limits:
       cpu: 200m
