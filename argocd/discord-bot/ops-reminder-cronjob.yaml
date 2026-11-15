@@ -1,0 +1,62 @@
+apiVersion: batch/v1
+kind: CronJob
+metadata:
+  name: dicoco-ops-reminder
+spec:
+  schedule: "0 10 * * *"
+  timeZone: Asia/Seoul
+  concurrencyPolicy: Forbid
+  # Enable after the Vault secret and the dicoco image containing /ops-reminder exist.
+  suspend: true
+  startingDeadlineSeconds: 1800
+  successfulJobsHistoryLimit: 3
+  failedJobsHistoryLimit: 3
+  jobTemplate:
+    spec:
+      backoffLimit: 0
+      activeDeadlineSeconds: 1800
+      template:
+        spec:
+          nodeSelector:
+            kubernetes.io/arch: arm64
+          restartPolicy: Never
+          containers:
+            - name: ops-reminder
+              image: yny.ocir.io/ax1dvc8vmenm/discord-bot
+              imagePullPolicy: Always
+              command: ["/ops-reminder"]
+              args: ["-mode", "daily", "-send"]
+              env:
+                - name: NOTION_TOKEN
+                  valueFrom:
+                    secretKeyRef:
+                      name: dicoco-ops-reminder
+                      key: notion_token
+                - name: OPENROUTER_KEY
+                  valueFrom:
+                    secretKeyRef:
+                      name: dicoco-ops-reminder
+                      key: openrouter_key
+                - name: OPENROUTER_MODEL
+                  value: openai/gpt-4.1-mini
+                - name: NOTION_MEETING_DATA_SOURCE_ID
+                  value: "1be70e37-e9c7-818c-aefe-000b65d6cc4a"
+                - name: DISCORD_SOURCE_CHANNEL_ID
+                  value: "1498234190825656490"
+                - name: DISCORD_REMINDER_CHANNEL_ID
+                  value: "1498234190825656490"
+              volumeMounts:
+                - name: discord-bot-secret
+                  mountPath: /var/run/secrets/discord-bot
+                  readOnly: true
+              resources:
+                requests:
+                  cpu: 50m
+                  memory: 128Mi
+                limits:
+                  cpu: 500m
+                  memory: 512Mi
+          volumes:
+            - name: discord-bot-secret
+              secret:
+                secretName: discord-bot
