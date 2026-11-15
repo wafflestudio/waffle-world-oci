@@ -5,7 +5,7 @@ metadata:
   labels:
     app: snutt-bq-sync
 spec:
-  schedule: "0 4 * * *"
+  schedule: "0 3 * * *"
   timeZone: Asia/Seoul
   concurrencyPolicy: Forbid
   successfulJobsHistoryLimit: 2
