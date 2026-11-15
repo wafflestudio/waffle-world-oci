@@ -57,14 +57,61 @@ alloy:
           }
         }
 
-        // warn은 재시작/설정 리로드처럼 정상 운영 로그에도 흔히 찍혀 waffle-alert
-        // ApplicationErrorLog 알림에 노이즈로 들어왔다(예: otelcol Config updated,
-        // restart service 로그, kube-system node-problem-detector 초기화 로그가
-        // warn을 포함해 오탐). error/fatal/panic만 남긴다.
+        // 로그에 적힌 level로 거른다. 줄 전체에서 error 단어만 찾으면 메시지에 error가 들어간
+        // info/warn 줄까지 waffle-alert ApplicationErrorLog 알림이 된다(예: loki-sc-rules가 룰
+        // ConfigMap 이름 loki-error-log-alert-rules를 찍는 INFO, Alloy의 tailer stopped warn).
+        //
+        // 형식별로 level을 꺼낸다. 앞 단계는 줄 어디서든 찾고, 뒤 단계는 줄 맨 앞에 고정된 형식이라
+        // 둘 다 맞으면 뒤 단계 값이 남는다.
+        stage.regex { // logfmt: Loki, Alloy, Grafana, ArgoCD
+          expression = `(?:^|\s)level="?(?P<level>[A-Za-z]+)`
+        }
+        stage.regex { // JSON: ESO, k8s-sidecar
+          expression = `^\s*\{.*?"(?:level|severity|lvl)"\s*:\s*"(?P<level>[A-Za-z]+)"`
+        }
+        stage.regex { // MongoDB JSON ("s":"I"/"W"/"E"/"F")
+          expression = `^\s*\{"t":\{"\$date":"[^"]*"\},"s":"(?P<level>[A-Z])`
+        }
+        stage.regex { // 시각 + 레벨: Spring Boot, telepresence, Python logging
+          expression = `^\d{4}-\d\d-\d\d[T ]\d\d:\d\d:\d\d(?:[.,]\d+)?(?:Z|[+-]\d\d:?\d\d)?\s+(?P<level>TRACE|DEBUG|INFO|WARN|WARNING|ERROR|FATAL|CRITICAL)\b`
+        }
+        stage.regex { // PostgreSQL
+          expression = `^\d{4}-\d\d-\d\d \d\d:\d\d:\d\d(?:\.\d+)? \w+ \[\d+\] (?P<level>DEBUG\d?|INFO|NOTICE|WARNING|ERROR|LOG|FATAL|PANIC):`
+        }
+        stage.regex { // uvicorn 등 Python 기본 형식
+          expression = `^(?P<level>DEBUG|INFO|WARNING|ERROR|CRITICAL):\s`
+        }
+        stage.regex { // klog (I/W/E/F)
+          expression = `^(?P<level>[IWEF])\d{4} \d\d:\d\d:\d\d\.\d+`
+        }
+        stage.regex { // istio
+          expression = `^\d{4}-\d\d-\d\dT\S+\t(?P<level>debug|info|warn|warning|error|fatal)\t`
+        }
+
+        stage.labels {
+          values = {
+            level = "",
+          }
+        }
+
+        // level이 있는 줄은 error 이상(klog·MongoDB의 E/F 포함)만 남긴다. warn은 재시작이나
+        // 설정 리로드처럼 정상 운영에도 흔히 찍혀 노이즈가 된다.
         stage.match {
-          selector = `{always="1"} !~ "(?i)\\b(error|fatal|panic)\\b"`
-          action   = "drop"
+          selector            = `{always="1", level!~"(?i)(|e|err|error|f|fatal|panic|crit|critical|alert|emerg)"}`
+          action              = "drop"
+          drop_counter_reason = "below_error_level"
+        }
+
+        // level이 없는 줄(traceback, 평문 로그 등)은 전처럼 error/fatal/panic 단어로 판단한다.
+        stage.match {
+          selector            = `{always="1", level=""} !~ "(?i)\\b(error|fatal|panic)\\b"`
+          action              = "drop"
           drop_counter_reason = "not_error_level"
+        }
+
+        // level은 판단에만 쓰고 Loki 스트림은 전과 같게 둔다(ApplicationErrorLog 룰과 그룹 키가 그대로).
+        stage.label_drop {
+          values = ["level"]
         }
       }
 
