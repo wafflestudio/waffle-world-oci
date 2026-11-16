@@ -28,3 +28,13 @@ streams:
       updated_at: timestamp
     source_options:
       flatten: 1
+
+  # 친구 관계. 친구에게 붙인 표시 이름(from/toUserDisplayName)은 적재하지 않는다.
+  # 요청을 거절하거나 친구를 끊으면 문서가 지워진다.
+  snutt.friend:
+    columns:
+      createdAt: timestamp
+      updatedAt: timestamp
+    source_options:
+      flatten: 1
+      jq: '{_id, fromUserId, toUserId, isAccepted, createdAt, updatedAt}'

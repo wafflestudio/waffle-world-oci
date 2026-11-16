@@ -24,6 +24,7 @@ spec:
           restartPolicy: OnFailure
           serviceAccountName: snutt-bq-sync
           # 1) snutt Mongo → snutt_raw_v1  2) snutt-ev MySQL → snutt_raw_v1  3) 계약 view(snutt.*) 갱신
+          # 4) 대시보드용 집계(snutt_metrics) 갱신
           initContainers:
             - name: replicate
               image: docker.io/slingdata/sling:1.6.5-arm64
@@ -63,10 +64,16 @@ spec:
               env: *env
               volumeMounts: *mounts
               resources: *resources
-          containers:
             - name: apply-views
               image: docker.io/slingdata/sling:1.6.5-arm64
               args: ["conns", "exec", "BIGQUERY", "/config/views.sql"]
+              env: *env
+              volumeMounts: *mounts
+              resources: *resources
+          containers:
+            - name: build-metrics
+              image: docker.io/slingdata/sling:1.6.5-arm64
+              args: ["conns", "exec", "BIGQUERY", "/config/metrics.sql"]
               env: *env
               volumeMounts: *mounts
               resources: *resources

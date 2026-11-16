@@ -101,3 +101,15 @@ SELECT
   user_id,
   created_at
 FROM `snutt-792f1.snutt_raw_v1.ev_evaluation_like`;
+
+-- 친구 관계. is_accepted가 FALSE면 아직 수락하지 않은 요청이다.
+-- 거절하거나 끊은 관계는 원본에서 지워지므로 여기에도 없다.
+CREATE OR REPLACE VIEW `snutt-792f1.snutt.friend` AS
+SELECT
+  _id AS id,
+  fromUserId AS from_user_id,
+  toUserId AS to_user_id,
+  IFNULL(isAccepted, FALSE) AS is_accepted,
+  createdAt AS created_at,
+  updatedAt AS updated_at
+FROM `snutt-792f1.snutt_raw_v1.friend`;

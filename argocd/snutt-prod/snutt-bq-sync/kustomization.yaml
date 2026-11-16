@@ -9,3 +9,4 @@ configMapGenerator:
   - replication.yaml
   - replication-ev.yaml
   - views.sql
+  - metrics.sql
