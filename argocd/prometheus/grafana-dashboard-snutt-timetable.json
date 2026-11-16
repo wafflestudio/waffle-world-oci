@@ -1,0 +1,330 @@
+{
+  "uid": "snutt-timetable",
+  "title": "SNUTT 시간표 짜기",
+  "description": "학기별 대표 시간표, 시간표 생성, 강의 검색·상세 보기 같은 시간표를 짜는 행동. 데이터는 BigQuery snutt_metrics.",
+  "tags": [
+    "snutt",
+    "bigquery"
+  ],
+  "timezone": "Asia/Seoul",
+  "editable": true,
+  "graphTooltip": 1,
+  "time": {
+    "from": "now-90d/d",
+    "to": "now/d"
+  },
+  "timepicker": {
+    "refresh_intervals": [
+      "1h",
+      "6h",
+      "1d"
+    ]
+  },
+  "refresh": "",
+  "schemaVersion": 39,
+  "version": 1,
+  "annotations": {
+    "list": []
+  },
+  "templating": {
+    "list": []
+  },
+  "links": [
+    {
+      "type": "dashboards",
+      "tags": [
+        "snutt"
+      ],
+      "asDropdown": false,
+      "includeVars": false,
+      "keepTime": true,
+      "targetBlank": false,
+      "title": "SNUTT"
+    }
+  ],
+  "panels": [
+    {
+      "type": "text",
+      "id": 1,
+      "title": "",
+      "options": {
+        "mode": "markdown",
+        "content": "**데이터 기준** · 매일 03:00(KST)에 갱신돼요. 시간표 숫자는 **지금 남아 있는 시간표 기준**이라, 지운 시간표는 과거 숫자에서도 빠져요. 강의 탐색 행동(GA)은 Android 이벤트 이름이 깨져 있어 거의 iOS 값이에요."
+      },
+      "gridPos": {
+        "x": 0,
+        "y": 0,
+        "w": 24,
+        "h": 2
+      }
+    },
+    {
+      "type": "row",
+      "id": 2,
+      "title": "학기별",
+      "collapsed": false,
+      "gridPos": {
+        "x": 0,
+        "y": 2,
+        "w": 24,
+        "h": 1
+      },
+      "panels": []
+    },
+    {
+      "type": "barchart",
+      "id": 3,
+      "title": "학기별 대표 시간표 수",
+      "description": "학기마다 대표 시간표로 지정된 시간표 수와, 그 학기 시간표를 하나라도 가진 사용자 수. 현재 상태 기준. S=여름, W=겨울.",
+      "datasource": {
+        "type": "grafana-bigquery-datasource",
+        "uid": "snutt-bigquery"
+      },
+      "targets": [
+        {
+          "refId": "A",
+          "datasource": {
+            "type": "grafana-bigquery-datasource",
+            "uid": "snutt-bigquery"
+          },
+          "editorMode": "code",
+          "rawQuery": true,
+          "format": 1,
+          "location": "US",
+          "project": "snutt-792f1",
+          "rawSql": "SELECT label AS `학기`, primary_timetables AS `대표 시간표`, users_with_timetable AS `시간표가 있는 사용자`\nFROM `snutt-792f1.snutt_metrics.semester_stats` ORDER BY year DESC, semester DESC LIMIT 12"
+        }
+      ],
+      "fieldConfig": {
+        "defaults": {
+          "color": {
+            "mode": "palette-classic"
+          },
+          "custom": {
+            "fillOpacity": 80,
+            "lineWidth": 1
+          }
+        },
+        "overrides": []
+      },
+      "options": {
+        "xField": "학기",
+        "orientation": "vertical",
+        "stacking": "none",
+        "showValue": "never",
+        "groupWidth": 0.7,
+        "barWidth": 0.9,
+        "xTickLabelRotation": -45,
+        "legend": {
+          "displayMode": "list",
+          "placement": "bottom",
+          "showLegend": true
+        },
+        "tooltip": {
+          "mode": "multi",
+          "sort": "none"
+        }
+      },
+      "gridPos": {
+        "x": 0,
+        "y": 3,
+        "w": 12,
+        "h": 9
+      }
+    },
+    {
+      "type": "table",
+      "id": 4,
+      "title": "학기별 시간표 현황",
+      "description": "현재 상태 기준. 평균 강의 수와 평균 학점은 대표 시간표 기준이에요. 시간표를 지우면 과거 학기 숫자도 줄어요.",
+      "datasource": {
+        "type": "grafana-bigquery-datasource",
+        "uid": "snutt-bigquery"
+      },
+      "targets": [
+        {
+          "refId": "A",
+          "datasource": {
+            "type": "grafana-bigquery-datasource",
+            "uid": "snutt-bigquery"
+          },
+          "editorMode": "code",
+          "rawQuery": true,
+          "format": 1,
+          "location": "US",
+          "project": "snutt-792f1",
+          "rawSql": "SELECT label AS `학기`, timetables AS `시간표`, users_with_timetable AS `사용자`, primary_timetables AS `대표 시간표`,\n  ROUND(avg_lectures_per_primary, 1) AS `평균 강의 수`, ROUND(avg_credits_per_primary, 1) AS `평균 학점`\nFROM `snutt-792f1.snutt_metrics.semester_stats` ORDER BY year DESC, semester DESC LIMIT 12"
+        }
+      ],
+      "fieldConfig": {
+        "defaults": {
+          "custom": {
+            "align": "auto",
+            "cellOptions": {
+              "type": "auto"
+            }
+          }
+        },
+        "overrides": []
+      },
+      "options": {
+        "showHeader": true,
+        "cellHeight": "sm",
+        "footer": {
+          "show": false,
+          "reducer": [
+            "sum"
+          ],
+          "fields": ""
+        }
+      },
+      "gridPos": {
+        "x": 12,
+        "y": 3,
+        "w": 12,
+        "h": 9
+      }
+    },
+    {
+      "type": "row",
+      "id": 5,
+      "title": "날짜별",
+      "collapsed": false,
+      "gridPos": {
+        "x": 0,
+        "y": 12,
+        "w": 24,
+        "h": 1
+      },
+      "panels": []
+    },
+    {
+      "type": "timeseries",
+      "id": 6,
+      "title": "새로 만든 시간표",
+      "description": "날짜별로 새로 만든 시간표 수. 지금도 남아 있는 시간표 기준.",
+      "datasource": {
+        "type": "grafana-bigquery-datasource",
+        "uid": "snutt-bigquery"
+      },
+      "targets": [
+        {
+          "refId": "A",
+          "datasource": {
+            "type": "grafana-bigquery-datasource",
+            "uid": "snutt-bigquery"
+          },
+          "editorMode": "code",
+          "rawQuery": true,
+          "format": 0,
+          "location": "US",
+          "project": "snutt-792f1",
+          "rawSql": "SELECT TIMESTAMP(date, 'Asia/Seoul') AS time, timetables_created AS `새 시간표` FROM `snutt-792f1.snutt_metrics.server_daily` WHERE date BETWEEN DATE($__timeFrom(), 'Asia/Seoul') AND DATE($__timeTo(), 'Asia/Seoul') ORDER BY time"
+        }
+      ],
+      "fieldConfig": {
+        "defaults": {
+          "unit": "short",
+          "custom": {
+            "drawStyle": "bars",
+            "lineWidth": 2,
+            "fillOpacity": 70,
+            "pointSize": 4,
+            "showPoints": "never",
+            "spanNulls": false,
+            "stacking": {
+              "mode": "none",
+              "group": "A"
+            },
+            "axisSoftMin": 0
+          },
+          "color": {
+            "mode": "palette-classic"
+          }
+        },
+        "overrides": []
+      },
+      "options": {
+        "legend": {
+          "displayMode": "list",
+          "placement": "bottom",
+          "showLegend": true
+        },
+        "tooltip": {
+          "mode": "multi",
+          "sort": "desc"
+        }
+      },
+      "gridPos": {
+        "x": 0,
+        "y": 13,
+        "w": 12,
+        "h": 8
+      }
+    },
+    {
+      "type": "timeseries",
+      "id": 7,
+      "title": "강의 관련 앱 행동 (GA)",
+      "description": "앱이 보낸 이벤트 수. Android는 이벤트 일부만 이름이 남아 있어 거의 iOS 값이에요.",
+      "datasource": {
+        "type": "grafana-bigquery-datasource",
+        "uid": "snutt-bigquery"
+      },
+      "targets": [
+        {
+          "refId": "A",
+          "datasource": {
+            "type": "grafana-bigquery-datasource",
+            "uid": "snutt-bigquery"
+          },
+          "editorMode": "code",
+          "rawQuery": true,
+          "format": 0,
+          "location": "US",
+          "project": "snutt-792f1",
+          "rawSql": "SELECT TIMESTAMP(date, 'Asia/Seoul') AS time,\n  SUM(search_lecture) AS `강의 검색`, SUM(lecture_detail) AS `강의 상세`, SUM(review_detail) AS `강의평 상세`,\n  SUM(add_to_bookmark) AS `관심강좌`, SUM(add_to_vacancy) AS `빈자리 알림`\nFROM `snutt-792f1.snutt_metrics.ga_daily` WHERE date BETWEEN DATE($__timeFrom(), 'Asia/Seoul') AND DATE($__timeTo(), 'Asia/Seoul') GROUP BY time ORDER BY time"
+        }
+      ],
+      "fieldConfig": {
+        "defaults": {
+          "unit": "short",
+          "custom": {
+            "drawStyle": "line",
+            "lineWidth": 2,
+            "fillOpacity": 10,
+            "pointSize": 4,
+            "showPoints": "never",
+            "spanNulls": false,
+            "stacking": {
+              "mode": "none",
+              "group": "A"
+            },
+            "axisSoftMin": 0
+          },
+          "color": {
+            "mode": "palette-classic"
+          }
+        },
+        "overrides": []
+      },
+      "options": {
+        "legend": {
+          "displayMode": "list",
+          "placement": "bottom",
+          "showLegend": true
+        },
+        "tooltip": {
+          "mode": "multi",
+          "sort": "desc"
+        }
+      },
+      "gridPos": {
+        "x": 12,
+        "y": 13,
+        "w": 12,
+        "h": 8
+      }
+    }
+  ]
+}

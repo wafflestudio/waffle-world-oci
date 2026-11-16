@@ -1,0 +1,65 @@
+# Google BigQuery datasource. 지금은 snutt 대시보드(grafana-dashboard-snutt-*.json)가 쓴다.
+# 데이터(snutt_metrics)는 argocd/snutt-prod/snutt-bq-sync CronJob이 매일 채운다.
+# 플러그인은 values.yaml의 grafana.ini plugins.preinstall_sync로 설치한다.
+#
+# 인증은 GCP 서비스 계정 키(JWT)다. 키는 OCI Vault 'grafana-bigquery'에서 ExternalSecret으로 받아
+# Grafana 환경 변수(GF_BIGQUERY_*)로 넣고, 아래 provisioning에서 ${...}로 읽는다.
+#
+# Viewer도 Explore로 이 datasource에 임의 SQL을 보낼 수 있다(values.yaml viewers_can_edit).
+# 그래서 서비스 계정에는 집계 데이터셋(snutt_metrics) 읽기와 쿼리 실행 권한만 준다.
+#   - 프로젝트: roles/bigquery.jobUser
+#   - 데이터셋 snutt-792f1.snutt_metrics: roles/bigquery.dataViewer
+# 쿼리 하나가 1GB 넘게 읽으려 하면 실행 전에 실패하고 과금되지 않는다(MaxBytesBilled).
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: bigquery-grafana-datasource
+  namespace: prometheus
+  labels:
+    grafana_datasource: "1"
+data:
+  bigquery-datasource.yaml: |-
+    apiVersion: 1
+    datasources:
+      - name: BigQuery (snutt)
+        # 대시보드 JSON이 이 uid를 참조한다
+        uid: snutt-bigquery
+        type: grafana-bigquery-datasource
+        access: proxy
+        isDefault: false
+        editable: false
+        jsonData:
+          authenticationType: jwt
+          clientEmail: ${GF_BIGQUERY_CLIENT_EMAIL}
+          defaultProject: snutt-792f1
+          tokenUri: https://oauth2.googleapis.com/token
+          processingLocation: US
+          MaxBytesBilled: 1073741824
+        secureJsonData:
+          privateKey: ${GF_BIGQUERY_PRIVATE_KEY}
+---
+# Vault 'grafana-bigquery'에는 GCP 서비스 계정 키 JSON을 그대로 넣는다.
+apiVersion: external-secrets.io/v1
+kind: ExternalSecret
+metadata:
+  name: grafana-bigquery
+  namespace: prometheus
+spec:
+  refreshInterval: 5m
+  secretStoreRef:
+    name: oci-vault
+    kind: ClusterSecretStore
+  target:
+    name: grafana-bigquery
+    creationPolicy: Owner
+    template:
+      data:
+        client-email: '{{ .raw | fromJson | dig "client_email" "" }}'
+        private-key: '{{ .raw | fromJson | dig "private_key" "" }}'
+  data:
+    - secretKey: raw
+      remoteRef:
+        conversionStrategy: Default
+        decodingStrategy: None
+        key: grafana-bigquery
+        metadataPolicy: None
