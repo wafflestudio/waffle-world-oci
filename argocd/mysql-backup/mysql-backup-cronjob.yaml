@@ -37,9 +37,15 @@ spec:
                   sys="'mysql','information_schema','performance_schema','sys','mysql_audit','mysql_option','mysql_tasks'"
                   dbs=$(q "SELECT schema_name FROM information_schema.schemata WHERE schema_name NOT IN ($sys)")
                   ignore=$(q "SELECT CONCAT('--ignore-table=', table_schema, '.', table_name) FROM information_schema.views WHERE table_schema NOT IN ($sys)")
-                  mysqldump -h "$MYSQL_HOST" -u "$MYSQL_USER" \
-                    --single-transaction --set-gtid-purged=OFF --no-tablespaces \
-                    $ignore --databases $dbs | gzip > /backup/dump.sql.gz
+                  : > /backup/dump.sql.gz
+                  for db in $dbs; do
+                    start=$(date +%s)
+                    mysqldump -h "$MYSQL_HOST" -u "$MYSQL_USER" \
+                      --single-transaction --set-gtid-purged=OFF --no-tablespaces \
+                      $ignore --databases "$db" | gzip >> /backup/dump.sql.gz
+                    echo "$db $(( $(date +%s) - start ))s"
+                    sleep 5
+                  done
                   ls -l /backup/dump.sql.gz
               resources:
                 requests:
