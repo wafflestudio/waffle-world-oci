@@ -56,14 +56,17 @@ grafana:
         name: prometheus-grafana
         key: github-client-secret
     # BigQuery datasource(bigquery-datasource.yaml)가 provisioning 때 읽는 GCP 서비스 계정 정보
+    # optional: Vault secret이 아직 없어도 Grafana는 뜬다 (BigQuery datasource만 인증 실패)
     GF_BIGQUERY_CLIENT_EMAIL:
       secretKeyRef:
         name: grafana-bigquery
         key: client-email
+        optional: true
     GF_BIGQUERY_PRIVATE_KEY:
       secretKeyRef:
         name: grafana-bigquery
         key: private-key
+        optional: true
   podAnnotations:
     sidecar.istio.io/inject: "true"
   sidecar:
