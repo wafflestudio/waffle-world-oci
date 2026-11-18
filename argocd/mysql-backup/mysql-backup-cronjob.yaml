@@ -25,7 +25,7 @@ spec:
           restartPolicy: Never
           initContainers:
             - name: dump
-              image: mysql:8.4
+              image: docker.io/library/mysql:8.4
               envFrom:
                 - secretRef:
                     name: mysql-backup
@@ -33,11 +33,13 @@ spec:
               args:
                 - |
                   set -euo pipefail
-                  dbs=$(mysql -h "$MYSQL_HOST" -u "$MYSQL_USER" -N -e "SELECT schema_name FROM information_schema.schemata WHERE schema_name NOT IN ('mysql','information_schema','performance_schema','sys')")
+                  q() { mysql -h "$MYSQL_HOST" -u "$MYSQL_USER" -N -e "$1"; }
+                  sys="'mysql','information_schema','performance_schema','sys','mysql_audit','mysql_option','mysql_tasks'"
+                  dbs=$(q "SELECT schema_name FROM information_schema.schemata WHERE schema_name NOT IN ($sys)")
+                  ignore=$(q "SELECT CONCAT('--ignore-table=', table_schema, '.', table_name) FROM information_schema.views WHERE table_schema NOT IN ($sys)")
                   mysqldump -h "$MYSQL_HOST" -u "$MYSQL_USER" \
-                    --single-transaction --routines --events --triggers \
-                    --set-gtid-purged=OFF --no-tablespaces \
-                    --databases $dbs | gzip > /backup/dump.sql.gz
+                    --single-transaction --set-gtid-purged=OFF --no-tablespaces \
+                    $ignore --databases $dbs | gzip > /backup/dump.sql.gz
                   ls -l /backup/dump.sql.gz
               resources:
                 requests:
