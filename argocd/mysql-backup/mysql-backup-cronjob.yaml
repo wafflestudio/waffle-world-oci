@@ -1,0 +1,92 @@
+apiVersion: batch/v1
+kind: CronJob
+metadata:
+  name: mysql-backup
+  labels:
+    app: mysql-backup
+spec:
+  schedule: "0 4 * * *"
+  timeZone: Asia/Seoul
+  concurrencyPolicy: Forbid
+  successfulJobsHistoryLimit: 1
+  failedJobsHistoryLimit: 3
+  jobTemplate:
+    spec:
+      backoffLimit: 2
+      template:
+        metadata:
+          labels:
+            app: mysql-backup
+          annotations:
+            sidecar.istio.io/inject: "false"
+        spec:
+          nodeSelector:
+            kubernetes.io/arch: arm64
+          restartPolicy: Never
+          initContainers:
+            - name: dump
+              image: docker.io/library/mysql:8.4
+              envFrom:
+                - secretRef:
+                    name: mysql-backup
+              command: ["/bin/bash", "-c"]
+              args:
+                - |
+                  set -euo pipefail
+                  q() { mysql -h "$MYSQL_HOST" -u "$MYSQL_USER" -N -e "$1"; }
+                  sys="'mysql','information_schema','performance_schema','sys','mysql_audit','mysql_option','mysql_tasks'"
+                  dbs=$(q "SELECT schema_name FROM information_schema.schemata WHERE schema_name NOT IN ($sys)")
+                  ignore=$(q "SELECT CONCAT('--ignore-table=', table_schema, '.', table_name) FROM information_schema.views WHERE table_schema NOT IN ($sys)")
+                  : > /backup/dump.sql.gz
+                  for db in $dbs; do
+                    start=$(date +%s)
+                    mysqldump -h "$MYSQL_HOST" -u "$MYSQL_USER" \
+                      --single-transaction --set-gtid-purged=OFF --no-tablespaces \
+                      $ignore --databases "$db" | gzip >> /backup/dump.sql.gz
+                    echo "$db $(( $(date +%s) - start ))s"
+                    sleep 5
+                  done
+                  ls -l /backup/dump.sql.gz
+              resources:
+                requests:
+                  cpu: 100m
+                  memory: 256Mi
+                limits:
+                  memory: 512Mi
+              volumeMounts:
+                - name: backup
+                  mountPath: /backup
+          containers:
+            - name: upload
+              image: ghcr.io/oracle/oci-cli:20261111
+              command: ["/bin/bash", "-c"]
+              args:
+                - |
+                  set -euo pipefail
+                  oci os object put --auth instance_principal \
+                    --namespace ax1dvc8vmenm --bucket-name mysql-backup \
+                    --name "wafflestudio-mysql/$(date -u +%Y-%m-%dT%H%M%SZ).sql.gz" \
+                    --file /backup/dump.sql.gz
+                  oci os object list --auth instance_principal \
+                    --namespace ax1dvc8vmenm --bucket-name mysql-backup \
+                    --prefix wafflestudio-mysql/ --all --query 'data[].name' > /tmp/names.json
+                  python3 -c "import json; n = sorted(json.load(open('/tmp/names.json'))); print('\n'.join(n[:-7]))" |
+                    while read -r obj; do
+                      [ -n "$obj" ] || continue
+                      oci os object delete --auth instance_principal \
+                        --namespace ax1dvc8vmenm --bucket-name mysql-backup \
+                        --object-name "$obj" --force
+                    done
+              resources:
+                requests:
+                  cpu: 100m
+                  memory: 256Mi
+                limits:
+                  memory: 512Mi
+              volumeMounts:
+                - name: backup
+                  mountPath: /backup
+          volumes:
+            - name: backup
+              emptyDir:
+                sizeLimit: 5Gi
