@@ -93,7 +93,7 @@ JOIN active AS a
 GROUP BY d.date;
 
 -- 주간 설치 cohort 리텐션. 설치(first_open)한 주를 W0으로 두고, N주 뒤에 앱을 연 기기 비율.
--- 아직 오지 않은 주는 NULL이다.
+-- 아직 오지 않은 주는 NULL, 지난 주인데 돌아온 기기가 없으면 0이다.
 CREATE OR REPLACE VIEW `snutt-792f1.snutt_metrics.ga_retention_weekly` AS
 WITH cohort AS (
   SELECT user_pseudo_id, DATE_TRUNC(MIN(date), WEEK(MONDAY)) AS cohort_week
@@ -125,12 +125,12 @@ SELECT
   s.cohort_week,
   s.installs,
   -- N주차(월~일)가 데이터상 끝났을 때만 비율을 낸다
-  IF(DATE_ADD(s.cohort_week, INTERVAL 2 WEEK) <= DATE_ADD(l.date, INTERVAL 1 DAY), SAFE_DIVIDE(MAX(IF(c.week_n = 1, c.users, NULL)), s.installs), NULL) AS w1,
-  IF(DATE_ADD(s.cohort_week, INTERVAL 3 WEEK) <= DATE_ADD(l.date, INTERVAL 1 DAY), SAFE_DIVIDE(MAX(IF(c.week_n = 2, c.users, NULL)), s.installs), NULL) AS w2,
-  IF(DATE_ADD(s.cohort_week, INTERVAL 4 WEEK) <= DATE_ADD(l.date, INTERVAL 1 DAY), SAFE_DIVIDE(MAX(IF(c.week_n = 3, c.users, NULL)), s.installs), NULL) AS w3,
-  IF(DATE_ADD(s.cohort_week, INTERVAL 5 WEEK) <= DATE_ADD(l.date, INTERVAL 1 DAY), SAFE_DIVIDE(MAX(IF(c.week_n = 4, c.users, NULL)), s.installs), NULL) AS w4,
-  IF(DATE_ADD(s.cohort_week, INTERVAL 7 WEEK) <= DATE_ADD(l.date, INTERVAL 1 DAY), SAFE_DIVIDE(MAX(IF(c.week_n = 6, c.users, NULL)), s.installs), NULL) AS w6,
-  IF(DATE_ADD(s.cohort_week, INTERVAL 9 WEEK) <= DATE_ADD(l.date, INTERVAL 1 DAY), SAFE_DIVIDE(MAX(IF(c.week_n = 8, c.users, NULL)), s.installs), NULL) AS w8
+  IF(DATE_ADD(s.cohort_week, INTERVAL 2 WEEK) <= DATE_ADD(l.date, INTERVAL 1 DAY), SAFE_DIVIDE(IFNULL(MAX(IF(c.week_n = 1, c.users, NULL)), 0), s.installs), NULL) AS w1,
+  IF(DATE_ADD(s.cohort_week, INTERVAL 3 WEEK) <= DATE_ADD(l.date, INTERVAL 1 DAY), SAFE_DIVIDE(IFNULL(MAX(IF(c.week_n = 2, c.users, NULL)), 0), s.installs), NULL) AS w2,
+  IF(DATE_ADD(s.cohort_week, INTERVAL 4 WEEK) <= DATE_ADD(l.date, INTERVAL 1 DAY), SAFE_DIVIDE(IFNULL(MAX(IF(c.week_n = 3, c.users, NULL)), 0), s.installs), NULL) AS w3,
+  IF(DATE_ADD(s.cohort_week, INTERVAL 5 WEEK) <= DATE_ADD(l.date, INTERVAL 1 DAY), SAFE_DIVIDE(IFNULL(MAX(IF(c.week_n = 4, c.users, NULL)), 0), s.installs), NULL) AS w4,
+  IF(DATE_ADD(s.cohort_week, INTERVAL 7 WEEK) <= DATE_ADD(l.date, INTERVAL 1 DAY), SAFE_DIVIDE(IFNULL(MAX(IF(c.week_n = 6, c.users, NULL)), 0), s.installs), NULL) AS w6,
+  IF(DATE_ADD(s.cohort_week, INTERVAL 9 WEEK) <= DATE_ADD(l.date, INTERVAL 1 DAY), SAFE_DIVIDE(IFNULL(MAX(IF(c.week_n = 8, c.users, NULL)), 0), s.installs), NULL) AS w8
 FROM sizes AS s
 CROSS JOIN last_day AS l
 LEFT JOIN counts AS c ON c.cohort_week = s.cohort_week
@@ -203,6 +203,8 @@ WITH tt AS (
   WHERE t.year IS NOT NULL
   GROUP BY 1, 2
 ),
+-- 평균 강의 수·학점은 강의가 하나 이상 담긴 대표 시간표만 센다.
+-- 빈 대표 시간표까지 넣으면 평균이 실제 수강 규모보다 낮게 나온다.
 primary_lectures AS (
   SELECT t.year, t.semester, AVG(n) AS avg_lectures_per_primary, AVG(credits) AS avg_credits_per_primary
   FROM `snutt-792f1.snutt.timetable` AS t
