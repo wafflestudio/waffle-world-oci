@@ -1,0 +1,94 @@
+apiVersion: batch/v1
+kind: CronJob
+metadata:
+  name: snutt-bq-sync
+  labels:
+    app: snutt-bq-sync
+spec:
+  schedule: "0 3 * * *"
+  timeZone: Asia/Seoul
+  concurrencyPolicy: Forbid
+  successfulJobsHistoryLimit: 2
+  failedJobsHistoryLimit: 3
+  jobTemplate:
+    spec:
+      backoffLimit: 2
+      activeDeadlineSeconds: 3600
+      template:
+        metadata:
+          annotations:
+            sidecar.istio.io/inject: "false"
+        spec:
+          nodeSelector:
+            kubernetes.io/arch: arm64
+          restartPolicy: OnFailure
+          serviceAccountName: snutt-bq-sync
+          # 1) snutt Mongo → snutt_raw_v1  2) snutt-ev MySQL → snutt_raw_v1  3) 계약 view(snutt.*) 갱신
+          # 4) 대시보드용 집계(snutt_metrics) 갱신
+          initContainers:
+            - name: replicate
+              image: docker.io/slingdata/sling:1.6.5-arm64
+              args: ["run", "-r", "/config/replication.yaml"]
+              env: &env
+                - name: HOME
+                  value: /tmp
+                - name: SNUTT_MONGO
+                  valueFrom:
+                    secretKeyRef:
+                      name: snutt-bq-sync
+                      key: SNUTT_MONGO
+                - name: SNUTT_EV_MYSQL
+                  valueFrom:
+                    secretKeyRef:
+                      name: snutt-bq-sync
+                      key: SNUTT_EV_MYSQL
+                - name: BIGQUERY
+                  value: '{type: bigquery, project: snutt-792f1, dataset: snutt_raw_v1, location: US, key_file: /secrets/gcp/key.json}'
+              volumeMounts: &mounts
+                - name: config
+                  mountPath: /config
+                  readOnly: true
+                - name: gcp-key
+                  mountPath: /secrets/gcp
+                  readOnly: true
+              resources: &resources
+                requests:
+                  cpu: 100m
+                  memory: 256Mi
+                limits:
+                  cpu: 1000m
+                  memory: 1Gi
+            - name: replicate-ev
+              image: docker.io/slingdata/sling:1.6.5-arm64
+              args: ["run", "-r", "/config/replication-ev.yaml"]
+              env: *env
+              volumeMounts: *mounts
+              resources: *resources
+            - name: apply-views
+              image: docker.io/slingdata/sling:1.6.5-arm64
+              args: ["conns", "exec", "BIGQUERY", "/config/views.sql"]
+              env: *env
+              volumeMounts: *mounts
+              resources: *resources
+          containers:
+            - name: build-metrics
+              image: docker.io/slingdata/sling:1.6.5-arm64
+              args: ["conns", "exec", "BIGQUERY", "/config/metrics.sql"]
+              env: *env
+              volumeMounts: *mounts
+              resources: *resources
+          volumes:
+            - name: config
+              configMap:
+                name: snutt-bq-sync-config
+            - name: gcp-key
+              secret:
+                secretName: snutt-bq-sync
+                items:
+                  - key: GCP_SA_KEY
+                    path: key.json
+---
+apiVersion: v1
+kind: ServiceAccount
+metadata:
+  name: snutt-bq-sync

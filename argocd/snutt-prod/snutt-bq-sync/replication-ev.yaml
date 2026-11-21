@@ -1,0 +1,53 @@
+# snutt-ev v1(MySQL snutt_prod) → BigQuery snutt_raw_v1 전체 덮어쓰기 적재.
+# 강의평 본문(content)과 신고 내용은 적재하지 않는다. 본문은 글자 수만 남긴다.
+# v2 전환 시 이 파일은 지우고, v2 MySQL의 course, evaluation, evaluation_like를 replication.yaml에 합친다.
+source: SNUTT_EV_MYSQL
+target: BIGQUERY
+
+defaults:
+  mode: full-refresh
+
+streams:
+  ev_lecture:
+    object: snutt_raw_v1.ev_lecture
+    sql: |
+      SELECT id, course_number, instructor, title, department, created_at
+      FROM lecture
+    columns:
+      created_at: timestamp
+
+  ev_semester_lecture:
+    object: snutt_raw_v1.ev_semester_lecture
+    sql: |
+      SELECT id, lecture_id, year, semester, created_at
+      FROM semester_lecture
+    columns:
+      created_at: timestamp
+
+  ev_lecture_evaluation:
+    object: snutt_raw_v1.ev_lecture_evaluation
+    sql: |
+      SELECT id, semester_lecture_id, user_id, CHAR_LENGTH(content) AS content_length,
+             grade_satisfaction, teaching_skill, gains, life_balance, rating, like_count,
+             is_hidden = 1 AS is_hidden, is_reported = 1 AS is_reported, from_snuev = 1 AS from_snuev,
+             created_at, updated_at
+      FROM lecture_evaluation
+    columns:
+      grade_satisfaction: float
+      teaching_skill: float
+      gains: float
+      life_balance: float
+      rating: float
+      is_hidden: bool
+      is_reported: bool
+      from_snuev: bool
+      created_at: timestamp
+      updated_at: timestamp
+
+  ev_evaluation_like:
+    object: snutt_raw_v1.ev_evaluation_like
+    sql: |
+      SELECT id, lecture_evaluation_id, user_id, created_at
+      FROM evaluation_like
+    columns:
+      created_at: timestamp
