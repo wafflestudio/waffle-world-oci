@@ -136,7 +136,7 @@
       "type": "table",
       "id": 4,
       "title": "학기별 시간표 현황",
-      "description": "현재 상태 기준. 평균 강의 수와 평균 학점은 대표 시간표 기준이에요. 시간표를 지우면 과거 학기 숫자도 줄어요.",
+      "description": "현재 상태 기준. 평균 강의 수와 평균 학점은 강의가 하나 이상 있는 대표 시간표 기준이에요. 시간표를 지우면 과거 학기 숫자도 줄어요.",
       "datasource": {
         "type": "grafana-bigquery-datasource",
         "uid": "snutt-bigquery"

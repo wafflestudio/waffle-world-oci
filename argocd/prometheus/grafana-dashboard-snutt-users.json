@@ -133,7 +133,7 @@
       "type": "stat",
       "id": 4,
       "title": "활성 사용자 (기기)",
-      "description": "가장 최근 날짜 기준. DAU=그날, WAU=그날 포함 7일, MAU=그날 포함 30일 동안 앱을 연 기기 수.",
+      "description": "가장 최근 날짜 기준. DAU=그날, WAU=그날 포함 7일, MAU=그날 포함 30일 동안 앱을 연 기기 수. 데이터가 30일 치 쌓이기 전에는 MAU를 비워 둬요.",
       "datasource": {
         "type": "grafana-bigquery-datasource",
         "uid": "snutt-bigquery"
@@ -150,7 +150,7 @@
           "format": 1,
           "location": "US",
           "project": "snutt-792f1",
-          "rawSql": "SELECT dau AS DAU, wau AS WAU, mau AS MAU FROM `snutt-792f1.snutt_metrics.ga_active_users` ORDER BY date DESC LIMIT 1"
+          "rawSql": "SELECT dau AS DAU, wau AS WAU, IF(mau_complete, mau, NULL) AS MAU FROM `snutt-792f1.snutt_metrics.ga_active_users` ORDER BY date DESC LIMIT 1"
         }
       ],
       "fieldConfig": {
