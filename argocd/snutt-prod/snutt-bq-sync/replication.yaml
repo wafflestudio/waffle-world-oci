@@ -1,0 +1,40 @@
+# snutt v1(Mongo) → BigQuery snutt_raw_v1 전체 덮어쓰기 적재.
+# v2 전환 시 source를 MySQL 연결로, object를 snutt_raw_v2로 바꾸고 streams를 v2 테이블로 교체한다.
+source: SNUTT_MONGO
+target: BIGQUERY
+
+defaults:
+  mode: full-refresh
+  object: snutt_raw_v1.{stream_table}
+
+streams:
+  # 이메일, 비밀번호, 소셜 계정 식별자는 적재하지 않고 로그인 방식 여부만 남긴다.
+  snutt.users:
+    columns:
+      regDate: timestamp
+      notificationCheckedAt: timestamp
+      lastLoginTimestamp: bigint
+    source_options:
+      flatten: 1
+      jq: >-
+        {_id, nickname, active, isAdmin, isEmailVerified, regDate, lastLoginTimestamp, notificationCheckedAt,
+         has_local: (.credential.localId != null), has_facebook: (.credential.fbId != null),
+         has_apple: (.credential.appleSub != null), has_google: (.credential.googleSub != null),
+         has_kakao: (.credential.kakaoSub != null)}
+
+  # lecture_list는 JSON 컬럼으로 적재한다. (sling의 jq는 Mongo 배열 필드를 다루지 못한다)
+  snutt.timetables:
+    columns:
+      updated_at: timestamp
+    source_options:
+      flatten: 1
+
+  # 친구 관계. 친구에게 붙인 표시 이름(from/toUserDisplayName)은 적재하지 않는다.
+  # 요청을 거절하거나 친구를 끊으면 문서가 지워진다.
+  snutt.friend:
+    columns:
+      createdAt: timestamp
+      updatedAt: timestamp
+    source_options:
+      flatten: 1
+      jq: '{_id, fromUserId, toUserId, isAccepted, createdAt, updatedAt}'
