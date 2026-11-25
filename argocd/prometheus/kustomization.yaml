@@ -7,6 +7,7 @@ resources:
 - resources.yaml
 - alert-rules.yaml
 - loki-datasource.yaml
+- bigquery-datasource.yaml
 
 # Grafana 대시보드 JSON을 ConfigMap으로 만든다. grafana의 dashboard sidecar가
 # label 'grafana_dashboard: "1"'을 감지해 grafana_folder 폴더로 자동 로드한다.
@@ -36,3 +37,14 @@ configMapGenerator:
   namespace: prometheus
   files:
   - grafana-dashboard-team-resource-usage.json
+# snutt 대시보드. 데이터는 BigQuery(bigquery-datasource.yaml)이고 snutt 폴더에 둔다.
+- name: grafana-dashboards-snutt
+  namespace: prometheus
+  files:
+  - grafana-dashboard-snutt-users.json
+  - grafana-dashboard-snutt-timetable.json
+  - grafana-dashboard-snutt-evaluation.json
+  - grafana-dashboard-snutt-friend.json
+  options:
+    annotations:
+      grafana_folder: "snutt"
