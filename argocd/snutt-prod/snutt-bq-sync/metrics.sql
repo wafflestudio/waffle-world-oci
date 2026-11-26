@@ -209,7 +209,8 @@ primary_lectures AS (
   SELECT t.year, t.semester, AVG(n) AS avg_lectures_per_primary, AVG(credits) AS avg_credits_per_primary
   FROM `snutt-792f1.snutt.timetable` AS t
   JOIN (
-    SELECT timetable_id, COUNT(*) AS n, SUM(IFNULL(credit, 0)) AS credits
+    -- 직접 만든 강의는 학점을 마음대로 넣을 수 있어서 INT64 최댓값 같은 값도 있다. 0~30학점만 더한다.
+    SELECT timetable_id, COUNT(*) AS n, SUM(IF(credit BETWEEN 0 AND 30, credit, 0)) AS credits
     FROM `snutt-792f1.snutt.timetable_lecture`
     GROUP BY timetable_id
   ) AS l ON l.timetable_id = t.id
