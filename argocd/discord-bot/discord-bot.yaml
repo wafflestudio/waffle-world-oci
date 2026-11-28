@@ -36,8 +36,7 @@ spec:
             cpu: 5m
             memory: 32Mi
           limits:
-            cpu: 15m
-            memory: 64Mi
+            memory: 512Mi
 
       #시크릿.
       volumes:
